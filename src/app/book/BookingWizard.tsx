@@ -3,6 +3,16 @@
 import React, { useState, useTransition } from 'react';
 import { createBookingAction } from '../admin/actions';
 import Link from 'next/link';
+import {
+  DAY_STAY_PRICE,
+  OPD_PRICE,
+  OPD_TIME_SLOTS,
+  calculateStayDays,
+  calculateStayPricing,
+  type Gender,
+  type Nationality,
+  type RoomCategory,
+} from '@/lib/healthCentre';
 
 interface DoctorItem {
   id: string;
@@ -24,8 +34,8 @@ export default function BookingWizard({ doctors }: BookingWizardProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [contactNumber, setContactNumber] = useState('');
-  const [gender, setGender] = useState<'Male' | 'Female'>('Male');
-  const [nationality, setNationality] = useState<'Indian' | 'Non-Indian'>('Indian');
+  const [gender, setGender] = useState<Gender>('Male');
+  const [nationality, setNationality] = useState<Nationality>('Indian');
   const [yogiExperienceMonths, setYogiExperienceMonths] = useState<number>(12);
 
   // Booking Type State
@@ -35,12 +45,12 @@ export default function BookingWizard({ doctors }: BookingWizardProps) {
   const [selectedDoctorId, setSelectedDoctorId] = useState(() => doctors[0]?.id || '');
 
   const [appointmentDate, setAppointmentDate] = useState('');
-  const [timeSlot, setTimeSlot] = useState('10:00 - 10:30');
+  const [timeSlot, setTimeSlot] = useState<string>(OPD_TIME_SLOTS[0]);
 
   // Stay (IPD) Details
   const [checkInDate, setCheckInDate] = useState('');
   const [checkOutDate, setCheckOutDate] = useState('');
-  const [roomCategory, setRoomCategory] = useState<string>('Double');
+  const [roomCategory, setRoomCategory] = useState<RoomCategory>('Double');
   const [sharingOccupants, setSharingOccupants] = useState<number>(1);
   const [error, setError] = useState('');
 
@@ -49,7 +59,7 @@ export default function BookingWizard({ doctors }: BookingWizardProps) {
   const isEligibleForIPD = yogiExperienceMonths >= 12;
 
   // Gender change handler that adjusts room category
-  const handleGenderChange = (val: 'Male' | 'Female') => {
+  const handleGenderChange = (val: Gender) => {
     setGender(val);
     if (roomCategory === 'Ladies Dormitory' && val === 'Male') {
       setRoomCategory("Men's Dormitory");
@@ -59,32 +69,13 @@ export default function BookingWizard({ doctors }: BookingWizardProps) {
   };
 
   // Pricing Engine logic (Derived State)
-  let pricePerDay = 3000;
-  const isIndian = nationality === 'Indian';
-
-  if (roomCategory === 'Double') {
-    if (sharingOccupants === 1) {
-      pricePerDay = 3000;
-    } else {
-      pricePerDay = isIndian ? 1800 : 2000;
-    }
-  } else if (roomCategory === 'Ladies Dormitory' || roomCategory === "Men's Dormitory") {
-    pricePerDay = isIndian ? 1000 : 1500;
-  } else if (roomCategory === 'Family') {
-    pricePerDay = isIndian ? 2500 : 3000;
-  }
-
-  // Calculate days
-  let stayDays = 1;
-  if (checkInDate && checkOutDate) {
-    const start = new Date(checkInDate);
-    const end = new Date(checkOutDate);
-    const timeDiff = end.getTime() - start.getTime();
-    stayDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
-    if (stayDays < 1) stayDays = 1;
-  }
-
-  const totalAmount = stayDays * pricePerDay * sharingOccupants;
+  const stayDays = calculateStayDays(checkInDate, checkOutDate);
+  const { pricePerDay, rateLabel, totalAmount } = calculateStayPricing({
+    nationality,
+    roomCategory,
+    sharingOccupants,
+    stayDays,
+  });
 
   const handleNextStep1 = (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,8 +146,6 @@ export default function BookingWizard({ doctors }: BookingWizardProps) {
           checkOutDate,
           roomCategory,
           sharingOccupants,
-          pricePerDay,
-          totalAmount,
         }),
       },
     };
@@ -453,18 +442,22 @@ export default function BookingWizard({ doctors }: BookingWizardProps) {
                     onChange={(e) => setTimeSlot(e.target.value)}
                     className="w-full border border-neutral-200 p-2 text-xs focus:border-neutral-950 focus:outline-none bg-white h-[34px]"
                   >
-                    <option value="10:00 - 10:30">10:00 AM - 10:30 AM</option>
-                    <option value="10:30 - 11:00">10:30 AM - 11:00 AM</option>
-                    <option value="11:00 - 11:30">11:00 AM - 11:30 AM</option>
-                    <option value="11:30 - 12:00">11:30 AM - 12:00 AM</option>
-                    <option value="12:00 - 12:30">12:00 PM - 12:30 PM</option>
+                    {OPD_TIME_SLOTS.map((slot) => (
+                      <option key={slot} value={slot}>
+                        {slot === '10:00 - 10:30' && '10:00 AM - 10:30 AM'}
+                        {slot === '10:30 - 11:00' && '10:30 AM - 11:00 AM'}
+                        {slot === '11:00 - 11:30' && '11:00 AM - 11:30 AM'}
+                        {slot === '11:30 - 12:00' && '11:30 AM - 12:00 PM'}
+                        {slot === '12:00 - 12:30' && '12:00 PM - 12:30 PM'}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
 
               <div className="pt-2 border-t border-neutral-200 flex justify-between items-baseline">
                 <span className="text-xs text-neutral-400">Total Consultation Charge:</span>
-                <span className="font-mono text-lg font-semibold">₹50</span>
+                <span className="font-mono text-lg font-semibold">₹{OPD_PRICE}</span>
               </div>
             </div>
           )}
@@ -488,12 +481,12 @@ export default function BookingWizard({ doctors }: BookingWizardProps) {
               </div>
 
               <p className="text-[11px] text-neutral-500 leading-relaxed font-light">
-                Day Stay timings are from **10:00 AM to 5:00 PM**. Includes vibratory evaluations, clearance sessions, meditations, and wholesome vegetarian meals.
+                Day Stay timings are from <strong className="font-medium text-neutral-900">10:00 AM to 5:00 PM</strong>. Includes vibratory evaluations, clearance sessions, meditations, and wholesome vegetarian meals.
               </p>
 
               <div className="pt-2 border-t border-neutral-200 flex justify-between items-baseline">
                 <span className="text-xs text-neutral-400">Tariff per day:</span>
-                <span className="font-mono text-lg font-semibold">₹400</span>
+                <span className="font-mono text-lg font-semibold">₹{DAY_STAY_PRICE}</span>
               </div>
             </div>
           )}
@@ -541,7 +534,7 @@ export default function BookingWizard({ doctors }: BookingWizardProps) {
                   <select
                     value={roomCategory}
                     onChange={(e) => {
-                      setRoomCategory(e.target.value);
+                      setRoomCategory(e.target.value as RoomCategory);
                       setSharingOccupants(1);
                     }}
                     className="w-full border border-neutral-200 p-2 text-xs focus:border-neutral-950 focus:outline-none bg-white h-[34px]"
@@ -591,7 +584,7 @@ export default function BookingWizard({ doctors }: BookingWizardProps) {
                   Billing Breakdowns
                 </span>
                 <p><strong>Room Category:</strong> {roomCategory}</p>
-                <p><strong>Daily Rate:</strong> ₹{pricePerDay} per adult</p>
+                <p><strong>Daily Rate:</strong> ₹{pricePerDay} {rateLabel}</p>
                 <p><strong>Occupants count:</strong> {sharingOccupants}</p>
                 <p><strong>Stay Duration:</strong> {stayDays} day(s)</p>
                 <div className="pt-2 border-t border-dashed border-neutral-200 flex justify-between items-baseline font-sans text-sm font-bold text-neutral-950">

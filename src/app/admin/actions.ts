@@ -2,13 +2,25 @@
 
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
-import Doctor from '@/models/Doctor';
+import Doctor, { type IAvailabilitySchedule } from '@/models/Doctor';
 import Room from '@/models/Room';
 import Bed from '@/models/Bed';
 import Appointment from '@/models/Appointment';
 import StayBooking from '@/models/StayBooking';
 import bcrypt from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
+import {
+  DAY_STAY_PRICE,
+  DAY_STAY_TIME_LABEL,
+  OPD_PRICE,
+  OPD_TIME_SLOTS,
+  calculateStayDays,
+  calculateStayPricing,
+  isOperationalDay,
+  resolveMaxOccupancy,
+  validateRoomConfig,
+  type RoomCategory,
+} from '@/lib/healthCentre';
 
 // Seeding function
 export async function seedDatabase() {
@@ -297,6 +309,9 @@ export async function checkInStay(bookingId: string, bedId: string) {
     const bed = await Bed.findById(bedId);
     if (!bed) throw new Error('Bed not found');
     if (bed.occupied) throw new Error('Bed is already occupied');
+    if (bed.roomId.toString() !== booking.roomId.toString()) {
+      throw new Error('Selected bed does not belong to the booked room.');
+    }
 
     // Update bed
     bed.occupied = true;
@@ -359,28 +374,31 @@ export async function updateStayPayment(bookingId: string, paymentStatus: 'Pendi
 // Add Room & Beds
 export async function addRoom(
   roomNumber: string,
-  category: 'Double' | 'Family' | 'Ladies Dormitory' | "Men's Dormitory",
+  category: RoomCategory,
   totalBeds: number
 ) {
   try {
     await dbConnect();
 
+    const normalizedRoomNumber = roomNumber.trim();
+    if (!normalizedRoomNumber) {
+      throw new Error('Room number is required.');
+    }
+
+    if (!validateRoomConfig(category, totalBeds)) {
+      throw new Error(`Invalid bed capacity for ${category}.`);
+    }
+
     // Check if room number already exists
-    const existing = await Room.findOne({ roomNumber });
+    const existing = await Room.findOne({ roomNumber: normalizedRoomNumber });
     if (existing) {
       throw new Error('Room number already exists');
     }
 
-    let maxOccupancy = 1;
-    if (category === 'Double') maxOccupancy = 2;
-    else if (category === 'Family') maxOccupancy = 4;
-    else if (category === 'Ladies Dormitory') maxOccupancy = 36;
-    else if (category === "Men's Dormitory") maxOccupancy = 25;
-
     const room = await Room.create({
-      roomNumber,
+      roomNumber: normalizedRoomNumber,
       category,
-      maxOccupancy,
+      maxOccupancy: resolveMaxOccupancy(category, totalBeds),
       totalBeds,
     });
 
@@ -429,7 +447,7 @@ export async function createBookingAction(data: {
     timeSlot?: string;
     checkInDate?: string;
     checkOutDate?: string;
-    roomCategory?: string;
+    roomCategory?: RoomCategory;
     sharingOccupants?: number;
     pricePerDay?: number;
     totalAmount?: number;
@@ -478,37 +496,123 @@ export async function createBookingAction(data: {
       if (!data.details.doctorId || !data.details.appointmentDate || !data.details.timeSlot) {
         throw new Error('Missing OPD appointment details.');
       }
+
+      if (!OPD_TIME_SLOTS.includes(data.details.timeSlot as (typeof OPD_TIME_SLOTS)[number])) {
+        throw new Error('Invalid OPD time slot selected.');
+      }
+
+      const appointmentDate = new Date(data.details.appointmentDate);
+      if (!isOperationalDay(appointmentDate)) {
+        throw new Error('OPD bookings are available Monday through Saturday only.');
+      }
+
+      const doctor = await Doctor.findOne({ _id: data.details.doctorId, active: true });
+      if (!doctor) {
+        throw new Error('Selected doctor is not available.');
+      }
+
+      const appointmentDay = appointmentDate.getUTCDay();
+      const matchingAvailability = doctor.availability.find(
+        (slot: IAvailabilitySchedule) =>
+          slot.dayOfWeek === appointmentDay &&
+          slot.startTime <= data.details.timeSlot!.slice(0, 5) &&
+          slot.endTime >= data.details.timeSlot!.slice(-5)
+      );
+
+      if (!matchingAvailability) {
+        throw new Error('Selected doctor is not available for that date or slot.');
+      }
+
+      const existingAppointment = await Appointment.findOne({
+        doctorId: data.details.doctorId,
+        type: 'OPD',
+        appointmentDate,
+        timeSlot: data.details.timeSlot,
+        status: { $in: ['Pending', 'Confirmed'] },
+      });
+
+      if (existingAppointment) {
+        throw new Error('That OPD slot is already booked. Please choose another time.');
+      }
+
       await Appointment.create({
         patientId: user._id,
         doctorId: data.details.doctorId,
         type: 'OPD',
-        appointmentDate: new Date(data.details.appointmentDate),
+        appointmentDate,
         timeSlot: data.details.timeSlot,
         status: 'Pending',
         paymentStatus: 'Pending',
-        price: 50,
+        price: OPD_PRICE,
       });
     } else if (data.bookingType === 'Day Stay') {
       if (!data.details.appointmentDate) {
         throw new Error('Missing Day Stay date.');
       }
+
+      const appointmentDate = new Date(data.details.appointmentDate);
+      if (!isOperationalDay(appointmentDate)) {
+        throw new Error('Day Stay bookings are available Monday through Saturday only.');
+      }
+
+      const existingDayStay = await Appointment.findOne({
+        patientId: user._id,
+        type: 'Day Stay',
+        appointmentDate,
+        status: { $in: ['Pending', 'Confirmed'] },
+      });
+
+      if (existingDayStay) {
+        throw new Error('A Day Stay is already booked for this patient on that date.');
+      }
+
       await Appointment.create({
         patientId: user._id,
         doctorId: null,
         type: 'Day Stay',
-        appointmentDate: new Date(data.details.appointmentDate),
-        timeSlot: 'Day Stay (10am - 5pm)',
+        appointmentDate,
+        timeSlot: DAY_STAY_TIME_LABEL,
         status: 'Pending',
         paymentStatus: 'Pending',
-        price: 400,
+        price: DAY_STAY_PRICE,
       });
     } else if (data.bookingType === 'IPD') {
-      if (!data.details.checkInDate || !data.details.checkOutDate || !data.details.roomCategory || !data.details.pricePerDay || !data.details.totalAmount) {
+      if (!data.details.checkInDate || !data.details.checkOutDate || !data.details.roomCategory) {
         throw new Error('Missing IPD stay details.');
       }
 
-      // Find an available room of this category
-      const room = await Room.findOne({ category: data.details.roomCategory });
+      const stayDays = calculateStayDays(data.details.checkInDate, data.details.checkOutDate);
+      if (stayDays < 1) {
+        throw new Error('Check-out date must be after check-in date.');
+      }
+
+      if (
+        data.gender === 'Male' &&
+        data.details.roomCategory === 'Ladies Dormitory'
+      ) {
+        throw new Error('Male patients cannot be assigned to the ladies dormitory.');
+      }
+
+      if (
+        data.gender === 'Female' &&
+        data.details.roomCategory === "Men's Dormitory"
+      ) {
+        throw new Error("Female patients cannot be assigned to the men's dormitory.");
+      }
+
+      const sharingOccupants = data.details.sharingOccupants || 1;
+      const pricing = calculateStayPricing({
+        nationality: data.nationality,
+        roomCategory: data.details.roomCategory,
+        sharingOccupants,
+        stayDays,
+      });
+
+      const room = await Room.findOne({
+        category: data.details.roomCategory,
+        totalBeds: { $gte: data.details.roomCategory === 'Family' ? sharingOccupants : 1 },
+      }).sort({ totalBeds: 1, roomNumber: 1 });
+
       if (!room) {
         throw new Error(`No rooms of category ${data.details.roomCategory} found at the health centre.`);
       }
@@ -520,11 +624,11 @@ export async function createBookingAction(data: {
         checkInDate: new Date(data.details.checkInDate),
         checkOutDate: new Date(data.details.checkOutDate),
         status: 'Pending',
-        pricePerDay: data.details.pricePerDay,
-        totalAmount: data.details.totalAmount,
+        pricePerDay: pricing.pricePerDay,
+        totalAmount: pricing.totalAmount,
         yogiExperienceMonths: data.yogiExperienceMonths,
         nationality: data.nationality,
-        sharingOccupants: data.details.sharingOccupants || 1,
+        sharingOccupants,
         paymentStatus: 'Pending',
       });
     }

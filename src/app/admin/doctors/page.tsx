@@ -1,7 +1,7 @@
 import React from 'react';
 import dbConnect from '@/lib/db';
 import Doctor from '@/models/Doctor';
-import User from '@/models/User'; // Required to populate User relation
+import '@/models/User';
 import DoctorForm from './DoctorForm';
 
 export const revalidate = 0; // Disable cache to reflect new doctor additions in real-time

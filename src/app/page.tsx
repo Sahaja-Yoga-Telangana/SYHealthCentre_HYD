@@ -1,5 +1,7 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import MobileNav from '@/components/MobileNav';
+import shriMatajiPortrait from '../../ShriMatajisPictures/1990_Cairns-X3.jpg';
 
 export default function Home() {
   return (
@@ -37,25 +39,66 @@ export default function Home() {
 
       {/* Hero Section */}
       <section id="about" className="py-20 px-8 border-b border-neutral-100">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          <h1 className="text-4xl md:text-5xl font-light tracking-tight text-neutral-900 leading-tight">
-            International Sahaja Yoga <br />
-            <span className="font-normal">Research & Health Centre</span>
-          </h1>
-          <p className="text-xs tracking-widest uppercase text-neutral-400">Nirmal Nagari, Hyderabad</p>
-          <div className="w-12 h-[1px] bg-neutral-400 mx-auto"></div>
-          <p className="text-lg text-neutral-600 font-light max-w-2xl mx-auto leading-relaxed">
-            Welcome to a unique sanctuary of healing and peace, where scientific research meets ancient spiritual knowledge. 
-            Our treatments utilize the power of <strong className="font-medium text-neutral-900">vibratory awareness</strong> and 
-            Sahaja Yoga meditation, helping to cleanse, balance, and rejuvenate the subtle system.
-          </p>
-          <div className="pt-6">
-            <Link 
-              href="/book" 
-              className="inline-block text-sm font-medium tracking-wider px-8 py-3 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
-            >
-              SCHEDULE A VISIT OR STAY
-            </Link>
+        <div className="max-w-6xl mx-auto grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center">
+          <div className="text-center lg:text-left space-y-8">
+            <div className="space-y-5">
+              <p className="text-xs tracking-[0.35em] uppercase text-neutral-400">Nirmal Nagari, Hyderabad</p>
+              <h1 className="text-4xl md:text-5xl font-light tracking-tight text-neutral-900 leading-tight">
+                International Sahaja Yoga <br />
+                <span className="font-normal">Research & Health Centre</span>
+              </h1>
+              <div className="w-12 h-[1px] bg-neutral-400 mx-auto lg:mx-0"></div>
+              <p className="text-lg text-neutral-600 font-light max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                Welcome to a unique sanctuary of healing and peace, where scientific research meets ancient spiritual knowledge.
+                Our treatments utilize the power of <strong className="font-medium text-neutral-900">vibratory awareness</strong> and
+                Sahaja Yoga meditation to help cleanse, balance, and rejuvenate the subtle system.
+              </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="border border-neutral-200 bg-neutral-50 p-4 text-left">
+                <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">Healing Focus</p>
+                <p className="mt-2 text-sm text-neutral-600 leading-relaxed">
+                  OPD consultations, day stays, and in-patient accommodation designed around Sahaja Yoga eligibility and restorative care.
+                </p>
+              </div>
+              <div className="border border-neutral-200 bg-neutral-50 p-4 text-left">
+                <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">Living Tradition</p>
+                <p className="mt-2 text-sm text-neutral-600 leading-relaxed">
+                  The centre experience is rooted in meditation, subtle-system awareness, and the teachings associated with Shri Mataji Nirmala Devi.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <Link
+                href="/book"
+                className="inline-block text-sm font-medium tracking-wider px-8 py-3 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
+              >
+                SCHEDULE A VISIT OR STAY
+              </Link>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="relative overflow-hidden border border-neutral-200 bg-neutral-100">
+              <div className="relative aspect-[4/5]">
+                <Image
+                  src={shriMatajiPortrait}
+                  alt="Shri Mataji Nirmala Devi"
+                  fill
+                  priority
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                />
+              </div>
+            </div>
+            <div className="border border-neutral-200 p-4 bg-white">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">Quiet Inspiration</p>
+              <p className="mt-2 text-sm text-neutral-600 leading-relaxed">
+                A calm visual presence has been added from your `ShriMatajisPictures` folder to anchor the landing experience and the booking journey.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -107,7 +150,7 @@ export default function Home() {
                 </tr>
                 <tr className="bg-neutral-50/50">
                   <td className="p-4 border-r border-neutral-200"><strong>Family Room</strong><br />Private family room accommodating up to 4 adults.</td>
-                  <td className="p-4 font-mono font-medium text-neutral-950">₹2,500 / day <span className="text-xs text-neutral-400">(Indian)</span><br />₹3,000 / day <span className="text-xs text-neutral-400">(Non-Indian)</span></td>
+                  <td className="p-4 font-mono font-medium text-neutral-950">₹2,500 / day <span className="text-xs text-neutral-400">(Indian)</span><br />₹3,000 / day <span className="text-xs text-neutral-400">(Non-Indian, current project assumption)</span></td>
                 </tr>
               </tbody>
             </table>
@@ -153,7 +196,7 @@ export default function Home() {
                   <div className="p-2 border border-neutral-100 bg-neutral-50">7. Sahastrar (Crown)</div>
                   <div className="p-2 border border-neutral-100 bg-neutral-50">6. Agnya (Forehead)</div>
                   <div className="p-2 border border-neutral-100 bg-neutral-50">5. Vishuddhi (Throat)</div>
-                  <div className="p-2 border border-neutral-100 bg-neutral-50">4. Anahat (Heart)</div>
+                  <div className="p-2 border border-neutral-100 bg-neutral-50">4. Heart (Anahat)</div>
                 </div>
                 <div className="space-y-2">
                   <div className="p-2 border border-neutral-100 bg-neutral-50">3. Nabhi (Solar Plexus)</div>

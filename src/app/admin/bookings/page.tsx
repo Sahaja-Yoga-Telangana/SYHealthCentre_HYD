@@ -3,9 +3,9 @@ import dbConnect from '@/lib/db';
 import StayBooking from '@/models/StayBooking';
 import Appointment from '@/models/Appointment';
 import Bed from '@/models/Bed';
-import Room from '@/models/Room'; // Required to populate Room relation
-import User from '@/models/User'; // Required to populate User relation
-import Doctor from '@/models/Doctor'; // Required to populate Doctor relation
+import '@/models/Room';
+import '@/models/User';
+import '@/models/Doctor';
 import BookingsClient from './BookingsClient';
 
 export const revalidate = 0; // Disable cache for live admission flow updates
@@ -79,4 +79,3 @@ export default async function AdminBookingsPage() {
     </div>
   );
 }
-

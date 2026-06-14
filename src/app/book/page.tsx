@@ -1,9 +1,11 @@
+import Image from 'next/image';
 import React from 'react';
 import dbConnect from '@/lib/db';
 import Doctor, { IAvailabilitySchedule } from '@/models/Doctor';
-import User from '@/models/User'; // Required to register User schema for mongoose populate
+import '@/models/User';
 import BookingWizard from './BookingWizard';
 import Link from 'next/link';
+import shriMatajiPortrait from '../../../ShriMatajisPictures/1990_Cairns-X3.jpg';
 
 export const revalidate = 0; // Disable caching to fetch the latest doctor directory on page load
 
@@ -58,6 +60,30 @@ export default async function BookingPage() {
             {errorMsg}
           </div>
         )}
+
+        <div className="max-w-2xl mx-auto border border-neutral-200 bg-white overflow-hidden">
+          <div className="grid md:grid-cols-[180px_1fr] items-stretch">
+            <div className="relative min-h-[220px] bg-neutral-100">
+              <Image
+                src={shriMatajiPortrait}
+                alt="Shri Mataji Nirmala Devi"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 180px"
+                priority
+              />
+            </div>
+            <div className="p-6 space-y-3">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">Centred Booking Flow</p>
+              <h1 className="text-xl font-light tracking-wide text-neutral-900">
+                Reserve treatment, day stay, or accommodation
+              </h1>
+              <p className="text-sm text-neutral-600 leading-relaxed">
+                Guided by the serene atmosphere of the Hyderabad centre, this booking flow checks Sahaja Yoga eligibility, consultation timing, and accommodation preferences before your request reaches the admissions desk.
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Wizard */}
         <BookingWizard doctors={doctorsList} />

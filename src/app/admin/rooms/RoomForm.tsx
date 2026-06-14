@@ -2,22 +2,22 @@
 
 import React, { useState, useTransition } from 'react';
 import { addRoom } from '../actions';
+import { ROOM_CAPACITY_OPTIONS, type RoomCategory } from '@/lib/healthCentre';
 
 export default function RoomForm() {
   const [isPending, startTransition] = useTransition();
   const [roomNumber, setRoomNumber] = useState('');
-  const [category, setCategory] = useState<'Double' | 'Family' | 'Ladies Dormitory' | "Men's Dormitory">('Double');
+  const [category, setCategory] = useState<RoomCategory>('Double');
   const [totalBeds, setTotalBeds] = useState(2);
   const [error, setError] = useState('');
 
-  const handleCategoryChange = (val: string) => {
-    const cat = val as any;
+  const handleCategoryChange = (val: RoomCategory) => {
+    const cat = val;
     setCategory(cat);
-    if (cat === 'Double') setTotalBeds(2);
-    else if (cat === 'Family') setTotalBeds(4);
-    else if (cat === 'Ladies Dormitory') setTotalBeds(36);
-    else if (cat === "Men's Dormitory") setTotalBeds(25);
+    setTotalBeds(ROOM_CAPACITY_OPTIONS[cat][ROOM_CAPACITY_OPTIONS[cat].length - 1]);
   };
+
+  const capacityOptions = ROOM_CAPACITY_OPTIONS[category];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,7 +78,7 @@ export default function RoomForm() {
           </label>
           <select
             value={category}
-            onChange={(e) => handleCategoryChange(e.target.value)}
+            onChange={(e) => handleCategoryChange(e.target.value as RoomCategory)}
             className="w-full border border-neutral-200 p-2 text-xs focus:border-neutral-950 focus:outline-none bg-white h-[34px]"
             disabled={isPending}
           >
@@ -93,14 +93,21 @@ export default function RoomForm() {
           <label className="block text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-1">
             Total Bed Capacity
           </label>
-          <input
-            type="number"
+          <select
             value={totalBeds}
-            onChange={(e) => setTotalBeds(parseInt(e.target.value) || 0)}
-            className="w-full border border-neutral-200 p-2 text-xs focus:border-neutral-950 focus:outline-none bg-white"
-            placeholder="2"
+            onChange={(e) => setTotalBeds(parseInt(e.target.value, 10))}
+            className="w-full border border-neutral-200 p-2 text-xs focus:border-neutral-950 focus:outline-none bg-white h-[34px]"
             disabled={isPending}
-          />
+          >
+            {capacityOptions.map((capacity) => (
+              <option key={capacity} value={capacity}>
+                {capacity} {capacity === 1 ? 'bed' : 'beds'}
+              </option>
+            ))}
+          </select>
+          <p className="mt-2 text-[10px] text-neutral-400">
+            Double rooms support 1 or 2 adults, family rooms support up to 4, and dormitories stay fixed at their full bed counts.
+          </p>
         </div>
       </div>
 

@@ -2,7 +2,7 @@ import React from 'react';
 import dbConnect from '@/lib/db';
 import Room from '@/models/Room';
 import Bed from '@/models/Bed';
-import User from '@/models/User'; // Required to populate occupiedBy relation
+import '@/models/User';
 import RoomForm from './RoomForm';
 
 export const revalidate = 0; // Disable cache to reflect room adjustments in real-time

@@ -109,9 +109,9 @@ export default function BookingsClient({
                   const patient = stay.patientId;
                   const room = stay.roomId;
                   
-                  // Filter beds that are in the matching room category
+                  // Filter beds that are in the exact booked room
                   const eligibleBeds = availableBeds.filter(
-                    (bed) => bed.roomId?.category === room?.category
+                    (bed) => bed.roomId?._id?.toString() === room?._id?.toString()
                   );
 
                   return (
