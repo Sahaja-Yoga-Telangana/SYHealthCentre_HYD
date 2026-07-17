@@ -1,11 +1,19 @@
 import React from 'react';
 import Link from 'next/link';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || session.user.role !== 'Admin') {
+    redirect('/login?callbackUrl=/admin');
+  }
   return (
     <div className="flex min-h-screen bg-white text-neutral-900 font-sans">
       {/* Sidebar */}
@@ -52,6 +60,12 @@ export default function AdminLayout({
               className="flex items-center space-x-3 px-3 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-neutral-50 border border-transparent hover:border-neutral-200 transition-all"
             >
               <span>Reviews</span>
+            </Link>
+            <Link
+              href="/admin/admins"
+              className="flex items-center space-x-3 px-3 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-neutral-50 border border-transparent hover:border-neutral-200 transition-all"
+            >
+              <span>Admins</span>
             </Link>
           </nav>
         </div>

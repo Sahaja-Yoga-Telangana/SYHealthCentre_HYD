@@ -2,9 +2,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import MobileNav from '@/components/MobileNav';
 import ReviewForm from '@/components/ReviewForm';
+import LogoutButton from '@/components/LogoutButton';
 import dbConnect from '@/lib/db';
 import Session from '@/models/Session';
 import Review from '@/models/Review';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import shriMatajiPortrait from '../../ShriMatajisPictures/1990_Cairns-X3.jpg';
 
 export const revalidate = 0; // Fresh fetch on every load
@@ -12,6 +15,8 @@ export const revalidate = 0; // Fresh fetch on every load
 export default async function Home() {
   let sessions: any[] = [];
   let reviews: any[] = [];
+  const session = await getServerSession(authOptions);
+  const user = session?.user;
 
   try {
     await dbConnect();
@@ -23,6 +28,8 @@ export default async function Home() {
     console.error('Error loading landing page data:', error);
   }
 
+  const hasSessions = sessions.length > 0;
+
   return (
     <div className="min-h-screen bg-white text-neutral-900 font-sans selection:bg-neutral-900 selection:text-white">
       {/* Header */}
@@ -33,7 +40,7 @@ export default async function Home() {
             <span className="text-xs text-neutral-500 tracking-wider">Research & Health Centre, Hyderabad</span>
           </div>
           <nav className="hidden md:flex items-center space-x-8 text-sm font-medium tracking-wide">
-            <Link href="/" className="hover:text-neutral-500 transition-colors">Home</Link>
+            <a href="#hero" className="hover:text-neutral-500 transition-colors">Home</a>
             
             {/* About Dropdown */}
             <div className="relative group py-2">
@@ -50,19 +57,40 @@ export default async function Home() {
               </div>
             </div>
 
-            <a href="#upcoming-sessions" className="hover:text-neutral-500 transition-colors">Upcoming Sessions</a>
+            {hasSessions && (
+              <a href="#upcoming-sessions" className="hover:text-neutral-500 transition-colors">Upcoming Sessions</a>
+            )}
             <a href="#reviews" className="hover:text-neutral-500 transition-colors">Reviews</a>
           </nav>
 
           <MobileNav />
 
           <div className="flex items-center space-x-4">
-            <Link 
-              href="/admin" 
-              className="hidden md:inline-block text-xs font-semibold px-4 py-2 border border-neutral-200 hover:border-neutral-900 transition-colors"
-            >
-              ADMIN
-            </Link>
+            {/* Auth Buttons */}
+            {user ? (
+              <>
+                <span className="hidden md:inline-block text-[10px] text-neutral-400 font-mono">
+                  Hi, {user.name}
+                </span>
+                {user.role === 'Admin' && (
+                  <Link 
+                    href="/admin" 
+                    className="hidden md:inline-block text-xs font-semibold px-4 py-2 border border-neutral-950 hover:bg-neutral-900 hover:text-white transition-colors"
+                  >
+                    ADMIN
+                  </Link>
+                )}
+                <LogoutButton />
+              </>
+            ) : (
+              <Link 
+                href="/login" 
+                className="hidden md:inline-block text-xs font-semibold px-4 py-2 border border-neutral-200 hover:border-neutral-900 transition-colors"
+              >
+                LOGIN
+              </Link>
+            )}
+
             <Link 
               href="/book" 
               className="text-xs font-semibold px-4 py-2 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
@@ -74,13 +102,13 @@ export default async function Home() {
       </header>
 
       {/* Hero Section */}
-      <section id="hero" className="py-20 px-8 border-b border-neutral-100">
+      <section id="hero" className="py-20 px-8 border-b border-neutral-100 scroll-mt-24">
         <div className="max-w-6xl mx-auto grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center">
           <div className="text-center lg:text-left space-y-8">
             <div className="space-y-5">
               <p className="text-xs tracking-[0.35em] uppercase text-neutral-400">Nirmal Nagari, Hyderabad</p>
               <h1 className="text-4xl md:text-5xl font-light tracking-tight text-neutral-900 leading-tight">
-                International Sahaja Yoga <br />
+                Sahaja Yoga <br />
                 <span className="font-normal">Research & Health Centre</span>
               </h1>
               <div className="w-12 h-[1px] bg-neutral-400 mx-auto lg:mx-0"></div>
@@ -129,87 +157,27 @@ export default async function Home() {
                 />
               </div>
             </div>
-            <div className="border border-neutral-200 p-4 bg-white">
-              <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">Inspiration</p>
-              <p className="mt-2 text-sm text-neutral-600 leading-relaxed">
-                Shri Mataji Nirmala Devi, founder of Sahaja Yoga, whose wisdom guides our collective clearance techniques.
+            <div className="border border-neutral-200 p-6 bg-white space-y-3">
+              <p className="text-sm italic text-neutral-600 font-light leading-relaxed">
+                &quot;The time has come for all of you to get your self-realisation, by which your attention becomes enlightened, your health gets completely all right, your mental processes are sensible, but above all you stand in your present.&quot;
+              </p>
+              <p className="text-right text-[10px] text-neutral-400 font-mono">
+                — H.H. Shri Mataji Nirmala Devi, 29.09.1994, Los Angeles, USA.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* About Sections */}
-      <section className="py-20 px-8 border-b border-neutral-100 bg-neutral-50/50">
-        <div className="max-w-6xl mx-auto space-y-16">
-          {/* About Shri Mataji */}
-          <div id="shri-mataji" className="grid lg:grid-cols-3 gap-8 items-start scroll-mt-24">
-            <div className="lg:col-span-1">
-              <h2 className="text-xl font-light tracking-widest text-neutral-500 uppercase">SHRI MATAJI</h2>
-              <p className="text-xs text-neutral-400 uppercase tracking-widest mt-1">Founder of Sahaja Yoga</p>
+      {/* Upcoming Sessions Section - ONLY rendered if there are sessions */}
+      {hasSessions && (
+        <section id="upcoming-sessions" className="py-20 px-8 border-b border-neutral-100 scroll-mt-24">
+          <div className="max-w-6xl mx-auto space-y-12">
+            <div className="text-center space-y-4">
+              <h2 className="text-2xl font-light tracking-wider uppercase">UPCOMING SESSIONS</h2>
+              <p className="text-sm text-neutral-500">Book your attendance for our upcoming collective clearance and meditation workshops.</p>
             </div>
-            <div className="lg:col-span-2 space-y-4">
-              <p className="text-sm text-neutral-600 font-light leading-relaxed">
-                Born in 1923 in Chhindwara, India, Shri Mataji Nirmala Devi discovered a unique method of mass Kundalini awakening on May 5th, 1970.
-                She traveled the world for over 40 years, giving self-realization to hundreds of thousands of seekers of truth for free.
-              </p>
-              <p className="text-sm text-neutral-600 font-light leading-relaxed">
-                She emphasized that self-realization is the birthright of every human being, and it cannot be bought or paid for. Her teachings on the subtle system form the foundation of all balancing treatments conducted at the Hyderabad Research & Health Centre.
-              </p>
-            </div>
-          </div>
 
-          <div className="h-[1px] bg-neutral-200"></div>
-
-          {/* About Sahaja Yoga */}
-          <div id="sahaja-yoga" className="grid lg:grid-cols-3 gap-8 items-start scroll-mt-24">
-            <div className="lg:col-span-1">
-              <h2 className="text-xl font-light tracking-widest text-neutral-500 uppercase">SAHAJA YOGA</h2>
-              <p className="text-xs text-neutral-400 uppercase tracking-widest mt-1">Spiritual Ascent & Balance</p>
-            </div>
-            <div className="lg:col-span-2 space-y-4">
-              <p className="text-sm text-neutral-600 font-light leading-relaxed">
-                &quot;Saha&quot; means with, &quot;ja&quot; means born, and &quot;yoga&quot; means union. Sahaja Yoga is the spontaneous union of the individual soul with the all-pervading divine energy, achieved through the gentle awakening of the Kundalini energy dormant inside the sacrum bone.
-              </p>
-              <p className="text-sm text-neutral-600 font-light leading-relaxed">
-                By experiencing our self-realization, we enter into a state of thoughtless awareness, where the mind becomes silent and peaceful. This activation balances our left (desire) and right (action) energy channels, fostering physical, mental, and emotional recovery.
-              </p>
-            </div>
-          </div>
-
-          <div className="h-[1px] bg-neutral-200"></div>
-
-          {/* About Us */}
-          <div id="about-us" className="grid lg:grid-cols-3 gap-8 items-start scroll-mt-24">
-            <div className="lg:col-span-1">
-              <h2 className="text-xl font-light tracking-widest text-neutral-500 uppercase">ABOUT US</h2>
-              <p className="text-xs text-neutral-400 uppercase tracking-widest mt-1">Research & Health Centre</p>
-            </div>
-            <div className="lg:col-span-2 space-y-4">
-              <p className="text-sm text-neutral-600 font-light leading-relaxed">
-                The International Sahaja Yoga Research & Health Centre, located in Nirmal Nagari, Hyderabad, Telangana, is dedicated to scientific exploration of Sahaja Yoga techniques. Our qualified team of doctors and coordinators studies the restorative effects of vibrations on human physiology.
-              </p>
-              <p className="text-sm text-neutral-600 font-light leading-relaxed">
-                Seekers visit our sanctuary to learn ancient balancing techniques (such as footsoaking, ice-packs, three-channel balancing, and mantra vibrations) to clear their chakras and strengthen their collective consciousness.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Upcoming Sessions Section */}
-      <section id="upcoming-sessions" className="py-20 px-8 border-b border-neutral-100 scroll-mt-24">
-        <div className="max-w-6xl mx-auto space-y-12">
-          <div className="text-center space-y-4">
-            <h2 className="text-2xl font-light tracking-wider uppercase">UPCOMING SESSIONS</h2>
-            <p className="text-sm text-neutral-500">Book your attendance for our upcoming collective clearance and meditation workshops.</p>
-          </div>
-
-          {sessions.length === 0 ? (
-            <p className="text-xs text-neutral-400 font-light py-8 text-center border border-dashed border-neutral-200">
-              No sessions scheduled at the moment. Please check back later.
-            </p>
-          ) : (
             <div className="grid gap-6 md:grid-cols-3">
               {sessions.map((session) => {
                 const spotsLeft = Math.max(0, session.maxParticipants - session.registeredCount);
@@ -261,12 +229,70 @@ export default async function Home() {
                 );
               })}
             </div>
-          )}
+          </div>
+        </section>
+      )}
+
+      {/* About Sections */}
+      <section className="py-20 px-8 border-b border-neutral-100 bg-neutral-50/50">
+        <div className="max-w-6xl mx-auto space-y-16">
+          {/* About Shri Mataji */}
+          <div id="shri-mataji" className="grid lg:grid-cols-3 gap-8 items-start scroll-mt-24">
+            <div className="lg:col-span-1">
+              <h2 className="text-xl font-light tracking-widest text-neutral-500 uppercase">SHRI MATAJI</h2>
+              <p className="text-xs text-neutral-400 uppercase tracking-widest mt-1">Founder of Sahaja Yoga</p>
+            </div>
+            <div className="lg:col-span-2 space-y-4">
+              <p className="text-sm text-neutral-600 font-light leading-relaxed">
+                Born in 1923 in Chhindwara, India, Shri Mataji Nirmala Devi discovered a unique method of mass Kundalini awakening on May 5th, 1970.
+                She traveled the world for over 40 years, giving self-realization to hundreds of thousands of seekers of truth for free.
+              </p>
+              <p className="text-sm text-neutral-600 font-light leading-relaxed">
+                She emphasized that self-realization is the birthright of every human being, and it cannot be bought or paid for. Her teachings on the subtle system form the foundation of all balancing treatments conducted at the Hyderabad Research & Health Centre.
+              </p>
+            </div>
+          </div>
+
+          <div className="h-[1px] bg-neutral-200"></div>
+
+          {/* About Sahaja Yoga */}
+          <div id="sahaja-yoga" className="grid lg:grid-cols-3 gap-8 items-start scroll-mt-24">
+            <div className="lg:col-span-1">
+              <h2 className="text-xl font-light tracking-widest text-neutral-500 uppercase">SAHAJA YOGA</h2>
+              <p className="text-xs text-neutral-400 uppercase tracking-widest mt-1">Spiritual Ascent & Balance</p>
+            </div>
+            <div className="lg:col-span-2 space-y-4">
+              <p className="text-sm text-neutral-600 font-light leading-relaxed">
+                &quot;Saha&quot; means with, &quot;ja&quot; means born, and &quot;yoga&quot; means union. Sahaja Yoga is the spontaneous union of the individual soul with the all-pervading divine energy, achieved through the gentle awakening of the Kundalini energy dormant inside the sacrum bone.
+              </p>
+              <p className="text-sm text-neutral-600 font-light leading-relaxed">
+                By experiencing our self-realization, we enter into a state of thoughtless awareness, where the mind becomes silent and peaceful. This activation balances our left (desire) and right (action) energy channels, fostering physical, mental, and emotional recovery.
+              </p>
+            </div>
+          </div>
+
+          <div className="h-[1px] bg-neutral-200"></div>
+
+          {/* About Us */}
+          <div id="about-us" className="grid lg:grid-cols-3 gap-8 items-start scroll-mt-24">
+            <div className="lg:col-span-1">
+              <h2 className="text-xl font-light tracking-widest text-neutral-500 uppercase">ABOUT US</h2>
+              <p className="text-xs text-neutral-400 uppercase tracking-widest mt-1">Research & Health Centre</p>
+            </div>
+            <div className="lg:col-span-2 space-y-4">
+              <p className="text-sm text-neutral-600 font-light leading-relaxed">
+                The Sahaja Yoga Research & Health Centre, located in Nirmal Nagari, Hyderabad, Telangana, is dedicated to scientific exploration of Sahaja Yoga techniques. Our qualified team of doctors and coordinators studies the restorative effects of vibrations on human physiology.
+              </p>
+              <p className="text-sm text-neutral-600 font-light leading-relaxed">
+                Seekers visit our sanctuary to learn ancient balancing techniques (such as footsoaking, ice-packs, three-channel balancing, and mantra vibrations) to clear their chakras and strengthen their collective consciousness.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Subtle System Section */}
-      <section id="subtle-system" className="py-20 px-8 border-b border-neutral-100 bg-neutral-50/50">
+      <section id="subtle-system" className="py-20 px-8 border-b border-neutral-100">
         <div className="max-w-5xl mx-auto space-y-16">
           <div className="text-center space-y-4">
             <h2 className="text-2xl font-light tracking-wider">THE SUBTLE SYSTEM</h2>
@@ -370,7 +396,7 @@ export default async function Home() {
                 <div>
                   <h4 className="text-xs uppercase tracking-wider text-neutral-400 font-semibold mb-1">Location Address</h4>
                   <p className="text-sm text-neutral-600 font-light leading-relaxed">
-                    International Sahaja Yoga Research & Health Centre<br />
+                    Sahaja Yoga Research & Health Centre<br />
                     Nirmal Nagari, Ghansimi Bazar,<br />
                     Hyderabad, Telangana - 500005, India
                   </p>
@@ -398,25 +424,24 @@ export default async function Home() {
               </div>
             </div>
 
-            {/* Map Placeholder */}
-            <div className="border border-neutral-200 bg-white p-8 flex flex-col items-center justify-center text-center">
-              <div className="space-y-4 w-full">
-                <div className="w-full aspect-[4/3] bg-neutral-100 border border-neutral-200 flex flex-col items-center justify-center p-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-neutral-400 mb-2">
-                    <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  <span className="text-xs font-semibold tracking-widest uppercase text-neutral-900">Map representation</span>
-                  <span className="text-xs text-neutral-500 font-light mt-1 max-w-[200px]">Nirmal Nagari Area, Near Ghansimi Bazar, Hyderabad</span>
-                  <div className="w-full mt-4 border-t border-dashed border-neutral-300 pt-2 text-[10px] text-neutral-400">
-                    Lat: 17.3850° N, Long: 78.4867° E
-                  </div>
-                </div>
+            {/* Map Preview */}
+            <div className="border border-neutral-200 bg-white p-4 flex flex-col justify-between">
+              <div className="w-full aspect-[4/3] bg-neutral-100 border border-neutral-200 relative overflow-hidden">
+                <iframe 
+                  src="https://maps.google.com/maps?q=Nirmal%20Nagari,%20Ghansimi%20Bazar,%20Hyderabad&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+                  width="100%" 
+                  height="100%" 
+                  style={{ border: 0 }} 
+                  allowFullScreen 
+                  loading="lazy"
+                ></iframe>
+              </div>
+              <div className="mt-4">
                 <a 
-                  href="https://maps.google.com" 
+                  href="https://maps.app.goo.gl/QNu14TFmGcJaZ3cn6" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="inline-block text-xs font-semibold px-4 py-2 border border-neutral-900 hover:bg-neutral-900 hover:text-white transition-all w-full"
+                  className="inline-block text-center text-xs font-semibold px-4 py-2.5 border border-neutral-900 hover:bg-neutral-900 hover:text-white transition-all w-full"
                 >
                   OPEN IN GOOGLE MAPS
                 </a>
@@ -429,11 +454,11 @@ export default async function Home() {
       {/* Footer */}
       <footer className="border-t border-neutral-200 py-10 px-8 text-center text-xs text-neutral-400">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <span>&copy; 2026 International Sahaja Yoga Research & Health Centre, Hyderabad. All Rights Reserved.</span>
+          <span>&copy; 2026 Sahaja Yoga Research & Health Centre, Hyderabad. All Rights Reserved.</span>
           <div className="space-x-6">
-            <Link href="/" className="hover:underline">Home</Link>
+            <a href="#hero" className="hover:underline">Home</a>
             <a href="#shri-mataji" className="hover:underline">About</a>
-            <a href="#upcoming-sessions" className="hover:underline">Sessions</a>
+            {hasSessions && <a href="#upcoming-sessions" className="hover:underline">Sessions</a>}
             <a href="#reviews" className="hover:underline">Reviews</a>
             <Link href="/book" className="hover:underline">Register</Link>
           </div>

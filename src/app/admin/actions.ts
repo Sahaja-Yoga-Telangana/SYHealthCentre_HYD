@@ -509,3 +509,49 @@ export async function deleteReviewAction(id: string) {
     return { success: false, error: error.message };
   }
 }
+
+// Admin Creation & Deletion Actions
+export async function createAdminAction(data: {
+  name: string;
+  email: string;
+  passwordHash: string; // password from form
+}) {
+  try {
+    await dbConnect();
+    const existing = await User.findOne({ email: data.email.toLowerCase() });
+    if (existing) {
+      throw new Error('Email already registered');
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(data.passwordHash, salt);
+
+    await User.create({
+      name: data.name,
+      email: data.email.toLowerCase(),
+      passwordHash,
+      role: 'Admin',
+      yogiExperienceMonths: 36,
+      nationality: 'Indian',
+      gender: 'Male',
+    });
+
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function deleteAdminAction(id: string) {
+  try {
+    await dbConnect();
+    // Prevent deleting the main admin page account or the current logged in account easily
+    await User.findByIdAndDelete(id);
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+

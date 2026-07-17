@@ -481,7 +481,7 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                   Medical & Treatment Disclaimer
                 </h4>
                 <p className="text-[10px] text-neutral-500 leading-relaxed">
-                  The International Sahaja Yoga Research & Health Centre provides alternative clearing therapies using physical elements (footsoaking, ice packs) and collective meditation techniques.
+                  The Sahaja Yoga Research & Health Centre provides alternative clearing therapies using physical elements (footsoaking, ice packs) and collective meditation techniques.
                   <strong> No modern diagnostic machinery or pharmaceutical medicine is practiced here.</strong>
                   This program is dedicated exclusively to alternative holistic care and spiritual ascent. Seekers with critical diseases requiring intensive medical machinery or emergency hospitalization should not register.
                 </p>
