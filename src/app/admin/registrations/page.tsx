@@ -33,6 +33,8 @@ export default async function RegistrationsAdminPage() {
       familyLinkage: r.familyLinkage || '',
       existingDiseases: r.existingDiseases || '',
       status: r.status,
+      checkInStatus: r.checkInStatus || 'Pending',
+      tokenNumber: r.tokenNumber || '',
       createdAt: r.createdAt.toISOString(),
       session: {
         id: r.sessionId?._id?.toString() || 'deleted',
@@ -40,6 +42,11 @@ export default async function RegistrationsAdminPage() {
         date: r.sessionId?.date?.toISOString() || '',
         time: r.sessionId?.time || '',
       },
+      billing: r.billing ? {
+        samarpanAmount: r.billing.samarpanAmount || 0,
+        paymentMode: r.billing.paymentMode || 'Pending',
+        paymentStatus: r.billing.paymentStatus || 'Outstanding',
+      } : undefined
     }));
 
     // Load active sessions for filtering

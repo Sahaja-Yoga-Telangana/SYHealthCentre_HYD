@@ -56,6 +56,12 @@ export default async function AdminLayout({
               <span>Registrations</span>
             </Link>
             <Link
+              href="/admin/consultations"
+              className="flex items-center space-x-3 px-3 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-neutral-50 border border-transparent hover:border-neutral-200 transition-all"
+            >
+              <span>Consultations</span>
+            </Link>
+            <Link
               href="/admin/reviews"
               className="flex items-center space-x-3 px-3 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-neutral-50 border border-transparent hover:border-neutral-200 transition-all"
             >

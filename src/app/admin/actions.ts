@@ -555,3 +555,165 @@ export async function deleteAdminAction(id: string) {
   }
 }
 
+// EMR E-Health & Billing Actions
+export async function checkInYogiAction(
+  id: string,
+  data: {
+    samarpanAmount: number;
+    paymentMode: 'Cash' | 'UPI' | 'Card' | 'Pending';
+    paymentStatus: 'Paid' | 'Outstanding';
+  }
+) {
+  try {
+    await dbConnect();
+    
+    // Find patient record
+    const reg = await SessionRegistration.findById(id);
+    if (!reg) throw new Error('Registration record not found.');
+
+    // Count today's checked-in patients to assign next sequential token number
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const count = await SessionRegistration.countDocuments({
+      checkInStatus: 'Checked In',
+      updatedAt: { $gte: startOfDay },
+    });
+    
+    const tokenSeq = String(count + 1).padStart(2, '0');
+    const tokenNumber = `T-${tokenSeq}`;
+    
+    reg.checkInStatus = 'Checked In';
+    reg.tokenNumber = tokenNumber;
+    reg.billing = {
+      samarpanAmount: data.samarpanAmount,
+      paymentMode: data.paymentMode,
+      paymentStatus: data.paymentStatus,
+    };
+    reg.consultation = {
+      chiefComplaint: '',
+      examinationFindings: '',
+      doctorNotes: '',
+      status: 'Pending',
+    };
+
+    await reg.save();
+    
+    revalidatePath('/admin');
+    revalidatePath('/admin/registrations');
+    revalidatePath('/admin/consultations');
+    return { success: true, tokenNumber };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function collectPaymentAction(id: string) {
+  try {
+    await dbConnect();
+    const reg = await SessionRegistration.findById(id);
+    if (!reg) throw new Error('Registration not found');
+    
+    if (reg.billing) {
+      reg.billing.paymentStatus = 'Paid';
+      await reg.save();
+    }
+    
+    revalidatePath('/admin');
+    revalidatePath('/admin/registrations');
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function submitConsultationAction(
+  id: string,
+  data: {
+    chiefComplaint: string;
+    examinationFindings: string;
+    doctorNotes: string;
+  }
+) {
+  try {
+    await dbConnect();
+    const reg = await SessionRegistration.findById(id);
+    if (!reg) throw new Error('Registration record not found.');
+
+    reg.consultation = {
+      chiefComplaint: data.chiefComplaint,
+      examinationFindings: data.examinationFindings,
+      doctorNotes: data.doctorNotes,
+      status: 'Completed',
+      consultedAt: new Date(),
+    };
+    
+    // Once consulted, update checkInStatus to Checked Out
+    reg.checkInStatus = 'Checked Out';
+
+    await reg.save();
+    
+    revalidatePath('/admin');
+    revalidatePath('/admin/registrations');
+    revalidatePath('/admin/consultations');
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function createWalkInRegistrationAction(payload: {
+  sessionId: string;
+  name: string;
+  age: number;
+  gender: 'Male' | 'Female';
+  dob: string;
+  bloodGroup: string;
+  address: string;
+  phone: string;
+  emergencyContact: string;
+  centerAddress: string;
+  coordinatorNumber: string;
+  familyLinkage?: string;
+  existingDiseases?: string;
+}) {
+  try {
+    await dbConnect();
+
+    // Verify session
+    const session = await Session.findById(payload.sessionId);
+    if (!session) throw new Error('Session not found');
+    if (session.registeredCount >= session.maxParticipants) {
+      throw new Error('This session is fully registered.');
+    }
+
+    // Auto-generate MRD number
+    const today = new Date();
+    const dateStr = today.getFullYear() + 
+      String(today.getMonth() + 1).padStart(2, '0') + 
+      String(today.getDate()).padStart(2, '0');
+    const randomHex = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const mrdNumber = `MRD-${dateStr}-${randomHex}`;
+
+    // Create registration
+    const registration = await SessionRegistration.create({
+      ...payload,
+      dob: new Date(payload.dob),
+      mrdNumber,
+      status: 'Confirmed',
+      checkInStatus: 'Pending',
+      disclaimerAccepted: true, // Auto accepted for walk-ins by default
+    });
+
+    // Increment registered count
+    session.registeredCount += 1;
+    await session.save();
+
+    revalidatePath('/admin');
+    revalidatePath('/admin/registrations');
+    return { success: true, mrdNumber };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+
