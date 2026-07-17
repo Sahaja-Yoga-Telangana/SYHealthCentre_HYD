@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -32,10 +33,16 @@ export default function MobileNav() {
 
       {open && (
         <nav className="absolute top-full left-0 right-0 bg-white border-b border-neutral-200 px-8 py-6 space-y-4 z-50">
-          <a href="#about" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">About</a>
-          <a href="#tariffs" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">Tariffs</a>
-          <a href="#subtle-system" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">Subtle System</a>
-          <a href="#contact" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">Contact</a>
+          <Link href="/" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">Home</Link>
+          <div className="space-y-2">
+            <span className="block text-xs uppercase tracking-wider text-neutral-400 font-semibold">About</span>
+            <a href="#shri-mataji" onClick={() => setOpen(false)} className="block pl-4 text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">Shri Mataji</a>
+            <a href="#sahaja-yoga" onClick={() => setOpen(false)} className="block pl-4 text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">Sahaja Yoga</a>
+            <a href="#about-us" onClick={() => setOpen(false)} className="block pl-4 text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">About Us</a>
+          </div>
+          <a href="#upcoming-sessions" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">Upcoming Sessions</a>
+          <a href="#reviews" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">Reviews</a>
+          <Link href="/book" onClick={() => setOpen(false)} className="block text-sm font-bold text-center py-2 bg-neutral-900 text-white tracking-widest uppercase hover:bg-neutral-800 transition-colors">Register</Link>
         </nav>
       )}
     </div>

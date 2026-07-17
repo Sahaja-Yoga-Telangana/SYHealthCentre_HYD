@@ -1,41 +1,52 @@
 import Image from 'next/image';
 import React from 'react';
 import dbConnect from '@/lib/db';
-import Doctor, { IAvailabilitySchedule } from '@/models/Doctor';
-import '@/models/User';
+import Session from '@/models/Session';
 import BookingWizard from './BookingWizard';
 import Link from 'next/link';
 import shriMatajiPortrait from '../../../ShriMatajisPictures/1990_Cairns-X3.jpg';
 
-export const revalidate = 0; // Disable caching to fetch the latest doctor directory on page load
+export const revalidate = 0; // Fresh fetch on every load
 
-interface DoctorItem {
+interface SessionItem {
   id: string;
-  name: string;
-  specialty: string;
-  availabilityDays: number[];
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  instructor: string;
+  maxParticipants: number;
+  registeredCount: number;
 }
 
-export default async function BookingPage() {
-  let doctorsList: DoctorItem[] = [];
+export default async function BookingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sessionId?: string }>;
+}) {
+  let sessionsList: SessionItem[] = [];
   let errorMsg = '';
+  const { sessionId: preselectedSessionId } = await searchParams;
 
   try {
     await dbConnect();
-    // Fetch active doctors and populate user data
-    const activeDocs = await Doctor.find({ active: true })
-      .populate('userId', 'name')
-      .sort({ createdAt: 1 });
+    // Fetch active sessions that are not past and have available spots
+    const activeSessions = await Session.find({ isActive: true })
+      .sort({ date: 1 });
 
-    doctorsList = activeDocs.map((doc) => ({
-      id: doc._id.toString(),
-      name: (doc.userId as any)?.name || 'Unknown Doctor',
-      specialty: doc.specialty,
-      availabilityDays: doc.availability?.map((slot: IAvailabilitySchedule) => slot.dayOfWeek) || [],
+    sessionsList = activeSessions.map((session) => ({
+      id: session._id.toString(),
+      title: session.title,
+      description: session.description,
+      date: session.date.toISOString(),
+      time: session.time,
+      instructor: session.instructor,
+      maxParticipants: session.maxParticipants,
+      registeredCount: session.registeredCount,
     }));
   } catch (error: unknown) {
-    console.error('Error loading booking page doctors:', error);
-    errorMsg = 'Could not load doctors directory. Please try again later.';
+    console.error('Error loading registration page sessions:', error);
+    errorMsg = 'Could not load sessions directory. Please try again later.';
   }
 
   return (
@@ -47,11 +58,11 @@ export default async function BookingPage() {
           <Link href="/" className="flex flex-col group">
             <span className="font-bold tracking-widest text-sm text-neutral-900">SAHAJA YOGA</span>
             <span className="text-[10px] text-neutral-400 uppercase tracking-wider group-hover:text-neutral-900 transition-colors">
-              ← BACK TO HOME
+              ← BACK TO PORTAL
             </span>
           </Link>
           <span className="text-[10px] bg-white border border-neutral-200 px-3 py-1 font-mono text-neutral-500 uppercase">
-            Reservations System
+            Seeker Registration System
           </span>
         </div>
 
@@ -74,19 +85,19 @@ export default async function BookingPage() {
               />
             </div>
             <div className="p-6 space-y-3">
-              <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">Centred Booking Flow</p>
+              <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">Yogi Registration Flow</p>
               <h1 className="text-xl font-light tracking-wide text-neutral-900">
-                Reserve treatment, day stay, or accommodation
+                Register for Collective Sessions
               </h1>
               <p className="text-sm text-neutral-600 leading-relaxed">
-                Guided by the serene atmosphere of the Hyderabad centre, this booking flow checks Sahaja Yoga eligibility, consultation timing, and accommodation preferences before your request reaches the admissions desk.
+                Guided by the serene atmosphere of the Hyderabad centre, this registration flow captures your seeker details, center affiliation, and signs you up for upcoming collective meditation and clearing sessions.
               </p>
             </div>
           </div>
         </div>
 
         {/* Wizard */}
-        <BookingWizard doctors={doctorsList} />
+        <BookingWizard sessions={sessionsList} preselectedId={preselectedSessionId || ''} />
       </div>
     </div>
   );

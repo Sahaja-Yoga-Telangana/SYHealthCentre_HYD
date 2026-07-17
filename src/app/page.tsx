@@ -1,25 +1,61 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import MobileNav from '@/components/MobileNav';
+import ReviewForm from '@/components/ReviewForm';
+import dbConnect from '@/lib/db';
+import Session from '@/models/Session';
+import Review from '@/models/Review';
 import shriMatajiPortrait from '../../ShriMatajisPictures/1990_Cairns-X3.jpg';
 
-export default function Home() {
+export const revalidate = 0; // Fresh fetch on every load
+
+export default async function Home() {
+  let sessions: any[] = [];
+  let reviews: any[] = [];
+
+  try {
+    await dbConnect();
+    // Fetch upcoming active sessions
+    sessions = await Session.find({ isActive: true }).sort({ date: 1 });
+    // Fetch approved reviews
+    reviews = await Review.find({ isApproved: true }).sort({ createdAt: -1 });
+  } catch (error) {
+    console.error('Error loading landing page data:', error);
+  }
+
   return (
     <div className="min-h-screen bg-white text-neutral-900 font-sans selection:bg-neutral-900 selection:text-white">
       {/* Header */}
-      <header className="border-b border-neutral-200 py-6 px-8 sticky top-0 bg-white/80 backdrop-blur-md z-50 relative">
+      <header className="border-b border-neutral-200 py-6 px-8 sticky top-0 bg-white/80 backdrop-blur-md z-50">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex flex-col">
             <span className="font-semibold text-lg tracking-widest text-neutral-900">SAHAJA YOGA</span>
             <span className="text-xs text-neutral-500 tracking-wider">Research & Health Centre, Hyderabad</span>
           </div>
-          <nav className="hidden md:flex space-x-8 text-sm font-medium tracking-wide">
-            <a href="#about" className="hover:text-neutral-500 transition-colors">About</a>
-            <a href="#tariffs" className="hover:text-neutral-500 transition-colors">Tariffs</a>
-            <a href="#subtle-system" className="hover:text-neutral-500 transition-colors">Subtle System</a>
-            <a href="#contact" className="hover:text-neutral-500 transition-colors">Contact</a>
+          <nav className="hidden md:flex items-center space-x-8 text-sm font-medium tracking-wide">
+            <Link href="/" className="hover:text-neutral-500 transition-colors">Home</Link>
+            
+            {/* About Dropdown */}
+            <div className="relative group py-2">
+              <button className="hover:text-neutral-500 transition-colors flex items-center space-x-1 focus:outline-none">
+                <span>About</span>
+                <svg className="w-3 h-3 text-neutral-400 group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-neutral-200 py-2 shadow-sm rounded-none hidden group-hover:block z-50">
+                <a href="#shri-mataji" className="block px-4 py-2 text-xs hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 transition-colors">Shri Mataji</a>
+                <a href="#sahaja-yoga" className="block px-4 py-2 text-xs hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 transition-colors">Sahaja Yoga</a>
+                <a href="#about-us" className="block px-4 py-2 text-xs hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 transition-colors">About Us</a>
+              </div>
+            </div>
+
+            <a href="#upcoming-sessions" className="hover:text-neutral-500 transition-colors">Upcoming Sessions</a>
+            <a href="#reviews" className="hover:text-neutral-500 transition-colors">Reviews</a>
           </nav>
+
           <MobileNav />
+
           <div className="flex items-center space-x-4">
             <Link 
               href="/admin" 
@@ -31,14 +67,14 @@ export default function Home() {
               href="/book" 
               className="text-xs font-semibold px-4 py-2 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
             >
-              BOOK NOW
+              REGISTER NOW
             </Link>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section id="about" className="py-20 px-8 border-b border-neutral-100">
+      <section id="hero" className="py-20 px-8 border-b border-neutral-100">
         <div className="max-w-6xl mx-auto grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center">
           <div className="text-center lg:text-left space-y-8">
             <div className="space-y-5">
@@ -57,15 +93,15 @@ export default function Home() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="border border-neutral-200 bg-neutral-50 p-4 text-left">
-                <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">Healing Focus</p>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">Meditation Focus</p>
                 <p className="mt-2 text-sm text-neutral-600 leading-relaxed">
-                  OPD consultations, day stays, and in-patient accommodation designed around Sahaja Yoga eligibility and restorative care.
+                  Join our collective clearance sessions, workshops, and seminars designed around Sahaja Yoga subtle-system awareness.
                 </p>
               </div>
               <div className="border border-neutral-200 bg-neutral-50 p-4 text-left">
-                <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">Living Tradition</p>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">Scientific Research</p>
                 <p className="mt-2 text-sm text-neutral-600 leading-relaxed">
-                  The centre experience is rooted in meditation, subtle-system awareness, and the teachings associated with Shri Mataji Nirmala Devi.
+                  The health benefits of vibratory diagnostics and thoughtless awareness are scientifically evaluated and proven here.
                 </p>
               </div>
             </div>
@@ -75,7 +111,7 @@ export default function Home() {
                 href="/book"
                 className="inline-block text-sm font-medium tracking-wider px-8 py-3 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
               >
-                SCHEDULE A VISIT OR STAY
+                REGISTER FOR AN UPCOMING SESSION
               </Link>
             </div>
           </div>
@@ -94,72 +130,143 @@ export default function Home() {
               </div>
             </div>
             <div className="border border-neutral-200 p-4 bg-white">
-              <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">Quiet Inspiration</p>
+              <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">Inspiration</p>
               <p className="mt-2 text-sm text-neutral-600 leading-relaxed">
-                A calm visual presence has been added from your `ShriMatajisPictures` folder to anchor the landing experience and the booking journey.
+                Shri Mataji Nirmala Devi, founder of Sahaja Yoga, whose wisdom guides our collective clearance techniques.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Tariffs Section */}
-      <section id="tariffs" className="py-20 px-8 border-b border-neutral-100 bg-neutral-50">
-        <div className="max-w-6xl mx-auto space-y-12">
-          <div className="text-center space-y-4">
-            <h2 className="text-2xl font-light tracking-wider">TREATMENT & TARIFF SCHEME</h2>
-            <p className="text-sm text-neutral-500">Eligibility, pricing, and services provided at the centre.</p>
+      {/* About Sections */}
+      <section className="py-20 px-8 border-b border-neutral-100 bg-neutral-50/50">
+        <div className="max-w-6xl mx-auto space-y-16">
+          {/* About Shri Mataji */}
+          <div id="shri-mataji" className="grid lg:grid-cols-3 gap-8 items-start scroll-mt-24">
+            <div className="lg:col-span-1">
+              <h2 className="text-xl font-light tracking-widest text-neutral-500 uppercase">SHRI MATAJI</h2>
+              <p className="text-xs text-neutral-400 uppercase tracking-widest mt-1">Founder of Sahaja Yoga</p>
+            </div>
+            <div className="lg:col-span-2 space-y-4">
+              <p className="text-sm text-neutral-600 font-light leading-relaxed">
+                Born in 1923 in Chhindwara, India, Shri Mataji Nirmala Devi discovered a unique method of mass Kundalini awakening on May 5th, 1970.
+                She traveled the world for over 40 years, giving self-realization to hundreds of thousands of seekers of truth for free.
+              </p>
+              <p className="text-sm text-neutral-600 font-light leading-relaxed">
+                She emphasized that self-realization is the birthright of every human being, and it cannot be bought or paid for. Her teachings on the subtle system form the foundation of all balancing treatments conducted at the Hyderabad Research & Health Centre.
+              </p>
+            </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse border border-neutral-200 bg-white">
-              <thead>
-                <tr className="border-b border-neutral-200 bg-neutral-100 text-neutral-700 text-xs font-semibold uppercase tracking-wider">
-                  <th className="p-4 border-r border-neutral-200">Category</th>
-                  <th className="p-4 border-r border-neutral-200">Description</th>
-                  <th className="p-4 border-r border-neutral-200">Timings & Eligibility</th>
-                  <th className="p-4">Tariff (INR)</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm divide-y divide-neutral-200 text-neutral-600">
-                <tr>
-                  <td className="p-4 font-medium text-neutral-950 border-r border-neutral-200">OPD (Outpatient)</td>
-                  <td className="p-4 border-r border-neutral-200">Consultation with a qualified doctor on vibratory diagnostic methods.</td>
-                  <td className="p-4 border-r border-neutral-200">10:00 AM - 12:30 PM (Mon-Sat)<br /><span className="text-xs text-neutral-400">Req: 6+ months practicing</span></td>
-                  <td className="p-4 font-mono font-medium text-neutral-950">₹50</td>
-                </tr>
-                <tr>
-                  <td className="p-4 font-medium text-neutral-950 border-r border-neutral-200">Day Stay</td>
-                  <td className="p-4 border-r border-neutral-200">Day use facility including diagnostic checks, treatment sessions, and nutritious meals.</td>
-                  <td className="p-4 border-r border-neutral-200">10:00 AM - 5:00 PM (Mon-Sat)<br /><span className="text-xs text-neutral-400">Req: 6+ months practicing</span></td>
-                  <td className="p-4 font-mono font-medium text-neutral-950">₹400 / day</td>
-                </tr>
-                <tr className="bg-neutral-50/50">
-                  <td className="p-4 font-medium text-neutral-950 border-r border-neutral-200" rowSpan={4}>IPD (Accommodation + Treatment)</td>
-                  <td className="p-4 border-r border-neutral-200"><strong>Double Room (Single Occupant)</strong><br />Full board, individual treatments.</td>
-                  <td className="p-4 border-r border-neutral-200" rowSpan={4}>Requires 24-hour admission<br /><span className="text-xs text-neutral-400">Req: 1+ year practicing</span></td>
-                  <td className="p-4 border-b border-neutral-200 font-mono font-medium text-neutral-950">₹3,000 / day <span className="text-xs text-neutral-400">(All Nationalities)</span></td>
-                </tr>
-                <tr className="bg-neutral-50/50">
-                  <td className="p-4 border-r border-neutral-200"><strong>Double Room (Shared Occupancy)</strong><br />Per adult rate, shared double room.</td>
-                  <td className="p-4 border-b border-neutral-200 font-mono font-medium text-neutral-950">₹1,800 / day <span className="text-xs text-neutral-400">(Indian)</span><br />₹2,000 / day <span className="text-xs text-neutral-400">(Non-Indian)</span></td>
-                </tr>
-                <tr className="bg-neutral-50/50">
-                  <td className="p-4 border-r border-neutral-200"><strong>Dormitory (Ladies &amp; Men&apos;s)</strong><br />Gender-separated large halls (Ladies: max 36, Men&apos;s: max 25).</td>
-                  <td className="p-4 border-b border-neutral-200 font-mono font-medium text-neutral-950">₹1,000 / day <span className="text-xs text-neutral-400">(Indian)</span><br />₹1,500 / day <span className="text-xs text-neutral-400">(Non-Indian)</span></td>
-                </tr>
-                <tr className="bg-neutral-50/50">
-                  <td className="p-4 border-r border-neutral-200"><strong>Family Room</strong><br />Private family room accommodating up to 4 adults.</td>
-                  <td className="p-4 font-mono font-medium text-neutral-950">₹2,500 / day <span className="text-xs text-neutral-400">(Indian)</span><br />₹3,000 / day <span className="text-xs text-neutral-400">(Non-Indian, current project assumption)</span></td>
-                </tr>
-              </tbody>
-            </table>
+          <div className="h-[1px] bg-neutral-200"></div>
+
+          {/* About Sahaja Yoga */}
+          <div id="sahaja-yoga" className="grid lg:grid-cols-3 gap-8 items-start scroll-mt-24">
+            <div className="lg:col-span-1">
+              <h2 className="text-xl font-light tracking-widest text-neutral-500 uppercase">SAHAJA YOGA</h2>
+              <p className="text-xs text-neutral-400 uppercase tracking-widest mt-1">Spiritual Ascent & Balance</p>
+            </div>
+            <div className="lg:col-span-2 space-y-4">
+              <p className="text-sm text-neutral-600 font-light leading-relaxed">
+                &quot;Saha&quot; means with, &quot;ja&quot; means born, and &quot;yoga&quot; means union. Sahaja Yoga is the spontaneous union of the individual soul with the all-pervading divine energy, achieved through the gentle awakening of the Kundalini energy dormant inside the sacrum bone.
+              </p>
+              <p className="text-sm text-neutral-600 font-light leading-relaxed">
+                By experiencing our self-realization, we enter into a state of thoughtless awareness, where the mind becomes silent and peaceful. This activation balances our left (desire) and right (action) energy channels, fostering physical, mental, and emotional recovery.
+              </p>
+            </div>
+          </div>
+
+          <div className="h-[1px] bg-neutral-200"></div>
+
+          {/* About Us */}
+          <div id="about-us" className="grid lg:grid-cols-3 gap-8 items-start scroll-mt-24">
+            <div className="lg:col-span-1">
+              <h2 className="text-xl font-light tracking-widest text-neutral-500 uppercase">ABOUT US</h2>
+              <p className="text-xs text-neutral-400 uppercase tracking-widest mt-1">Research & Health Centre</p>
+            </div>
+            <div className="lg:col-span-2 space-y-4">
+              <p className="text-sm text-neutral-600 font-light leading-relaxed">
+                The International Sahaja Yoga Research & Health Centre, located in Nirmal Nagari, Hyderabad, Telangana, is dedicated to scientific exploration of Sahaja Yoga techniques. Our qualified team of doctors and coordinators studies the restorative effects of vibrations on human physiology.
+              </p>
+              <p className="text-sm text-neutral-600 font-light leading-relaxed">
+                Seekers visit our sanctuary to learn ancient balancing techniques (such as footsoaking, ice-packs, three-channel balancing, and mantra vibrations) to clear their chakras and strengthen their collective consciousness.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
+      {/* Upcoming Sessions Section */}
+      <section id="upcoming-sessions" className="py-20 px-8 border-b border-neutral-100 scroll-mt-24">
+        <div className="max-w-6xl mx-auto space-y-12">
+          <div className="text-center space-y-4">
+            <h2 className="text-2xl font-light tracking-wider uppercase">UPCOMING SESSIONS</h2>
+            <p className="text-sm text-neutral-500">Book your attendance for our upcoming collective clearance and meditation workshops.</p>
+          </div>
+
+          {sessions.length === 0 ? (
+            <p className="text-xs text-neutral-400 font-light py-8 text-center border border-dashed border-neutral-200">
+              No sessions scheduled at the moment. Please check back later.
+            </p>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-3">
+              {sessions.map((session) => {
+                const spotsLeft = Math.max(0, session.maxParticipants - session.registeredCount);
+                return (
+                  <div key={session._id.toString()} className="border border-neutral-200 p-6 bg-white flex flex-col justify-between space-y-6">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start">
+                        <span className="text-[10px] bg-neutral-100 px-2 py-0.5 border text-neutral-500 font-semibold tracking-wider uppercase font-mono">
+                          {session.time}
+                        </span>
+                        <span className={`text-[9px] font-bold px-2 py-0.5 border uppercase ${
+                          spotsLeft > 5 ? 'border-neutral-200 text-neutral-600' : 'border-neutral-900 bg-neutral-900 text-white animate-pulse'
+                        }`}>
+                          {spotsLeft} spots left
+                        </span>
+                      </div>
+                      <h3 className="text-base font-medium text-neutral-900 tracking-wide leading-tight">
+                        {session.title}
+                      </h3>
+                      <p className="text-xs text-neutral-500 font-light leading-relaxed">
+                        {session.description}
+                      </p>
+                    </div>
+
+                    <div className="pt-4 border-t border-neutral-100 space-y-3">
+                      <div className="flex justify-between text-xs text-neutral-500">
+                        <span>Instructor:</span>
+                        <span className="font-semibold text-neutral-800">{session.instructor}</span>
+                      </div>
+                      <div className="flex justify-between text-xs text-neutral-500">
+                        <span>Date:</span>
+                        <span className="font-semibold text-neutral-800 font-mono">
+                          {new Date(session.date).toLocaleDateString(undefined, {
+                            weekday: 'short',
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </span>
+                      </div>
+                      <Link
+                        href={`/book?sessionId=${session._id.toString()}`}
+                        className="block text-center text-[10px] font-semibold tracking-widest uppercase py-2.5 border border-neutral-900 hover:bg-neutral-900 hover:text-white transition-all w-full"
+                      >
+                        Register For Session
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* Subtle System Section */}
-      <section id="subtle-system" className="py-20 px-8 border-b border-neutral-100">
+      <section id="subtle-system" className="py-20 px-8 border-b border-neutral-100 bg-neutral-50/50">
         <div className="max-w-5xl mx-auto space-y-16">
           <div className="text-center space-y-4">
             <h2 className="text-2xl font-light tracking-wider">THE SUBTLE SYSTEM</h2>
@@ -167,7 +274,7 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-12">
-            <div className="border border-neutral-200 p-8 space-y-6">
+            <div className="border border-neutral-200 p-8 space-y-6 bg-white">
               <h3 className="text-lg font-medium border-b border-neutral-100 pb-3">The Three Energy Channels (Nadis)</h3>
               <ul className="space-y-4 text-sm text-neutral-600">
                 <li>
@@ -185,7 +292,7 @@ export default function Home() {
               </ul>
             </div>
 
-            <div className="border border-neutral-200 p-8 space-y-6">
+            <div className="border border-neutral-200 p-8 space-y-6 bg-white">
               <h3 className="text-lg font-medium border-b border-neutral-100 pb-3">The Seven Plexuses (Chakras) & Kundalini</h3>
               <p className="text-sm text-neutral-600 font-light">
                 The <strong className="font-medium text-neutral-900">Kundalini</strong> is a residual spiritual energy dormant in the sacrum bone. 
@@ -206,6 +313,44 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Reviews Section */}
+      <section id="reviews" className="py-20 px-8 border-b border-neutral-100 scroll-mt-24">
+        <div className="max-w-6xl mx-auto space-y-12">
+          <div className="text-center space-y-4">
+            <h2 className="text-2xl font-light tracking-wider uppercase">SEEKER REVIEWS</h2>
+            <p className="text-sm text-neutral-500">Read what others have to say about their balancing experiences at the Research & Health Centre.</p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {reviews.map((review) => (
+              <div key={review._id.toString()} className="border border-neutral-200 p-6 bg-neutral-50/50 space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-semibold text-neutral-800">{review.name}</span>
+                  <div className="flex text-amber-500 text-xs">
+                    {Array.from({ length: review.rating }).map((_, i) => (
+                      <span key={i}>★</span>
+                    ))}
+                    {Array.from({ length: 5 - review.rating }).map((_, i) => (
+                      <span key={i} className="text-neutral-200">★</span>
+                    ))}
+                  </div>
+                </div>
+                <p className="text-xs text-neutral-600 font-light italic leading-relaxed">
+                  &quot;{review.comment}&quot;
+                </p>
+                <div className="text-[10px] text-neutral-400 font-mono">
+                  Submitted on {new Date(review.createdAt).toLocaleDateString()}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-8">
+            <ReviewForm />
           </div>
         </div>
       </section>
@@ -234,8 +379,8 @@ export default function Home() {
                 <div>
                   <h4 className="text-xs uppercase tracking-wider text-neutral-400 font-semibold mb-1">Phone Numbers</h4>
                   <p className="text-sm text-neutral-600 font-light">
-                    +91 40 1234 5678 (OPD Desk)<br />
-                    +91 98765 43210 (In-Patient Booking Helpdesk)
+                    +91 40 1234 5678 (Helpdesk)<br />
+                    +91 98765 43210 (Admissions/Registrations Desk)
                   </p>
                 </div>
 
@@ -249,7 +394,7 @@ export default function Home() {
               </div>
 
               <div className="pt-6 border-t border-neutral-100 text-xs text-neutral-400">
-                Note: Patients must follow general Sahaja Yoga code of conduct.
+                Note: Seekers must follow the general Sahaja Yoga code of conduct.
               </div>
             </div>
 
@@ -286,9 +431,11 @@ export default function Home() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <span>&copy; 2026 International Sahaja Yoga Research & Health Centre, Hyderabad. All Rights Reserved.</span>
           <div className="space-x-6">
-            <a href="#about" className="hover:underline">About</a>
-            <a href="#tariffs" className="hover:underline">Tariffs</a>
-            <a href="#contact" className="hover:underline">Contact</a>
+            <Link href="/" className="hover:underline">Home</Link>
+            <a href="#shri-mataji" className="hover:underline">About</a>
+            <a href="#upcoming-sessions" className="hover:underline">Sessions</a>
+            <a href="#reviews" className="hover:underline">Reviews</a>
+            <Link href="/book" className="hover:underline">Register</Link>
           </div>
         </div>
       </footer>

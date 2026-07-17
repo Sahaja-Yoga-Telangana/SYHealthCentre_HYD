@@ -36,16 +36,22 @@ export default function AdminLayout({
               <span>Doctors</span>
             </Link>
             <Link
-              href="/admin/rooms"
+              href="/admin/sessions"
               className="flex items-center space-x-3 px-3 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-neutral-50 border border-transparent hover:border-neutral-200 transition-all"
             >
-              <span>Rooms & Beds</span>
+              <span>Sessions</span>
             </Link>
             <Link
-              href="/admin/bookings"
+              href="/admin/registrations"
               className="flex items-center space-x-3 px-3 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-neutral-50 border border-transparent hover:border-neutral-200 transition-all"
             >
-              <span>Bookings / Adm.</span>
+              <span>Registrations</span>
+            </Link>
+            <Link
+              href="/admin/reviews"
+              className="flex items-center space-x-3 px-3 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-neutral-50 border border-transparent hover:border-neutral-200 transition-all"
+            >
+              <span>Reviews</span>
             </Link>
           </nav>
         </div>
