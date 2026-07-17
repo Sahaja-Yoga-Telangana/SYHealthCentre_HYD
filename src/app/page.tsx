@@ -57,6 +57,7 @@ export default async function Home() {
               </div>
             </div>
 
+            <a href="https://sahajogtelangana.vercel.app/events" className="hover:text-neutral-500 transition-colors">Events</a>
             {hasSessions && (
               <a href="#upcoming-sessions" className="hover:text-neutral-500 transition-colors">Upcoming Sessions</a>
             )}
@@ -458,6 +459,7 @@ export default async function Home() {
           <div className="space-x-6">
             <a href="#hero" className="hover:underline">Home</a>
             <a href="#shri-mataji" className="hover:underline">About</a>
+            <a href="https://sahajogtelangana.vercel.app/events" className="hover:underline">Events</a>
             {hasSessions && <a href="#upcoming-sessions" className="hover:underline">Sessions</a>}
             <a href="#reviews" className="hover:underline">Reviews</a>
             <Link href="/book" className="hover:underline">Register</Link>
