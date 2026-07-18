@@ -24,7 +24,13 @@ interface RegistrationItem {
   emergencyContact: string;
   centerAddress: string;
   coordinatorNumber: string;
-  familyLinkage?: string;
+  familyMembers?: {
+    name: string;
+    age: number;
+    gender: string;
+    dob: string;
+    bloodGroup: string;
+  }[];
   existingDiseases?: string;
   status: 'Pending' | 'Confirmed' | 'Cancelled';
   checkInStatus: 'Pending' | 'Checked In' | 'Checked Out' | 'Cancelled';
@@ -62,62 +68,6 @@ export default function RegistrationsClient({ initialRegistrations, sessions }: 
   const [editPaymentMode, setEditPaymentMode] = useState<'Cash' | 'UPI' | 'Card' | 'Pending'>('UPI');
   const [editPaymentStatus, setEditPaymentStatus] = useState<'Paid' | 'Outstanding'>('Paid');
   const [editTransactionId, setEditTransactionId] = useState('');
-  const [uploadingScreenshot, setUploadingScreenshot] = useState(false);
-
-  const handleDetailScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !selectedReg) return;
-
-    setUploadingScreenshot(true);
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'df6iivqm6';
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'sahaja_events_unsigned';
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', uploadPreset);
-    formData.append('folder', 'sy-healthcentre-upi');
-
-    try {
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await res.json();
-      if (data.secure_url) {
-        startTransition(async () => {
-          const billingPayload = {
-            samarpanAmount: selectedReg.billing?.samarpanAmount || 500,
-            paymentMode: selectedReg.billing?.paymentMode || 'UPI',
-            paymentStatus: selectedReg.billing?.paymentStatus || 'Outstanding',
-            upiScreenshot: data.secure_url,
-          };
-
-          const updateRes = await updateBillingAction(selectedReg.id, billingPayload);
-          if (updateRes.success) {
-            setRegistrations((prev) =>
-              prev.map((r) =>
-                r.id === selectedReg.id
-                  ? { ...r, billing: { ...r.billing!, upiScreenshot: data.secure_url } }
-                  : r
-              )
-            );
-            setSelectedReg((prev) =>
-              prev ? { ...prev, billing: { ...prev.billing!, upiScreenshot: data.secure_url } } : null
-            );
-          } else {
-            alert(updateRes.error || 'Failed to update database with screenshot.');
-          }
-        });
-      } else {
-        alert('Transaction screenshot upload failed.');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Network error while uploading transaction receipt.');
-    } finally {
-      setUploadingScreenshot(false);
-    }
-  };
 
   const handleSaveBillingEdit = () => {
     if (!selectedReg) return;
@@ -289,6 +239,12 @@ export default function RegistrationsClient({ initialRegistrations, sessions }: 
       return;
     }
 
+    const phoneRegex = /^(\+91[\-\s]?)?[6789][0-9]{9}$/;
+    if (!phoneRegex.test(walkInPhone.trim().replace(/[\s\-]/g, ''))) {
+      alert('Please enter a valid 10-digit Indian mobile number.');
+      return;
+    }
+
     startTransition(async () => {
       const res = await createWalkInRegistrationAction({
         sessionId: walkInSession,
@@ -302,7 +258,7 @@ export default function RegistrationsClient({ initialRegistrations, sessions }: 
         emergencyContact: walkInEmergency || walkInPhone,
         centerAddress: walkInCenter || 'Hyderabad Center',
         coordinatorNumber: walkInCoordinator || 'Local Walk-In',
-        familyLinkage: walkInFamily,
+        familyMembers: [],
         existingDiseases: walkInDiseases,
       });
 
@@ -324,7 +280,7 @@ export default function RegistrationsClient({ initialRegistrations, sessions }: 
           emergencyContact: walkInEmergency || walkInPhone,
           centerAddress: walkInCenter || 'Hyderabad Center',
           coordinatorNumber: walkInCoordinator || 'Local Walk-In',
-          familyLinkage: walkInFamily,
+          familyMembers: [],
           existingDiseases: walkInDiseases,
           status: 'Confirmed',
           checkInStatus: 'Pending',
@@ -856,7 +812,7 @@ export default function RegistrationsClient({ initialRegistrations, sessions }: 
                               <button
                                 type="button"
                                 onClick={handleSaveBillingEdit}
-                                disabled={isPending || uploadingScreenshot}
+                                disabled={isPending}
                                 className="flex-1 text-[9px] font-bold py-1.5 bg-neutral-900 text-white hover:bg-neutral-800 tracking-wider uppercase"
                               >
                                 Save Changes
@@ -878,49 +834,6 @@ export default function RegistrationsClient({ initialRegistrations, sessions }: 
                               <p><strong className="text-neutral-500 font-normal">UPI Transaction ID:</strong> <span className="font-mono text-neutral-800 font-medium">{selectedReg.billing.transactionId}</span></p>
                             )}
                             
-                            {/* UPI Transaction Screenshot Container */}
-                            {selectedReg.billing.upiScreenshot && (
-                              <div className="space-y-1.5 pt-1.5 border-t border-neutral-200">
-                                <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold block">UPI Transaction Receipt</span>
-                                <a 
-                                  href={selectedReg.billing.upiScreenshot} 
-                                  target="_blank" 
-                                  rel="noreferrer" 
-                                  className="block relative aspect-video border bg-neutral-50 overflow-hidden group hover:border-neutral-900 transition-all"
-                                >
-                                  <img 
-                                    src={selectedReg.billing.upiScreenshot} 
-                                    alt="UPI Payment screenshot" 
-                                    className="object-cover w-full h-full" 
-                                  />
-                                  <div className="absolute inset-0 bg-neutral-950/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] text-white font-semibold uppercase tracking-wider transition-opacity animate-fade-in">
-                                    Open Receipt ↗
-                                  </div>
-                                </a>
-                              </div>
-                            )}
-
-                            {/* Option to Upload/Change Screenshot for UPI */}
-                            {selectedReg.billing.paymentMode === 'UPI' && (
-                              <div className="space-y-1.5 pt-1.5 border-t border-neutral-200">
-                                <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold block">
-                                  {selectedReg.billing.upiScreenshot ? 'Change UPI Screenshot' : 'Upload UPI Screenshot'}
-                                </span>
-                                <div className="flex items-center space-x-2">
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleDetailScreenshotUpload}
-                                    disabled={uploadingScreenshot || isPending}
-                                    className="text-[9px] file:mr-2 file:py-1 file:px-2 file:border file:border-neutral-200 file:bg-white hover:file:border-neutral-900 file:text-[8px] file:font-semibold file:uppercase cursor-pointer w-full"
-                                  />
-                                </div>
-                                {uploadingScreenshot && (
-                                  <p className="text-[8px] font-mono text-neutral-400 animate-pulse">Uploading screenshot to Cloudinary...</p>
-                                )}
-                              </div>
-                            )}
-
                             <div className="pt-2 flex space-x-2">
                               {selectedReg.billing.paymentStatus === 'Outstanding' && (
                                 <button
@@ -968,8 +881,17 @@ export default function RegistrationsClient({ initialRegistrations, sessions }: 
                       <h4 className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">Verifications</h4>
                       <p><strong className="text-neutral-500 font-normal">Center:</strong> {selectedReg.centerAddress}</p>
                       <p><strong className="text-neutral-500 font-normal">Coordinator Mob:</strong> {selectedReg.coordinatorNumber}</p>
-                      {selectedReg.familyLinkage && (
-                        <p><strong className="text-neutral-500 font-normal">Family Linkage:</strong> {selectedReg.familyLinkage}</p>
+                      {selectedReg.familyMembers && selectedReg.familyMembers.length > 0 && (
+                        <div className="space-y-1.5 mt-2">
+                          <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold block">Family Members Staying</span>
+                          <div className="space-y-1.5 pl-2 border-l border-neutral-200">
+                            {selectedReg.familyMembers.map((fm, idx) => (
+                              <div key={idx} className="text-[10px] text-neutral-600">
+                                <strong>{fm.name}</strong> ({fm.age} yrs, {fm.gender}, Blood: {fm.bloodGroup})
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       )}
                     </div>
 

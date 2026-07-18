@@ -386,7 +386,13 @@ export async function createRegistrationAction(payload: {
   emergencyContact: string;
   centerAddress: string;
   coordinatorNumber: string;
-  familyLinkage?: string;
+  familyMembers?: {
+    name: string;
+    age: number;
+    gender: 'Male' | 'Female';
+    dob: string;
+    bloodGroup: string;
+  }[];
   existingDiseases?: string;
   disclaimerAccepted: boolean;
   billing?: {
@@ -431,6 +437,38 @@ export async function createRegistrationAction(payload: {
     // Send confirmation email
     if (payload.email) {
       const emailSubject = `Booking Confirmation - ${mrdNumber} | Sahaja Yoga Health Centre`;
+      
+      const totalPeople = 1 + (payload.familyMembers?.length || 0);
+      const computedAmount = payload.billing?.samarpanAmount || 500;
+      const stayDays = Math.round(computedAmount / (500 * totalPeople));
+
+      let familyHtml = '';
+      if (payload.familyMembers && payload.familyMembers.length > 0) {
+        familyHtml = `
+        <div style="border-top: 1px solid #e5e5e5; padding-top: 12px; margin-top: 12px;">
+          <span style="font-size: 9px; font-weight: bold; text-transform: uppercase; color: #a3a3a3; display: block; letter-spacing: 0.05em; margin-bottom: 6px;">Family Members Staying With You</span>
+          <table style="width: 100%; font-size: 11px; color: #404040; border-collapse: collapse;">
+            <thead>
+              <tr style="border-bottom: 1px solid #f5f5f5; text-align: left;">
+                <th style="padding: 4px 0; font-weight: 600;">Name</th>
+                <th style="padding: 4px 0; font-weight: 600;">Age/Gender</th>
+                <th style="padding: 4px 0; font-weight: 600; text-align: right;">Blood</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${payload.familyMembers.map(fm => `
+                <tr style="border-bottom: 1px solid #fafafa;">
+                  <td style="padding: 5px 0;">${fm.name}</td>
+                  <td style="padding: 5px 0;">${fm.age} yrs / ${fm.gender}</td>
+                  <td style="padding: 5px 0; text-align: right; font-mono">${fm.bloodGroup}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        `;
+      }
+
       const emailHtml = `
 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e5e5; color: #171717;">
   <div style="text-align: center; border-bottom: 1px solid #e5e5e5; padding-bottom: 20px; margin-bottom: 20px;">
@@ -460,11 +498,15 @@ export async function createRegistrationAction(payload: {
       </tr>
       <tr style="border-bottom: 1px solid #f5f5f5;">
         <td style="padding: 6px 0; color: #737373; font-weight: 300;">Stay Duration:</td>
-        <td style="padding: 6px 0; font-weight: 600; text-align: right;">${payload.billing?.samarpanAmount ? payload.billing.samarpanAmount / 500 : 1} Day(s)</td>
+        <td style="padding: 6px 0; font-weight: 600; text-align: right;">${stayDays} Day(s)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f5f5f5;">
+        <td style="padding: 6px 0; color: #737373; font-weight: 300;">Total Seeker(s):</td>
+        <td style="padding: 6px 0; font-weight: 600; text-align: right;">${totalPeople} Person(s)</td>
       </tr>
       <tr style="border-bottom: 1px solid #f5f5f5;">
         <td style="padding: 6px 0; color: #737373; font-weight: 300;">Samarpan Fee:</td>
-        <td style="padding: 6px 0; font-weight: 600; text-align: right; color: #171717;">₹${payload.billing?.samarpanAmount || 500} (${payload.billing?.paymentMode === 'UPI' ? 'UPI' : 'Pay on Arrival'})</td>
+        <td style="padding: 6px 0; font-weight: 600; text-align: right; color: #171717;">₹${computedAmount} (${payload.billing?.paymentMode === 'UPI' ? 'UPI' : 'Pay on Arrival'})</td>
       </tr>
       ${payload.billing?.paymentMode === 'UPI' && payload.billing?.transactionId ? `
       <tr style="border-bottom: 1px solid #f5f5f5;">
@@ -481,6 +523,8 @@ export async function createRegistrationAction(payload: {
         <td style="padding: 6px 0; font-weight: 600; text-align: right;">${payload.coordinatorNumber}</td>
       </tr>
     </table>
+
+    ${familyHtml}
   </div>
 
   <div style="border-top: 1px solid #e5e5e5; padding-top: 15px; margin-top: 25px; font-size: 10px; color: #737373; line-height: 1.5; font-weight: 300;">
@@ -786,7 +830,13 @@ export async function createWalkInRegistrationAction(payload: {
   emergencyContact: string;
   centerAddress: string;
   coordinatorNumber: string;
-  familyLinkage?: string;
+  familyMembers?: {
+    name: string;
+    age: number;
+    gender: 'Male' | 'Female';
+    dob: string;
+    bloodGroup: string;
+  }[];
   existingDiseases?: string;
 }) {
   try {

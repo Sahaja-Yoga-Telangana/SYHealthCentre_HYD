@@ -14,7 +14,13 @@ export interface ISessionRegistration extends Document {
   emergencyContact: string;
   centerAddress: string;
   coordinatorNumber: string;
-  familyLinkage?: string;
+  familyMembers?: {
+    name: string;
+    age: number;
+    gender: 'Male' | 'Female';
+    dob: Date;
+    bloodGroup: string;
+  }[];
   existingDiseases?: string;
   disclaimerAccepted: boolean;
   status: 'Pending' | 'Confirmed' | 'Cancelled';
@@ -60,7 +66,13 @@ const SessionRegistrationSchema = new Schema<ISessionRegistration>(
     emergencyContact: { type: String, required: true },
     centerAddress: { type: String, required: true },
     coordinatorNumber: { type: String, required: true },
-    familyLinkage: { type: String, default: '' },
+    familyMembers: [{
+      name: { type: String, required: true },
+      age: { type: Number, required: true },
+      gender: { type: String, enum: ['Male', 'Female'], required: true },
+      dob: { type: Date, required: true },
+      bloodGroup: { type: String, required: true },
+    }],
     existingDiseases: { type: String, default: '' },
     disclaimerAccepted: { type: Boolean, required: true, validate: (v: boolean) => v === true },
     status: { type: String, enum: ['Pending', 'Confirmed', 'Cancelled'], default: 'Confirmed' },

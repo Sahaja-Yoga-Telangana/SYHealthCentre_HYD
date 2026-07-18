@@ -15,6 +15,14 @@ interface SessionItem {
   registeredCount: number;
 }
 
+interface FamilyMember {
+  name: string;
+  age: string;
+  gender: 'Male' | 'Female';
+  dob: string;
+  bloodGroup: string;
+}
+
 interface BookingWizardProps {
   sessions: SessionItem[];
   preselectedId?: string;
@@ -50,17 +58,20 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
   // Form States - Step 3: Stay, Center Affiliation & Billing details
   const [centerAddress, setCenterAddress] = useState('');
   const [coordinatorNumber, setCoordinatorNumber] = useState('');
-  const [familyLinkage, setFamilyLinkage] = useState('');
+  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
 
   // Samarpan Payment options
   const [stayDays, setStayDays] = useState('1');
   const [paymentMode, setPaymentMode] = useState<'Pending' | 'UPI'>('Pending');
-  const [upiScreenshot, setUpiScreenshot] = useState('');
   const [transactionId, setTransactionId] = useState('');
-  const [uploading, setUploading] = useState(false);
 
   const selectedSession = sessions.find((s) => s.id === selectedSessionId);
+
+  // Calculations
+  const totalPeopleCount = 1 + familyMembers.length;
+  const stayDaysCount = parseInt(stayDays, 10) || 1;
+  const computedTotalSamarpan = stayDaysCount * totalPeopleCount * 500;
 
   const handleNextStep1 = (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,38 +109,22 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
     setStep(3);
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Family members list builder
+  const handleAddFamilyMember = () => {
+    setFamilyMembers((prev) => [
+      ...prev,
+      { name: '', age: '', gender: 'Male', dob: '', bloodGroup: 'O+' }
+    ]);
+  };
 
-    setError('');
-    setUploading(true);
+  const handleRemoveFamilyMember = (index: number) => {
+    setFamilyMembers((prev) => prev.filter((_, i) => i !== index));
+  };
 
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'df6iivqm6';
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'sahaja_events_unsigned';
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', uploadPreset);
-    formData.append('folder', 'sy-healthcentre-upi');
-
-    try {
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await res.json();
-      if (data.secure_url) {
-        setUpiScreenshot(data.secure_url);
-      } else {
-        setError('Transaction screenshot upload failed. Please try again.');
-      }
-    } catch (err) {
-      console.error('Screenshot upload error:', err);
-      setError('Connection error. Failed to upload transaction screenshot.');
-    } finally {
-      setUploading(false);
-    }
+  const handleFamilyMemberChange = (index: number, key: keyof FamilyMember, value: string) => {
+    setFamilyMembers((prev) =>
+      prev.map((fm, i) => (i === index ? { ...fm, [key]: value } : fm))
+    );
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -147,13 +142,22 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
       return;
     }
 
-    if (paymentMode === 'UPI' && !transactionId.trim()) {
-      setError('Please enter your UPI Transaction ID / UTR Number.');
-      return;
+    // Validate family members
+    for (let i = 0; i < familyMembers.length; i++) {
+      const fm = familyMembers[i];
+      if (!fm.name.trim() || !fm.age || !fm.dob || !fm.bloodGroup.trim()) {
+        setError(`Please fill in all details for family member #${i + 1}.`);
+        return;
+      }
+      const fAge = parseInt(fm.age, 10);
+      if (isNaN(fAge) || fAge <= 0) {
+        setError(`Please enter a valid age for family member #${i + 1}.`);
+        return;
+      }
     }
 
-    if (paymentMode === 'UPI' && !upiScreenshot) {
-      setError('Please upload your UPI payment screenshot to complete the booking.');
+    if (paymentMode === 'UPI' && !transactionId.trim()) {
+      setError('Please enter your UPI Transaction ID / UTR Number.');
       return;
     }
 
@@ -163,7 +167,14 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
     }
 
     startTransition(async () => {
-      const computedAmount = parsedDays * 500;
+      const formattedFamily = familyMembers.map((fm) => ({
+        name: fm.name.trim(),
+        age: parseInt(fm.age, 10),
+        gender: fm.gender,
+        dob: fm.dob,
+        bloodGroup: fm.bloodGroup,
+      }));
+
       const payload = {
         sessionId: selectedSessionId,
         name,
@@ -177,14 +188,13 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
         emergencyContact,
         centerAddress,
         coordinatorNumber,
-        familyLinkage: familyLinkage.trim() || undefined,
+        familyMembers: formattedFamily.length > 0 ? formattedFamily : undefined,
         existingDiseases: existingDiseases.trim() || undefined,
         disclaimerAccepted,
         billing: {
-          samarpanAmount: computedAmount,
+          samarpanAmount: computedTotalSamarpan,
           paymentMode: paymentMode,
           paymentStatus: 'Outstanding' as const,
-          upiScreenshot: paymentMode === 'UPI' ? upiScreenshot : '',
           transactionId: paymentMode === 'UPI' ? transactionId.trim() : '',
         }
       };
@@ -235,12 +245,26 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
               <strong className="font-semibold text-neutral-800">Duration:</strong> {stayDays} Day(s) of Stay
             </p>
             <p>
-              <strong className="font-semibold text-neutral-800">Samarpan Fee:</strong> ₹{parseInt(stayDays, 10) * 500} &bull; <span className="uppercase font-semibold text-neutral-900">{paymentMode === 'UPI' ? 'UPI (Awaiting Verification)' : 'Pay on Arrival'}</span>
+              <strong className="font-semibold text-neutral-800">Total Seeker(s):</strong> {totalPeopleCount} Person(s)
+            </p>
+            <p>
+              <strong className="font-semibold text-neutral-800">Samarpan Fee:</strong> ₹{computedTotalSamarpan} &bull; <span className="uppercase font-semibold text-neutral-900">{paymentMode === 'UPI' ? 'UPI (Awaiting Verification)' : 'Pay on Arrival'}</span>
             </p>
             {paymentMode === 'UPI' && transactionId && (
               <p>
                 <strong className="font-semibold text-neutral-800">Transaction ID:</strong> <span className="font-mono text-neutral-900">{transactionId}</span>
               </p>
+            )}
+            
+            {familyMembers.length > 0 && (
+              <div className="pt-2 border-t border-neutral-200 mt-2 space-y-1">
+                <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-bold block">Family Members Registered:</span>
+                <ul className="list-disc list-inside text-neutral-600 pl-1">
+                  {familyMembers.map((fm, i) => (
+                    <li key={i}>{fm.name} ({fm.age} yrs, {fm.gender})</li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         </div>
@@ -464,20 +488,6 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
 
               <div className="md:col-span-2">
                 <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                  Current Address
-                </label>
-                <input
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                  placeholder="Street, City, State, Pin Code Address"
-                  required
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
                   Emergency Contact Details
                 </label>
                 <input
@@ -490,7 +500,6 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                 />
               </div>
 
-              {/* Advance Disease Acknowledgement (Requested in Step 2) */}
               <div className="md:col-span-2">
                 <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
                   Advance Acknowledgement of Existing Diseases (Optional)
@@ -570,26 +579,116 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                 />
               </div>
 
-              {/* Total Fee Indicator */}
-              <div className="flex flex-col justify-end bg-neutral-50 p-2 border border-neutral-200 text-center">
+              {/* Total Fee Indicator (Responsive & Dynamic) */}
+              <div className="flex flex-col justify-end bg-neutral-50 p-3 border border-neutral-200 text-center">
                 <span className="text-[8px] uppercase tracking-wider text-neutral-400 font-bold block">Total Samarpan Fee</span>
                 <span className="text-xl font-bold font-mono text-neutral-900 mt-1">
-                  ₹{parseInt(stayDays, 10) ? parseInt(stayDays, 10) * 500 : 0}
+                  ₹{computedTotalSamarpan}
                 </span>
-                <span className="text-[9px] text-neutral-400 block font-light mt-0.5">Based on ₹500/day daily rate</span>
+                <span className="text-[9px] text-neutral-400 block font-light mt-0.5">
+                  ₹500 / day per person ({totalPeopleCount} person(s) &bull; {stayDaysCount} day(s))
+                </span>
               </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                  Family Linkage (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={familyLinkage}
-                  onChange={(e) => setFamilyLinkage(e.target.value)}
-                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                  placeholder="Link with family registrations by typing their names or Patient IDs"
-                />
+              {/* Structured Family Members Builder */}
+              <div className="md:col-span-2 border border-neutral-200 p-4 bg-neutral-50 space-y-4">
+                <div className="flex justify-between items-center border-b border-neutral-200 pb-2">
+                  <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-800">
+                    Family Members Staying With You
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={handleAddFamilyMember}
+                    className="text-[9px] font-bold border border-neutral-900 px-3 py-1 uppercase bg-neutral-900 text-white hover:bg-neutral-800 tracking-wider transition-colors"
+                  >
+                    + Add Member
+                  </button>
+                </div>
+
+                {familyMembers.length === 0 ? (
+                  <p className="text-[10px] text-neutral-400 font-light italic">
+                    No family members added yet. Add other seekers checking in together.
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {familyMembers.map((fm, index) => (
+                      <div key={index} className="p-4 border border-neutral-200 bg-white space-y-3 relative">
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveFamilyMember(index)}
+                          className="absolute top-2 right-3 text-[9px] font-bold text-red-600 hover:text-red-800 transition-colors uppercase tracking-wider"
+                        >
+                          Remove
+                        </button>
+                        
+                        <span className="text-[8px] font-bold font-mono text-neutral-400 block uppercase">Seeker #{index + 2} Details</span>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[8px] uppercase tracking-wider text-neutral-400 font-semibold mb-1">Full Name</label>
+                            <input
+                              type="text"
+                              value={fm.name}
+                              onChange={(e) => handleFamilyMemberChange(index, 'name', e.target.value)}
+                              className="w-full text-xs p-1.5 border border-neutral-200 focus:outline-none bg-neutral-50"
+                              placeholder="Full Name"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[8px] uppercase tracking-wider text-neutral-400 font-semibold mb-1">Age</label>
+                            <input
+                              type="number"
+                              value={fm.age}
+                              onChange={(e) => handleFamilyMemberChange(index, 'age', e.target.value)}
+                              className="w-full text-xs p-1.5 border border-neutral-200 focus:outline-none bg-neutral-50"
+                              placeholder="Age"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[8px] uppercase tracking-wider text-neutral-400 font-semibold mb-1">Gender</label>
+                            <select
+                              value={fm.gender}
+                              onChange={(e) => handleFamilyMemberChange(index, 'gender', e.target.value)}
+                              className="w-full text-xs p-1.5 border border-neutral-200 focus:outline-none bg-neutral-50 bg-white"
+                            >
+                              <option value="Male">Male</option>
+                              <option value="Female">Female</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-[8px] uppercase tracking-wider text-neutral-400 font-semibold mb-1">Date of Birth</label>
+                            <input
+                              type="date"
+                              value={fm.dob}
+                              onChange={(e) => handleFamilyMemberChange(index, 'dob', e.target.value)}
+                              className="w-full text-xs p-1.5 border border-neutral-200 focus:outline-none bg-neutral-50 font-mono"
+                              required
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="block text-[8px] uppercase tracking-wider text-neutral-400 font-semibold mb-1">Blood Group</label>
+                            <select
+                              value={fm.bloodGroup}
+                              onChange={(e) => handleFamilyMemberChange(index, 'bloodGroup', e.target.value)}
+                              className="w-full text-xs p-1.5 border border-neutral-200 focus:outline-none bg-neutral-50 bg-white"
+                            >
+                              <option value="O+">O+</option>
+                              <option value="O-">O-</option>
+                              <option value="A+">A+</option>
+                              <option value="A-">A-</option>
+                              <option value="B+">B+</option>
+                              <option value="B-">B-</option>
+                              <option value="AB+">AB+</option>
+                              <option value="AB-">AB-</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Samarpan Payment selector */}
@@ -615,7 +714,7 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                       <div className="w-48 h-48 border border-neutral-200 p-2 bg-white flex items-center justify-center shadow-sm relative shrink-0">
                         <img
                           src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-                            `upi://pay?pa=syhealthcentre@upi&pn=Sahaja%20Yoga%20Health%20Centre&am=${parseInt(stayDays, 10) * 500}&cu=INR`
+                            `upi://pay?pa=syhealthcentre@upi&pn=Sahaja%20Yoga%20Health%20Centre&am=${computedTotalSamarpan}&cu=INR`
                           )}`}
                           alt="Scan to Pay UPI QR Code"
                           className="w-full h-full object-contain"
@@ -627,55 +726,27 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                           UPI ID: <span className="font-mono text-neutral-700 bg-neutral-100 px-1.5 py-0.5 border select-all">syhealthcentre@upi</span>
                         </p>
                         <p className="text-xs text-neutral-600 font-medium">
-                          Payable Samarpan: <span className="font-bold font-mono text-neutral-900">₹{parseInt(stayDays, 10) * 500}</span>
+                          Payable Samarpan: <span className="font-bold font-mono text-neutral-900">₹{computedTotalSamarpan}</span>
                         </p>
                         <p className="text-[10px] text-neutral-400 max-w-sm mx-auto leading-relaxed">
-                          Scan the QR code with GPay, PhonePe, Paytm, or any UPI app to pay. Once completed, enter the Transaction ID and upload your receipt screenshot below.
+                          Scan the QR code with GPay, PhonePe, Paytm, or any UPI app to pay. Once completed, enter the UTR / Transaction ID below for manual verification on arrival.
                         </p>
                       </div>
                     </div>
 
-                    <div className="space-y-4">
-                      <div className="space-y-1">
-                        <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold">
-                          UPI Transaction ID / UTR Number
-                        </label>
-                        <input
-                          type="text"
-                          value={transactionId}
-                          onChange={(e) => setTransactionId(e.target.value)}
-                          disabled={isPending}
-                          className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-white font-mono"
-                          placeholder="12-digit transaction ID / UTR (e.g. 326712345678)"
-                          required={paymentMode === 'UPI'}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold">
-                          Upload Payment Screenshot
-                        </label>
-                        <div className="flex items-center space-x-3">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            disabled={uploading || isPending}
-                            className="text-xs file:mr-4 file:py-1.5 file:px-3 file:border file:border-neutral-200 file:bg-white hover:file:border-neutral-900 file:text-[10px] file:font-semibold file:uppercase cursor-pointer"
-                          />
-                          {uploading && (
-                            <span className="text-[10px] text-neutral-500 font-mono animate-pulse">Uploading to Cloudinary...</span>
-                          )}
-                          {!uploading && upiScreenshot && (
-                            <span className="text-[10px] text-green-600 font-bold">✓ Screenshot Staged</span>
-                          )}
-                        </div>
-                        {upiScreenshot && (
-                          <div className="mt-2 relative w-32 aspect-video border bg-neutral-100 overflow-hidden">
-                            <img src={upiScreenshot} alt="UPI receipt preview" className="object-cover w-full h-full" />
-                          </div>
-                        )}
-                      </div>
+                    <div className="space-y-1">
+                      <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold">
+                        UPI Transaction ID / UTR Number
+                      </label>
+                      <input
+                        type="text"
+                        value={transactionId}
+                        onChange={(e) => setTransactionId(e.target.value)}
+                        disabled={isPending}
+                        className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-white font-mono"
+                        placeholder="12-digit transaction ID / UTR (e.g. 326712345678)"
+                        required={paymentMode === 'UPI'}
+                      />
                     </div>
                   </div>
                 )}
@@ -697,7 +768,7 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                     id="disclaimer"
                     checked={disclaimerAccepted}
                     onChange={(e) => setDisclaimerAccepted(e.target.checked)}
-                    disabled={isPending || uploading}
+                    disabled={isPending}
                     className="mt-0.5 border-neutral-300 focus:ring-neutral-900"
                     required
                   />
@@ -712,14 +783,14 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                disabled={isPending || uploading}
+                disabled={isPending}
                 className="text-[10px] font-semibold tracking-wider border border-neutral-200 px-6 py-2.5 hover:border-neutral-900 transition-colors"
               >
                 ← BACK
               </button>
               <button
                 type="submit"
-                disabled={isPending || uploading}
+                disabled={isPending}
                 className="text-[10px] font-bold tracking-wider bg-neutral-900 text-white px-6 py-2.5 hover:bg-neutral-800 transition-colors disabled:bg-neutral-300"
               >
                 {isPending ? 'BOOKING...' : 'CONFIRM & BOOK ✓'}
