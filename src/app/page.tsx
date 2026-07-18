@@ -33,11 +33,11 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-white text-neutral-900 font-sans selection:bg-neutral-900 selection:text-white">
       {/* Header */}
-      <header className="border-b border-neutral-200 py-6 px-8 sticky top-0 bg-white/80 backdrop-blur-md z-50">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div className="flex flex-col">
-            <span className="font-semibold text-lg tracking-widest text-neutral-900">SAHAJA YOGA</span>
-            <span className="text-xs text-neutral-500 tracking-wider">Research & Health Centre, Hyderabad</span>
+      <header className="border-b border-neutral-200 py-4 px-4 sm:px-6 lg:px-8 sticky top-0 bg-white/80 backdrop-blur-md z-50">
+        <div className="max-w-6xl mx-auto flex justify-between items-center gap-3">
+          <div className="flex min-w-0 flex-col">
+            <span className="font-semibold text-sm sm:text-lg tracking-widest text-neutral-900">SAHAJA YOGA</span>
+            <span className="text-[10px] sm:text-xs text-neutral-500 tracking-wider truncate">Research & Health Centre, Hyderabad</span>
           </div>
           <nav className="hidden md:flex items-center space-x-8 text-sm font-medium tracking-wide">
             <a href="#hero" className="hover:text-neutral-500 transition-colors">Home</a>
@@ -62,7 +62,7 @@ export default async function Home() {
 
           <MobileNav />
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* Auth Buttons */}
             {user ? (
               <>
@@ -90,7 +90,7 @@ export default async function Home() {
 
             <Link 
               href="/book" 
-              className="text-xs font-semibold px-4 py-2 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
+              className="text-[10px] sm:text-xs font-semibold px-3 sm:px-4 py-2 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors whitespace-nowrap"
             >
               BOOK NOW
             </Link>
@@ -99,17 +99,17 @@ export default async function Home() {
       </header>
 
       {/* Hero Section */}
-      <section id="hero" className="pt-12 pb-20 px-8 border-b border-neutral-100 scroll-mt-24">
+      <section id="hero" className="pt-10 pb-16 px-4 sm:px-6 lg:px-8 border-b border-neutral-100 scroll-mt-24">
         <div className="max-w-6xl mx-auto grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-start">
           <div className="text-center lg:text-left space-y-8">
             <div className="space-y-5">
-              <p className="text-xs tracking-[0.35em] uppercase text-neutral-400">Nirmal Nagari, Hyderabad</p>
-              <h1 className="text-4xl md:text-5xl font-light tracking-tight text-neutral-900 leading-tight">
+              <p className="text-xs tracking-[0.25em] sm:tracking-[0.35em] uppercase text-neutral-400">Nirmal Nagari, Hyderabad</p>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-neutral-900 leading-tight">
                 Sahaja Yoga <br />
                 <span className="font-normal">Research & Health Centre</span>
               </h1>
               <div className="w-12 h-[1px] bg-neutral-400 mx-auto lg:mx-0"></div>
-              <p className="text-lg text-neutral-600 font-light max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+              <p className="text-base sm:text-lg text-neutral-600 font-light max-w-2xl mx-auto lg:mx-0 leading-relaxed">
                 Welcome to a unique sanctuary of healing and peace, where scientific research meets ancient spiritual knowledge.
                 Our treatments utilize the power of <strong className="font-medium text-neutral-900">vibratory awareness</strong> and
                 Sahaja Yoga meditation to help cleanse, balance, and rejuvenate the subtle system.
@@ -167,7 +167,7 @@ export default async function Home() {
       </section>
 
       {/* About Sections */}
-      <section className="py-20 px-8 border-b border-neutral-100 bg-neutral-50/50">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 border-b border-neutral-100 bg-neutral-50/50">
         <div className="max-w-6xl mx-auto space-y-16">
           {/* About Shri Mataji */}
           <div id="shri-mataji" className="grid lg:grid-cols-3 gap-8 items-start scroll-mt-24">
@@ -225,7 +225,7 @@ export default async function Home() {
       </section>
 
       {/* Subtle System Section */}
-      <section id="subtle-system" className="py-20 px-8 border-b border-neutral-100">
+      <section id="subtle-system" className="py-16 px-4 sm:px-6 lg:px-8 border-b border-neutral-100">
         <div className="max-w-5xl mx-auto space-y-16">
           <div className="text-center space-y-4">
             <h2 className="text-2xl font-light tracking-wider">THE SUBTLE SYSTEM</h2>
@@ -233,7 +233,7 @@ export default async function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-12">
-            <div className="border border-neutral-200 p-8 space-y-6 bg-white">
+            <div className="border border-neutral-200 p-5 sm:p-8 space-y-6 bg-white">
               <h3 className="text-lg font-medium border-b border-neutral-100 pb-3">The Three Energy Channels (Nadis)</h3>
               <ul className="space-y-4 text-sm text-neutral-600">
                 <li>
@@ -251,7 +251,7 @@ export default async function Home() {
               </ul>
             </div>
 
-            <div className="border border-neutral-200 p-8 space-y-6 bg-white">
+            <div className="border border-neutral-200 p-5 sm:p-8 space-y-6 bg-white">
               <h3 className="text-lg font-medium border-b border-neutral-100 pb-3">The Seven Plexuses (Chakras) & Kundalini</h3>
               <p className="text-sm text-neutral-600 font-light">
                 The <strong className="font-medium text-neutral-900">Kundalini</strong> is a residual spiritual energy dormant in the sacrum bone. 
@@ -277,7 +277,7 @@ export default async function Home() {
       </section>
 
       {/* Reviews Section */}
-      <section id="reviews" className="py-20 px-8 border-b border-neutral-100 scroll-mt-24">
+      <section id="reviews" className="py-16 px-4 sm:px-6 lg:px-8 border-b border-neutral-100 scroll-mt-24">
         <div className="max-w-6xl mx-auto space-y-12">
           <div className="text-center space-y-4">
             <h2 className="text-2xl font-light tracking-wider uppercase">SEEKER REVIEWS</h2>
@@ -315,7 +315,7 @@ export default async function Home() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-20 px-8 bg-neutral-50">
+      <section id="contact" className="py-16 px-4 sm:px-6 lg:px-8 bg-neutral-50">
         <div className="max-w-5xl mx-auto space-y-12">
           <div className="text-center space-y-4">
             <h2 className="text-2xl font-light tracking-wider">VISIT THE CENTRE</h2>
@@ -391,7 +391,7 @@ export default async function Home() {
           <div className="space-x-6">
             <a href="#hero" className="hover:underline">Home</a>
             <a href="#shri-mataji" className="hover:underline">About</a>
-            <a href="https://sahajogtelangana.vercel.app/events" className="hover:underline">Events</a>
+            <Link href="/book" className="hover:underline">Stay Booking</Link>
             <a href="#reviews" className="hover:underline">Reviews</a>
             <Link href="/book" className="hover:underline">Register</Link>
           </div>

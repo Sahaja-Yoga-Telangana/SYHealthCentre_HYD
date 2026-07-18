@@ -682,21 +682,32 @@ export async function deleteReviewAction(id: string) {
 export async function createAdminAction(data: {
   name: string;
   email: string;
-  passwordHash: string; // password from form
+  passwordHash?: string; // optional password from form
 }) {
   try {
     await dbConnect();
-    const existing = await User.findOne({ email: data.email.toLowerCase() });
+    const normalizedEmail = data.email.toLowerCase().trim();
+    const existing = await User.findOne({ email: normalizedEmail });
     if (existing) {
-      throw new Error('Email already registered');
+      existing.name = data.name.trim() || existing.name;
+      existing.role = 'Admin';
+      if (data.passwordHash) {
+        const salt = await bcrypt.genSalt(10);
+        existing.passwordHash = await bcrypt.hash(data.passwordHash, salt);
+      }
+      await existing.save();
+      revalidatePath('/admin');
+      revalidatePath('/admin/admins');
+      return { success: true };
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(data.passwordHash, salt);
+    const passwordHash = data.passwordHash
+      ? await bcrypt.hash(data.passwordHash, await bcrypt.genSalt(10))
+      : undefined;
 
     await User.create({
-      name: data.name,
-      email: data.email.toLowerCase(),
+      name: data.name.trim(),
+      email: normalizedEmail,
       passwordHash,
       role: 'Admin',
       yogiExperienceMonths: 36,
@@ -705,6 +716,7 @@ export async function createAdminAction(data: {
     });
 
     revalidatePath('/admin');
+    revalidatePath('/admin/admins');
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -923,4 +935,3 @@ export async function createWalkInRegistrationAction(payload: {
     return { success: false, error: error.message };
   }
 }
-

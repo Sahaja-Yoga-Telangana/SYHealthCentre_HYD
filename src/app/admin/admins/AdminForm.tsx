@@ -16,8 +16,8 @@ export default function AdminForm() {
     setError('');
     setSuccess(false);
 
-    if (!name.trim() || !email.trim() || !password) {
-      setError('Please fill in all details.');
+    if (!name.trim() || !email.trim()) {
+      setError('Please enter the administrator name and email.');
       return;
     }
 
@@ -25,7 +25,7 @@ export default function AdminForm() {
       const res = await createAdminAction({
         name,
         email,
-        passwordHash: password,
+        passwordHash: password || undefined,
       });
 
       if (res.success) {
@@ -53,7 +53,7 @@ export default function AdminForm() {
 
       {success && (
         <div className="p-3 bg-neutral-900 border border-neutral-900 text-white text-xs font-mono text-center">
-          Administrator added successfully!
+          Administrator access saved. They can login with Google using this email.
         </div>
       )}
 
@@ -90,7 +90,7 @@ export default function AdminForm() {
 
         <div>
           <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-            Password
+            Password (optional)
           </label>
           <input
             type="password"
@@ -98,9 +98,11 @@ export default function AdminForm() {
             onChange={(e) => setPassword(e.target.value)}
             disabled={isPending}
             className="w-full text-xs p-2.5 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-            placeholder="••••••••"
-            required
+            placeholder="Only needed for email/password login"
           />
+          <p className="mt-1 text-[10px] text-neutral-400">
+            Leave blank to allow Google login by email only.
+          </p>
         </div>
       </div>
 

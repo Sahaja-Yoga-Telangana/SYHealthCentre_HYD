@@ -59,6 +59,10 @@ export const authOptions: AuthOptions = {
           throw new Error('No user found with this email');
         }
 
+        if (!user.passwordHash) {
+          throw new Error('Please sign in with Google for this account');
+        }
+
         // Validate password
         const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
         if (!isValid) {
@@ -97,6 +101,9 @@ export const authOptions: AuthOptions = {
               gender: 'Male', // Default, they can change it later
               contactNumber: '', // Default empty
             });
+          } else if (user.name && !existingUser.name) {
+            existingUser.name = user.name;
+            await existingUser.save();
           }
         } catch (error) {
           console.error('Error during Google sign-in creation:', error);
@@ -114,19 +121,24 @@ export const authOptions: AuthOptions = {
           token.nationality = user.nationality;
           token.yogiExperienceMonths = user.yogiExperienceMonths;
           token.gender = user.gender;
-        } else if (token.email) {
-          // Google provider or other OAuth
-          await dbConnect();
-          const dbUser = await User.findOne({ email: token.email.toLowerCase() });
-          if (dbUser) {
-            token.id = dbUser._id.toString();
-            token.role = dbUser.role;
-            token.nationality = dbUser.nationality;
-            token.yogiExperienceMonths = dbUser.yogiExperienceMonths;
-            token.gender = dbUser.gender;
-          }
         }
       }
+
+      // Keep OAuth sessions synced with the database so admin access can be
+      // granted simply by adding the person's email in the admin screen.
+      if (token.email) {
+        await dbConnect();
+        const dbUser = await User.findOne({ email: token.email.toLowerCase() });
+        if (dbUser) {
+          token.id = dbUser._id.toString();
+          token.role = dbUser.role;
+          token.nationality = dbUser.nationality;
+          token.yogiExperienceMonths = dbUser.yogiExperienceMonths;
+          token.gender = dbUser.gender;
+          token.name = dbUser.name;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
@@ -148,4 +160,3 @@ export const authOptions: AuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-development-only-replace-in-prod',
 };
-

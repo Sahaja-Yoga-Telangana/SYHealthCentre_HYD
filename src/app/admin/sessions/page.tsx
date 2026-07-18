@@ -37,20 +37,20 @@ export default async function SessionsAdminPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-light tracking-wide text-neutral-900">SESSIONS SCHEDULER</h1>
-        <p className="text-xs text-neutral-400 mt-1">Manage dates, time slots, instructors, and capacities for all health centre sessions.</p>
+        <h1 className="text-2xl font-light tracking-wide text-neutral-900">STAY DATE CONTROLS</h1>
+        <p className="text-xs text-neutral-400 mt-1">Manage optional date limits, admission slots, coordinators, and capacities for health centre stay bookings.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-8 items-start">
         {/* Sessions list */}
         <div className="border border-neutral-200 bg-white p-6 space-y-6">
           <h3 className="text-sm font-semibold tracking-wider uppercase text-neutral-800 border-b border-neutral-100 pb-2">
-            Scheduled Sessions List
+            Scheduled Stay Dates
           </h3>
 
           {sessions.length === 0 ? (
             <p className="text-xs text-neutral-400 font-light py-8 text-center border border-dashed border-neutral-200">
-              No sessions scheduled. Add one using the form on the right.
+              No date limits scheduled. Public visitors can book all dates until you add limitations here.
             </p>
           ) : (
             <div className="divide-y divide-neutral-200">
@@ -90,11 +90,7 @@ export default async function SessionsAdminPage() {
                         </button>
                       </form>
 
-                      <form action={handleDelete} onSubmit={(e) => {
-                        if (!confirm('Are you sure you want to delete this session? All registrations for this session will also be deleted.')) {
-                          e.preventDefault();
-                        }
-                      }}>
+                      <form action={handleDelete}>
                         <input type="hidden" name="id" value={session._id.toString()} />
                         <button
                           type="submit"

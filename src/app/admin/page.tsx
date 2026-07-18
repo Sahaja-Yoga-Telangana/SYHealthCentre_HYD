@@ -55,7 +55,7 @@ export default async function AdminDashboard() {
       <div className="border border-neutral-200 p-8 space-y-6 text-center bg-white">
         <h2 className="text-xl font-medium tracking-wide">Welcome to Sahaja Yoga Health Centre Admin Portal</h2>
         <p className="text-sm text-neutral-500 max-w-md mx-auto">
-          The database appears to be empty. Please seed the database with sample sessions, registrations, reviews, doctors, and users to view the dashboard functionality.
+          The database appears to be empty. Please seed the database with sample stay dates, registrations, reviews, doctors, and users to view the dashboard functionality.
         </p>
         <div className="pt-2">
           <SeedButton />
@@ -70,7 +70,7 @@ export default async function AdminDashboard() {
       <div className="flex justify-between items-end border-b border-neutral-100 pb-4">
         <div>
           <h1 className="text-2xl font-light tracking-wide text-neutral-900">DASHBOARD OVERVIEW</h1>
-          <p className="text-xs text-neutral-400 mt-1">Real-time registrations, upcoming sessions, and review moderation metrics.</p>
+          <p className="text-xs text-neutral-400 mt-1">Real-time registrations, upcoming stay dates, and review moderation metrics.</p>
         </div>
         <SeedButton />
       </div>
@@ -78,10 +78,10 @@ export default async function AdminDashboard() {
       {/* Metrics Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="border border-neutral-200 p-6 bg-white space-y-2">
-          <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-widest block">Active Sessions</span>
+          <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-widest block">Active Stay Dates</span>
           <div className="flex justify-between items-baseline">
             <span className="text-3xl font-mono font-medium">{metrics.activeSessions}</span>
-            <span className="text-xs text-neutral-500 font-light">Meditation & Workshops</span>
+            <span className="text-xs text-neutral-500 font-light">Admission controls</span>
           </div>
           <p className="text-[10px] text-neutral-400 mt-2">Currently scheduled</p>
         </div>
@@ -92,7 +92,7 @@ export default async function AdminDashboard() {
             <span className="text-3xl font-mono font-medium">{metrics.totalRegistrations}</span>
             <span className="text-xs text-neutral-500 font-light">Seekers registered</span>
           </div>
-          <p className="text-[10px] text-neutral-400 mt-2">Across all scheduled sessions</p>
+          <p className="text-[10px] text-neutral-400 mt-2">Across all stay dates</p>
         </div>
 
         <div className="border border-neutral-200 p-6 bg-white space-y-2">
@@ -108,15 +108,15 @@ export default async function AdminDashboard() {
           <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-widest block">Active Doctors</span>
           <div className="flex justify-between items-baseline">
             <span className="text-3xl font-mono font-medium">{metrics.totalDoctors}</span>
-            <span className="text-xs text-neutral-500 font-light font-mono">Verified Instructors</span>
+            <span className="text-xs text-neutral-500 font-light font-mono">Verified doctors</span>
           </div>
-          <p className="text-[10px] text-neutral-400 mt-2">Conducting clearing sessions</p>
+          <p className="text-[10px] text-neutral-400 mt-2">Conducting consultations</p>
         </div>
       </div>
 
       {/* Main Content Split Table */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Recent Session Registrations */}
+        {/* Recent Stay Registrations */}
         <div className="border border-neutral-200 p-6 bg-white space-y-6">
           <div className="border-b border-neutral-100 pb-3 flex justify-between items-center">
             <h3 className="text-sm font-semibold tracking-wider uppercase text-neutral-800">Recent Registrations</h3>
@@ -138,7 +138,7 @@ export default async function AdminDashboard() {
                     <div className="space-y-1">
                       <p className="font-semibold text-neutral-900">{reg.name}</p>
                       <p className="text-neutral-500 font-light">
-                        {reg.sessionId?.title || 'Unknown Session'} &bull; {reg.mrdNumber}
+                        {reg.sessionId?.title || 'Open Stay Date'} &bull; {reg.mrdNumber}
                       </p>
                     </div>
                     <div className="text-right space-y-1">

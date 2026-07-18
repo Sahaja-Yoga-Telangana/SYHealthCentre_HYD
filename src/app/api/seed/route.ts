@@ -6,7 +6,7 @@ export async function GET() {
   if (result.success) {
     return NextResponse.json({
       success: true,
-      message: 'Database seeded successfully with Sessions, Registrations, and Reviews.',
+      message: 'Database seeded successfully with stay dates, registrations, and reviews.',
     });
   } else {
     return NextResponse.json(

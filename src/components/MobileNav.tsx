@@ -43,7 +43,7 @@ export default function MobileNav() {
             <a href="#sahaja-yoga" onClick={() => setOpen(false)} className="block pl-4 text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">Sahaja Yoga</a>
             <a href="#about-us" onClick={() => setOpen(false)} className="block pl-4 text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">About Us</a>
           </div>
-          <a href="https://sahajogtelangana.vercel.app/events" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">Events</a>
+          <Link href="/book" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">Stay Booking</Link>
           <a href="#reviews" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">Reviews</a>
           
           <div className="border-t border-neutral-100 pt-4 space-y-2">

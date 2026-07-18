@@ -47,24 +47,20 @@ export default async function AdminsAdminPage() {
 
           <div className="divide-y divide-neutral-200 text-xs">
             {adminsList.map((admin) => (
-              <div key={admin.id} className="py-4 first:pt-0 last:pb-0 flex justify-between items-center">
+              <div key={admin.id} className="py-4 first:pt-0 last:pb-0 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
                 <div className="space-y-1">
                   <p className="font-semibold text-neutral-900">{admin.name}</p>
-                  <p className="text-neutral-500 font-light font-mono">{admin.email}</p>
+                  <p className="text-neutral-500 font-light font-mono break-all">{admin.email}</p>
                   <p className="text-[10px] text-neutral-400">Added on: {new Date(admin.createdAt).toLocaleDateString()}</p>
                 </div>
 
                 {/* Prevent self deletion or empty admin list */}
                 {adminsList.length > 1 && (
-                  <form action={handleDeleteAdmin} onSubmit={(e) => {
-                    if (!confirm('Are you sure you want to revoke admin privileges for this user?')) {
-                      e.preventDefault();
-                    }
-                  }}>
+                  <form action={handleDeleteAdmin}>
                     <input type="hidden" name="id" value={admin.id} />
                     <button
                       type="submit"
-                      className="text-[10px] font-semibold tracking-wider border border-red-200 text-red-500 px-3 py-1.5 hover:border-red-950 hover:bg-red-50 transition-colors"
+                      className="w-full sm:w-auto text-[10px] font-semibold tracking-wider border border-red-200 text-red-500 px-3 py-1.5 hover:border-red-950 hover:bg-red-50 transition-colors"
                     >
                       REVOKE ACCESS
                     </button>

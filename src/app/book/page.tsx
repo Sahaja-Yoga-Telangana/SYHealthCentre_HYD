@@ -31,7 +31,7 @@ export default async function BookingPage({
 
   try {
     await dbConnect();
-    // Fetch active sessions that are not past and have available spots
+    // Fetch active admin-created stay date controls.
     const activeSessions = await Session.find({ isActive: true })
       .sort({ date: 1 });
 
@@ -47,8 +47,8 @@ export default async function BookingPage({
       isActive: session.isActive,
     }));
   } catch (error: unknown) {
-    console.error('Error loading registration page sessions:', error);
-    errorMsg = 'Could not load sessions directory. Please try again later.';
+    console.error('Error loading registration page stay dates:', error);
+    errorMsg = 'Could not load stay date controls. You can still choose dates manually.';
   }
 
   return (

@@ -20,7 +20,7 @@ export default function SessionForm() {
     setSuccess(false);
 
     if (!title.trim() || !description.trim() || !date || !time.trim() || !instructor.trim()) {
-      setError('Please fill out all session details.');
+      setError('Please fill out all stay date details.');
       return;
     }
 
@@ -50,7 +50,7 @@ export default function SessionForm() {
   return (
     <form onSubmit={handleSubmit} className="border border-neutral-200 bg-white p-6 space-y-4">
       <h3 className="text-sm font-semibold tracking-wider uppercase text-neutral-800 border-b border-neutral-100 pb-2">
-        Schedule New Session
+        Add Stay Date Limit
       </h3>
 
       {error && (
@@ -61,14 +61,14 @@ export default function SessionForm() {
 
       {success && (
         <div className="p-3 bg-neutral-900 border border-neutral-900 text-white text-xs font-mono text-center">
-          Session scheduled successfully!
+          Stay date limit saved successfully!
         </div>
       )}
 
       <div className="space-y-3">
         <div>
           <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-            Session Title
+            Date Limit Title
           </label>
           <input
             type="text"
@@ -76,7 +76,7 @@ export default function SessionForm() {
             onChange={(e) => setTitle(e.target.value)}
             disabled={isPending}
             className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-            placeholder="e.g. Nadi Cleansing Session"
+            placeholder="e.g. Health Centre Stay"
             required
           />
         </div>
@@ -91,7 +91,7 @@ export default function SessionForm() {
             disabled={isPending}
             rows={3}
             className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-            placeholder="Describe the topics covered, techniques practiced..."
+            placeholder="Describe the stay date, intake notes, or admission limitation..."
             required
           ></textarea>
         </div>

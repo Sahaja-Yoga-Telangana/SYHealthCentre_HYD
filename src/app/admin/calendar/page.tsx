@@ -61,7 +61,7 @@ export default async function AdminCalendarPage() {
       <div>
         <h1 className="text-2xl font-light tracking-wide text-neutral-900">DOCTOR CALENDAR</h1>
         <p className="text-xs text-neutral-400 mt-1">
-          Effective staying seeker schedule dashboard. Track patient loads, check incoming arrivals, and select doctor filter schedules.
+          Effective staying seeker calendar. Track patient loads, check incoming arrivals, and filter doctor schedules.
         </p>
       </div>
 
