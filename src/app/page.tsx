@@ -100,8 +100,8 @@ export default async function Home() {
       </header>
 
       {/* Hero Section */}
-      <section id="hero" className="py-20 px-8 border-b border-neutral-100 scroll-mt-24">
-        <div className="max-w-6xl mx-auto grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center">
+      <section id="hero" className="pt-12 pb-20 px-8 border-b border-neutral-100 scroll-mt-24">
+        <div className="max-w-6xl mx-auto grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-start">
           <div className="text-center lg:text-left space-y-8">
             <div className="space-y-5">
               <p className="text-xs tracking-[0.35em] uppercase text-neutral-400">Nirmal Nagari, Hyderabad</p>
