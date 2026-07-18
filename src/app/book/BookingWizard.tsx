@@ -35,7 +35,7 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
     return sessions[0]?.id || '';
   });
 
-  // Form States - Step 2: Unified Booking Profile & Payment
+  // Form States - Step 2: Personal Information & Medical Acknowledgement
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [gender, setGender] = useState<'Male' | 'Female'>('Male');
@@ -44,10 +44,12 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [emergencyContact, setEmergencyContact] = useState('');
+  const [existingDiseases, setExistingDiseases] = useState('');
+
+  // Form States - Step 3: Stay, Center Affiliation & Billing details
   const [centerAddress, setCenterAddress] = useState('');
   const [coordinatorNumber, setCoordinatorNumber] = useState('');
   const [familyLinkage, setFamilyLinkage] = useState('');
-  const [existingDiseases, setExistingDiseases] = useState('');
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
 
   // Samarpan Payment options
@@ -74,6 +76,24 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
     }
 
     setStep(2);
+  };
+
+  const handleNextStep2 = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!name.trim() || !age || !dob || !bloodGroup.trim() || !address.trim() || !phone.trim() || !emergencyContact.trim()) {
+      setError('Please fill in all personal details.');
+      return;
+    }
+
+    const parsedAge = parseInt(age, 10);
+    if (isNaN(parsedAge) || parsedAge <= 0) {
+      setError('Please enter a valid age.');
+      return;
+    }
+
+    setStep(3);
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,18 +133,6 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
-    // Validation
-    if (!name.trim() || !age || !dob || !bloodGroup.trim() || !address.trim() || !phone.trim() || !emergencyContact.trim()) {
-      setError('Please fill in all personal details.');
-      return;
-    }
-
-    const parsedAge = parseInt(age, 10);
-    if (isNaN(parsedAge) || parsedAge <= 0) {
-      setError('Please enter a valid age.');
-      return;
-    }
 
     if (!centerAddress.trim() || !coordinatorNumber.trim()) {
       setError('Please fill in your Center Address and Coordinator Number.');
@@ -176,6 +184,7 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
       if (res.success && res.mrdNumber) {
         setGeneratedMrd(res.mrdNumber);
         setSuccess(true);
+        setStep(4);
       } else {
         setError(res.error || 'Stay booking failed. Please try again.');
       }
@@ -247,12 +256,15 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
   return (
     <div className="max-w-2xl mx-auto border border-neutral-200 bg-white overflow-hidden">
       {/* Step Indicators */}
-      <div className="grid grid-cols-2 border-b border-neutral-200 text-[10px] font-semibold uppercase tracking-wider text-center bg-neutral-50 select-none">
+      <div className="grid grid-cols-3 border-b border-neutral-200 text-[10px] font-semibold uppercase tracking-wider text-center bg-neutral-50 select-none">
         <div className={`p-4 border-r border-neutral-200 ${step === 1 ? 'bg-white text-neutral-950 font-bold' : 'text-neutral-400'}`}>
           1. Select Stay Date
         </div>
-        <div className={`p-4 ${step === 2 ? 'bg-white text-neutral-950 font-bold' : 'text-neutral-400'}`}>
-          2. Complete Registration & Payment
+        <div className={`p-4 border-r border-neutral-200 ${step === 2 ? 'bg-white text-neutral-950 font-bold' : 'text-neutral-400'}`}>
+          2. Personal Details
+        </div>
+        <div className={`p-4 ${step === 3 ? 'bg-white text-neutral-950 font-bold' : 'text-neutral-400'}`}>
+          3. Stay Info & Payment
         </div>
       </div>
 
@@ -323,237 +335,241 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                 disabled={!selectedSessionId}
                 className="text-[10px] font-semibold tracking-wider bg-neutral-900 text-white px-6 py-2.5 hover:bg-neutral-800 transition-colors disabled:bg-neutral-300"
               >
-                CONTINUE TO REGISTRATION →
+                CONTINUE TO PERSONAL DETAILS →
               </button>
             </div>
           </form>
         )}
 
-        {/* STEP 2: Unified Personal profile, stays, and payment details */}
+        {/* STEP 2: Personal Details & Medical acknowledgement */}
         {step === 2 && (
-          <form onSubmit={handleSubmit} className="space-y-8">
-            
-            {/* Section 1: Seeker Profile */}
-            <div className="space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-800 border-b pb-1.5">
-                1. Seeker Profile Details
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                    placeholder="e.g. Rahul Sharma"
-                    required
-                  />
-                </div>
+          <form onSubmit={handleNextStep2} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
+                  placeholder="e.g. Rahul Sharma"
+                  required
+                />
+              </div>
 
-                <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                    Age
-                  </label>
-                  <input
-                    type="number"
-                    value={age}
-                    onChange={(e) => setAge(e.target.value)}
-                    className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                    placeholder="e.g. 35"
-                    required
-                  />
-                </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
+                  Age
+                </label>
+                <input
+                  type="number"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
+                  placeholder="e.g. 35"
+                  required
+                />
+              </div>
 
-                <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                    Gender
-                  </label>
-                  <select
-                    value={gender}
-                    onChange={(e) => setGender(e.target.value as any)}
-                    className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                  >
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
+                  Gender
+                </label>
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value as any)}
+                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
+                >
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
 
-                <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                    Date of Birth
-                  </label>
-                  <input
-                    type="date"
-                    value={dob}
-                    onChange={(e) => setDob(e.target.value)}
-                    className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50 font-mono"
-                    required
-                  />
-                </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
+                  Date of Birth
+                </label>
+                <input
+                  type="date"
+                  value={dob}
+                  onChange={(e) => setDob(e.target.value)}
+                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50 font-mono"
+                  required
+                />
+              </div>
 
-                <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                    Blood Group
-                  </label>
-                  <select
-                    value={bloodGroup}
-                    onChange={(e) => setBloodGroup(e.target.value)}
-                    className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                  >
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
+                  Blood Group
+                </label>
+                <select
+                  value={bloodGroup}
+                  onChange={(e) => setBloodGroup(e.target.value)}
+                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
+                >
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                </select>
+              </div>
 
-                <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                    placeholder="e.g. +91 99999 99999"
-                    required
-                  />
-                </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
+                  placeholder="e.g. +91 99999 99999"
+                  required
+                />
+              </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                    Current Address
-                  </label>
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                    placeholder="Street, City, State, Pin Code Address"
-                    required
-                  />
-                </div>
+              <div className="md:col-span-2">
+                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
+                  Current Address
+                </label>
+                <input
+                  type="text"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
+                  placeholder="Street, City, State, Pin Code Address"
+                  required
+                />
+              </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                    Emergency Contact Details
-                  </label>
-                  <input
-                    type="text"
-                    value={emergencyContact}
-                    onChange={(e) => setEmergencyContact(e.target.value)}
-                    className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                    placeholder="e.g. Spouse Name, Phone (+91 98888 88888)"
-                    required
-                  />
-                </div>
+              <div className="md:col-span-2">
+                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
+                  Emergency Contact Details
+                </label>
+                <input
+                  type="text"
+                  value={emergencyContact}
+                  onChange={(e) => setEmergencyContact(e.target.value)}
+                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
+                  placeholder="e.g. Spouse Name, Phone (+91 98888 88888)"
+                  required
+                />
+              </div>
+
+              {/* Advance Disease Acknowledgement (Requested in Step 2) */}
+              <div className="md:col-span-2">
+                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
+                  Advance Acknowledgement of Existing Diseases (Optional)
+                </label>
+                <textarea
+                  value={existingDiseases}
+                  onChange={(e) => setExistingDiseases(e.target.value)}
+                  rows={3}
+                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
+                  placeholder="List any acute or chronic illnesses, allergies, or physical constraints..."
+                ></textarea>
               </div>
             </div>
 
-            {/* Section 2: Center Affiliation & Stay Info */}
-            <div className="space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-800 border-b pb-1.5">
-                2. Center Affiliation & Stay Details
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                    Center Address (Verification)
-                  </label>
-                  <input
-                    type="text"
-                    value={centerAddress}
-                    onChange={(e) => setCenterAddress(e.target.value)}
-                    className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                    placeholder="e.g. Ghansimi Bazar Center, Hyd"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                    Coordinator Mobile Number
-                  </label>
-                  <input
-                    type="tel"
-                    value={coordinatorNumber}
-                    onChange={(e) => setCoordinatorNumber(e.target.value)}
-                    className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                    placeholder="e.g. +91 95555 12345"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                    Stay Duration (Days)
-                  </label>
-                  <input
-                    type="number"
-                    value={stayDays}
-                    onChange={(e) => setStayDays(e.target.value)}
-                    min={1}
-                    className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50 font-semibold text-neutral-900"
-                    required
-                  />
-                </div>
-
-                {/* Total Fee Indicator */}
-                <div className="flex flex-col justify-end bg-neutral-50 p-2 border border-neutral-200 text-center">
-                  <span className="text-[8px] uppercase tracking-wider text-neutral-400 font-bold block">Total Samarpan Fee</span>
-                  <span className="text-xl font-bold font-mono text-neutral-900 mt-1">
-                    ₹{parseInt(stayDays, 10) ? parseInt(stayDays, 10) * 500 : 0}
-                  </span>
-                  <span className="text-[9px] text-neutral-400 block font-light mt-0.5 font-mono">₹500 / day daily rate</span>
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                    Family Linkage (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={familyLinkage}
-                    onChange={(e) => setFamilyLinkage(e.target.value)}
-                    className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                    placeholder="Link with family registrations by typing their names or Patient IDs"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                    Advance Acknowledgement of Existing Diseases (Optional)
-                  </label>
-                  <textarea
-                    value={existingDiseases}
-                    onChange={(e) => setExistingDiseases(e.target.value)}
-                    rows={3}
-                    className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                    placeholder="List any acute or chronic illnesses, allergies, or physical constraints..."
-                  ></textarea>
-                </div>
-              </div>
+            <div className="pt-4 border-t border-neutral-100 flex justify-between">
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="text-[10px] font-semibold tracking-wider border border-neutral-200 px-6 py-2.5 hover:border-neutral-900 transition-colors"
+              >
+                ← BACK
+              </button>
+              <button
+                type="submit"
+                className="text-[10px] font-semibold tracking-wider bg-neutral-900 text-white px-6 py-2.5 hover:bg-neutral-800 transition-colors"
+              >
+                CONTINUE TO STAY INFO →
+              </button>
             </div>
+          </form>
+        )}
 
-            {/* Section 3: Samarpan Payment details */}
-            <div className="space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-800 border-b pb-1.5">
-                3. Samarpan Payment Option
-              </h3>
+        {/* STEP 3: Stay, Center Affiliation & Payment / Disclaimer */}
+        {step === 3 && (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
-              <div className="border border-neutral-200 p-4 bg-neutral-50 space-y-4">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-semibold text-neutral-800 uppercase tracking-wide">Select payment scheme</span>
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
+                  Center Address (Verification)
+                </label>
+                <input
+                  type="text"
+                  value={centerAddress}
+                  onChange={(e) => setCenterAddress(e.target.value)}
+                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
+                  placeholder="e.g. Ghansimi Bazar Center, Hyd"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
+                  Coordinator Mobile Number
+                </label>
+                <input
+                  type="tel"
+                  value={coordinatorNumber}
+                  onChange={(e) => setCoordinatorNumber(e.target.value)}
+                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
+                  placeholder="e.g. +91 95555 12345"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
+                  Stay Duration (Days)
+                </label>
+                <input
+                  type="number"
+                  value={stayDays}
+                  onChange={(e) => setStayDays(e.target.value)}
+                  min={1}
+                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50 font-semibold text-neutral-900"
+                  required
+                />
+              </div>
+
+              {/* Total Fee Indicator */}
+              <div className="flex flex-col justify-end bg-neutral-50 p-2 border border-neutral-200 text-center">
+                <span className="text-[8px] uppercase tracking-wider text-neutral-400 font-bold block">Total Samarpan Fee</span>
+                <span className="text-xl font-bold font-mono text-neutral-900 mt-1">
+                  ₹{parseInt(stayDays, 10) ? parseInt(stayDays, 10) * 500 : 0}
+                </span>
+                <span className="text-[9px] text-neutral-400 block font-light mt-0.5">Based on ₹500/day daily rate</span>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
+                  Family Linkage (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={familyLinkage}
+                  onChange={(e) => setFamilyLinkage(e.target.value)}
+                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
+                  placeholder="Link with family registrations by typing their names or Patient IDs"
+                />
+              </div>
+
+              {/* Samarpan Payment selector */}
+              <div className="md:col-span-2 border border-neutral-200 p-4 bg-neutral-50 space-y-4">
+                <div className="border-b pb-2 flex justify-between items-center">
+                  <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-800">
+                    Samarpan (Fee) Payment Method
+                  </h4>
                   <select
                     value={paymentMode}
                     onChange={(e) => setPaymentMode(e.target.value as 'Pending' | 'UPI')}
@@ -580,7 +596,7 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                       <div className="space-y-1.5 flex-1">
                         <p className="text-xs font-semibold text-neutral-900">UPI ID: <span className="font-mono text-neutral-600 bg-neutral-100 px-1 py-0.5 border">syhealthcentre@upi</span></p>
                         <p className="text-[10px] text-neutral-500 leading-relaxed font-light">
-                          Please scan the QR or pay to the UPI ID above. Enter amount: <strong>₹{parseInt(stayDays, 10) ? parseInt(stayDays, 10) * 500 : 0}</strong>. Take a screenshot and upload it below.
+                          Please scan the QR or pay to the UPI ID above. Enter amount: <strong>₹{parseInt(stayDays, 10) * 500}</strong>. After successful payment, take a screenshot and upload it below.
                         </p>
                       </div>
                     </div>
@@ -613,16 +629,13 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                   </div>
                 )}
               </div>
-            </div>
 
-            {/* Section 4: Medical Disclaimer */}
-            <div className="space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-800 border-b pb-1.5">
-                4. Medical & Treatment Disclaimer
-              </h3>
-              
-              <div className="border border-neutral-200 p-4 bg-neutral-50 space-y-3">
-                <p className="text-[10px] text-neutral-500 leading-relaxed font-light">
+              {/* Medical Disclaimer */}
+              <div className="md:col-span-2 border border-neutral-200 p-4 bg-neutral-50 space-y-3">
+                <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-800">
+                  Medical & Treatment Disclaimer
+                </h4>
+                <p className="text-[10px] text-neutral-500 leading-relaxed">
                   The Sahaja Yoga Research & Health Centre provides alternative clearing therapies using physical elements (footsoaking, ice packs) and collective meditation techniques.
                   <strong> No modern diagnostic machinery or pharmaceutical medicine is practiced here.</strong>
                   This program is dedicated exclusively to alternative holistic care and spiritual ascent. Seekers with critical diseases requiring intensive medical machinery or emergency hospitalization should not register.
@@ -644,11 +657,10 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
               </div>
             </div>
 
-            {/* Submission Actions */}
             <div className="pt-4 border-t border-neutral-100 flex justify-between">
               <button
                 type="button"
-                onClick={() => setStep(1)}
+                onClick={() => setStep(2)}
                 disabled={isPending || uploading}
                 className="text-[10px] font-semibold tracking-wider border border-neutral-200 px-6 py-2.5 hover:border-neutral-900 transition-colors"
               >
