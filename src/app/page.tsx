@@ -57,7 +57,6 @@ export default async function Home() {
               </div>
             </div>
 
-            <a href="https://sahajogtelangana.vercel.app/events" className="hover:text-neutral-500 transition-colors">Events</a>
             <a href="#reviews" className="hover:text-neutral-500 transition-colors">Reviews</a>
           </nav>
 
@@ -166,70 +165,6 @@ export default async function Home() {
           </div>
         </div>
       </section>
-
-      {/* Upcoming Sessions Section - ONLY rendered if there are sessions */}
-      {hasSessions && (
-        <section id="upcoming-sessions" className="py-20 px-8 border-b border-neutral-100 scroll-mt-24">
-          <div className="max-w-6xl mx-auto space-y-12">
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl font-light tracking-wider uppercase">UPCOMING SESSIONS</h2>
-              <p className="text-sm text-neutral-500">Book your attendance for our upcoming collective clearance and meditation workshops.</p>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-3">
-              {sessions.map((session) => {
-                const spotsLeft = Math.max(0, session.maxParticipants - session.registeredCount);
-                return (
-                  <div key={session._id.toString()} className="border border-neutral-200 p-6 bg-white flex flex-col justify-between space-y-6">
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-start">
-                        <span className="text-[10px] bg-neutral-100 px-2 py-0.5 border text-neutral-500 font-semibold tracking-wider uppercase font-mono">
-                          {session.time}
-                        </span>
-                        <span className={`text-[9px] font-bold px-2 py-0.5 border uppercase ${
-                          spotsLeft > 5 ? 'border-neutral-200 text-neutral-600' : 'border-neutral-900 bg-neutral-900 text-white animate-pulse'
-                        }`}>
-                          {spotsLeft} spots left
-                        </span>
-                      </div>
-                      <h3 className="text-base font-medium text-neutral-900 tracking-wide leading-tight">
-                        {session.title}
-                      </h3>
-                      <p className="text-xs text-neutral-500 font-light leading-relaxed">
-                        {session.description}
-                      </p>
-                    </div>
-
-                    <div className="pt-4 border-t border-neutral-100 space-y-3">
-                      <div className="flex justify-between text-xs text-neutral-500">
-                        <span>Instructor:</span>
-                        <span className="font-semibold text-neutral-800">{session.instructor}</span>
-                      </div>
-                      <div className="flex justify-between text-xs text-neutral-500">
-                        <span>Date:</span>
-                        <span className="font-semibold text-neutral-800 font-mono">
-                          {new Date(session.date).toLocaleDateString(undefined, {
-                            weekday: 'short',
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                          })}
-                        </span>
-                      </div>
-                      <Link
-                        href={`/book?sessionId=${session._id.toString()}`}
-                        className="block text-center text-[10px] font-semibold tracking-widest uppercase py-2.5 border border-neutral-900 hover:bg-neutral-900 hover:text-white transition-all w-full"
-                      >
-                        Register For Session
-                      </Link>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* About Sections */}
       <section className="py-20 px-8 border-b border-neutral-100 bg-neutral-50/50">

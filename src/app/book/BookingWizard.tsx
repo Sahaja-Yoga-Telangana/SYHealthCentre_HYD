@@ -35,12 +35,24 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
   const [generatedMrd, setGeneratedMrd] = useState('');
   const [error, setError] = useState('');
 
+  // Calendar Date Navigation
+  const [calendarDate, setCalendarDate] = useState<Date>(() => {
+    // If a session is pre-selected, default calendar to that session's month/year
+    if (preselectedId) {
+      const match = sessions.find(s => s.id === preselectedId);
+      if (match && match.date) {
+        return new Date(match.date);
+      }
+    }
+    return new Date();
+  });
+
   // Form States - Step 1: Session Selection
   const [selectedSessionId, setSelectedSessionId] = useState(() => {
     if (preselectedId && sessions.some(s => s.id === preselectedId)) {
       return preselectedId;
     }
-    return sessions[0]?.id || '';
+    return '';
   });
 
   // Form States - Step 2: Personal Information & Medical Acknowledgement
@@ -73,12 +85,45 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
   const stayDaysCount = parseInt(stayDays, 10) || 1;
   const computedTotalSamarpan = stayDaysCount * totalPeopleCount * 500;
 
+  // Month navigation helpers
+  const handlePrevMonth = () => {
+    setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 1));
+  };
+
+  const year = calendarDate.getFullYear();
+  const month = calendarDate.getMonth();
+
+  // Get total days in month
+  const totalDays = new Date(year, month + 1, 0).getDate();
+
+  // Get start day of month (aligned to Monday)
+  const startDayIndex = (new Date(year, month, 1).getDay() + 6) % 7;
+
+  const DAYS_OF_WEEK = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+  const MONTH_NAMES = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  // Helper to find session matching day
+  const getSessionForDay = (day: number) => {
+    return sessions.find((s) => {
+      if (!s.date) return false;
+      const d = new Date(s.date);
+      return d.getDate() === day && d.getMonth() === month && d.getFullYear() === year;
+    });
+  };
+
   const handleNextStep1 = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     if (!selectedSessionId) {
-      setError('Please select a stay slot to attend.');
+      setError('Please select a stay date from the calendar.');
       return;
     }
 
@@ -103,6 +148,20 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
     const parsedAge = parseInt(age, 10);
     if (isNaN(parsedAge) || parsedAge <= 0) {
       setError('Please enter a valid age.');
+      return;
+    }
+
+    // Phone validation
+    const phoneRegex = /^(\+91[\-\s]?)?[6789][0-9]{9}$/;
+    if (!phoneRegex.test(phone.trim().replace(/[\s\-]/g, ''))) {
+      setError('Please enter a valid 10-digit Indian mobile number.');
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError('Please enter a valid email address.');
       return;
     }
 
@@ -316,65 +375,124 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
         {/* STEP 1: Select Stay Slot */}
         {step === 1 && (
           <form onSubmit={handleNextStep1} className="space-y-6">
-            <div>
+            <div className="space-y-4">
               <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-2">
-                Choose Stay Date Slot
+                Select Check-In Date
               </label>
-              {sessions.length === 0 ? (
-                <div className="p-4 border border-dashed text-center text-xs text-neutral-400 font-mono bg-neutral-50">
-                  No upcoming stay dates scheduled.
+
+              {/* Monthly calendar view for date selection */}
+              <div className="border border-neutral-200 bg-white p-4 space-y-4">
+                <div className="flex justify-between items-center border-b border-neutral-100 pb-3">
+                  <h3 className="text-xs font-bold text-neutral-900 tracking-widest uppercase">
+                    {MONTH_NAMES[month]} {year}
+                  </h3>
+                  <div className="flex space-x-1">
+                    <button
+                      type="button"
+                      onClick={handlePrevMonth}
+                      className="p-1.5 border border-neutral-200 hover:border-neutral-900 text-xs font-semibold"
+                    >
+                      ←
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNextMonth}
+                      className="p-1.5 border border-neutral-200 hover:border-neutral-900 text-xs font-semibold"
+                    >
+                      →
+                    </button>
+                  </div>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {sessions.map((session) => {
-                    const spotsLeft = Math.max(0, session.maxParticipants - session.registeredCount);
-                    const isSelected = selectedSessionId === session.id;
+
+                <div className="grid grid-cols-7 border-t border-l border-neutral-200 text-neutral-600 text-center select-none text-[10px]">
+                  {/* Day Headers */}
+                  {DAYS_OF_WEEK.map((day) => (
+                    <div key={day} className="p-2.5 border-b border-r border-neutral-200 font-bold bg-neutral-50 text-neutral-400">
+                      {day}
+                    </div>
+                  ))}
+
+                  {/* Empty offsets */}
+                  {Array.from({ length: startDayIndex }).map((_, index) => (
+                    <div key={`empty-${index}`} className="p-2.5 border-b border-r border-neutral-100 bg-neutral-50/10 min-h-[50px]" />
+                  ))}
+
+                  {/* Active and Selectable Days */}
+                  {Array.from({ length: totalDays }).map((_, index) => {
+                    const dayNum = index + 1;
+                    const daySession = getSessionForDay(dayNum);
+                    const isSelected = daySession && selectedSessionId === daySession.id;
+
+                    if (!daySession) {
+                      return (
+                        <div
+                          key={`day-${dayNum}`}
+                          className="p-2.5 border-b border-r border-neutral-100 text-neutral-300 min-h-[50px] flex items-center justify-center cursor-not-allowed bg-neutral-50/20 font-light"
+                        >
+                          {dayNum}
+                        </div>
+                      );
+                    }
+
+                    const spotsLeft = Math.max(0, daySession.maxParticipants - daySession.registeredCount);
                     const isFull = spotsLeft === 0;
+
+                    if (isFull) {
+                      return (
+                        <div
+                          key={`day-${dayNum}`}
+                          className="p-1 border-b border-r border-neutral-200 text-red-400 min-h-[50px] flex flex-col justify-between items-center cursor-not-allowed bg-red-50/30 opacity-70"
+                        >
+                          <span className="font-bold">{dayNum}</span>
+                          <span className="text-[7px] font-bold tracking-wider">FULL</span>
+                        </div>
+                      );
+                    }
 
                     return (
                       <div
-                        key={session.id}
-                        onClick={() => !isFull && setSelectedSessionId(session.id)}
-                        className={`border p-4 flex justify-between items-center transition-all select-none ${
-                          isFull 
-                            ? 'border-neutral-100 bg-neutral-50/50 opacity-50 cursor-not-allowed' 
-                            : isSelected
-                            ? 'border-neutral-900 bg-neutral-50 cursor-pointer'
-                            : 'border-neutral-200 hover:border-neutral-950 cursor-pointer bg-white'
+                        key={`day-${dayNum}`}
+                        onClick={() => setSelectedSessionId(daySession.id)}
+                        className={`p-1 border-b border-r border-neutral-200 min-h-[50px] flex flex-col justify-between items-center cursor-pointer transition-colors hover:bg-neutral-50 ${
+                          isSelected
+                            ? 'bg-neutral-900 text-white hover:bg-neutral-900 border-2 border-double border-neutral-950 font-bold'
+                            : 'bg-white text-neutral-950 font-bold border-l-2 border-l-neutral-900'
                         }`}
                       >
-                        <div className="space-y-1">
-                          <h4 className="text-xs font-bold text-neutral-900">{session.title}</h4>
-                          <p className="text-[10px] text-neutral-500 font-light font-mono">
-                            Date: {new Date(session.date).toLocaleDateString()} &bull; Time: {session.time} &bull; Doctor: {session.instructor}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <span className={`text-[9px] font-bold px-2 py-0.5 border uppercase ${
-                            isFull 
-                              ? 'border-red-200 text-red-500 bg-red-50' 
-                              : isSelected
-                              ? 'border-neutral-900 bg-neutral-900 text-white'
-                              : 'border-neutral-200 text-neutral-500'
-                          }`}>
-                            {isFull ? 'FULL' : `${spotsLeft} spots left`}
-                          </span>
-                        </div>
+                        <span className="text-xs">{dayNum}</span>
+                        <span className={`text-[6px] tracking-wider font-bold block ${isSelected ? 'text-white' : 'text-neutral-500'}`}>
+                          {spotsLeft} LEFT
+                        </span>
                       </div>
                     );
                   })}
                 </div>
-              )}
+              </div>
             </div>
 
-            <div className="pt-4 border-t border-neutral-100 flex justify-end">
-              <button
-                type="submit"
-                disabled={!selectedSessionId}
-                className="text-[10px] font-semibold tracking-wider bg-neutral-900 text-white px-6 py-2.5 hover:bg-neutral-800 transition-colors disabled:bg-neutral-300"
-              >
-                CONTINUE TO PERSONAL DETAILS →
-              </button>
+            {/* Selected Date Summary */}
+            <div className="pt-4 border-t border-neutral-100">
+              {selectedSession ? (
+                <div className="bg-neutral-50 p-4 border border-neutral-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div className="space-y-1">
+                    <span className="text-[8px] uppercase tracking-widest text-neutral-400 font-bold block">Selected Stay Details</span>
+                    <h4 className="text-xs font-bold text-neutral-950">{selectedSession.title}</h4>
+                    <p className="text-[10px] text-neutral-500 leading-relaxed font-light">
+                      Time slot: {selectedSession.time} &bull; Consulting Physician: {selectedSession.instructor}
+                    </p>
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full sm:w-auto text-[10px] font-bold tracking-wider uppercase py-2.5 px-6 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
+                  >
+                    CONTINUE TO DETAILS →
+                  </button>
+                </div>
+              ) : (
+                <div className="p-4 border border-dashed border-neutral-200 text-center text-[10px] text-neutral-400 font-light italic bg-neutral-50">
+                  Select a highlighted active check-in date from the calendar grid above to continue stay booking.
+                </div>
+              )}
             </div>
           </form>
         )}
