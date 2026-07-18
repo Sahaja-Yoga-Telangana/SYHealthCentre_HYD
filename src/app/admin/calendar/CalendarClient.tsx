@@ -22,6 +22,7 @@ interface RegistrationItem {
     samarpanAmount: number;
     paymentMode: string;
     paymentStatus: string;
+    transactionId?: string;
   };
 }
 
@@ -349,6 +350,9 @@ export default function CalendarClient({ initialRegistrations, doctors }: Calend
                         <span>Phone: <strong>{reg.phone}</strong></span>
                         <span>Check-In: <strong>{reg.checkInStatus}</strong></span>
                         <span>Physician: <strong className="text-neutral-700 font-medium">{reg.session.instructor}</strong></span>
+                        {reg.billing?.transactionId && (
+                          <span className="col-span-2">UPI Transaction ID: <strong className="font-mono text-neutral-800">{reg.billing.transactionId}</strong></span>
+                        )}
                       </div>
                     </div>
                   );

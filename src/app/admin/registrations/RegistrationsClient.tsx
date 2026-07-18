@@ -40,6 +40,7 @@ interface RegistrationItem {
     paymentMode: 'Cash' | 'UPI' | 'Card' | 'Pending';
     paymentStatus: 'Paid' | 'Outstanding';
     upiScreenshot?: string;
+    transactionId?: string;
   };
 }
 
@@ -55,11 +56,11 @@ export default function RegistrationsClient({ initialRegistrations, sessions }: 
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedReg, setSelectedReg] = useState<RegistrationItem | null>(null);
   
-  // Edit Billing Form State
   const [isEditingBilling, setIsEditingBilling] = useState(false);
   const [editSamarpanAmount, setEditSamarpanAmount] = useState(500);
   const [editPaymentMode, setEditPaymentMode] = useState<'Cash' | 'UPI' | 'Card' | 'Pending'>('UPI');
   const [editPaymentStatus, setEditPaymentStatus] = useState<'Paid' | 'Outstanding'>('Paid');
+  const [editTransactionId, setEditTransactionId] = useState('');
   const [uploadingScreenshot, setUploadingScreenshot] = useState(false);
 
   const handleDetailScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,6 +127,7 @@ export default function RegistrationsClient({ initialRegistrations, sessions }: 
         paymentMode: editPaymentMode,
         paymentStatus: editPaymentStatus,
         upiScreenshot: selectedReg.billing?.upiScreenshot || '',
+        transactionId: editTransactionId.trim(),
       };
 
       const res = await updateBillingAction(selectedReg.id, billingPayload);
@@ -834,6 +836,21 @@ export default function RegistrationsClient({ initialRegistrations, sessions }: 
                               </div>
                             </div>
 
+                            {editPaymentMode === 'UPI' && (
+                              <div>
+                                <label className="block text-[8px] uppercase tracking-wider text-neutral-400 font-semibold mb-1">
+                                  UPI Transaction ID / UTR
+                                </label>
+                                <input
+                                  type="text"
+                                  value={editTransactionId}
+                                  onChange={(e) => setEditTransactionId(e.target.value)}
+                                  className="w-full text-xs p-1 border border-neutral-200 focus:outline-none bg-white font-mono"
+                                  placeholder="e.g. 326712345678"
+                                />
+                              </div>
+                            )}
+
                             <div className="pt-1 flex space-x-2">
                               <button
                                 type="button"
@@ -856,6 +873,9 @@ export default function RegistrationsClient({ initialRegistrations, sessions }: 
                           <div className="space-y-2 text-xs">
                             <p><strong className="text-neutral-500 font-normal">Samarpan Fee:</strong> ₹{selectedReg.billing.samarpanAmount}</p>
                             <p><strong className="text-neutral-500 font-normal">Payment Method:</strong> {selectedReg.billing.paymentMode}</p>
+                            {selectedReg.billing.transactionId && (
+                              <p><strong className="text-neutral-500 font-normal">UPI Transaction ID:</strong> <span className="font-mono text-neutral-800 font-medium">{selectedReg.billing.transactionId}</span></p>
+                            )}
                             
                             {/* UPI Transaction Screenshot Container */}
                             {selectedReg.billing.upiScreenshot && (
@@ -916,6 +936,7 @@ export default function RegistrationsClient({ initialRegistrations, sessions }: 
                                   setEditSamarpanAmount(selectedReg.billing?.samarpanAmount || 500);
                                   setEditPaymentMode(selectedReg.billing?.paymentMode || 'UPI');
                                   setEditPaymentStatus(selectedReg.billing?.paymentStatus || 'Outstanding');
+                                  setEditTransactionId(selectedReg.billing?.transactionId || '');
                                   setIsEditingBilling(true);
                                 }}
                                 className="text-[9px] font-semibold border border-neutral-300 px-3 py-1.5 hover:bg-white"

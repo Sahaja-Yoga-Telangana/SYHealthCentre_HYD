@@ -595,6 +595,7 @@ export async function checkInYogiAction(
       paymentMode: data.paymentMode,
       paymentStatus: data.paymentStatus,
       upiScreenshot: reg.billing?.upiScreenshot || '',
+      transactionId: reg.billing?.transactionId || '',
     };
     reg.consultation = {
       chiefComplaint: '',
@@ -640,6 +641,7 @@ export async function updateBillingAction(
     paymentMode: 'Cash' | 'UPI' | 'Card' | 'Pending';
     paymentStatus: 'Paid' | 'Outstanding';
     upiScreenshot?: string;
+    transactionId?: string;
   }
 ) {
   try {
@@ -652,6 +654,7 @@ export async function updateBillingAction(
       paymentMode: data.paymentMode,
       paymentStatus: data.paymentStatus,
       upiScreenshot: data.upiScreenshot !== undefined ? data.upiScreenshot : reg.billing?.upiScreenshot || '',
+      transactionId: data.transactionId !== undefined ? data.transactionId : reg.billing?.transactionId || '',
     };
 
     await reg.save();

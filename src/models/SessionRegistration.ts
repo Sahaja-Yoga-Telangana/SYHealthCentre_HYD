@@ -28,6 +28,7 @@ export interface ISessionRegistration extends Document {
     paymentMode: 'Cash' | 'UPI' | 'Card' | 'Pending';
     paymentStatus: 'Paid' | 'Outstanding';
     upiScreenshot?: string;
+    transactionId?: string;
   };
 
   // Doctor Consultation details
@@ -71,6 +72,7 @@ const SessionRegistrationSchema = new Schema<ISessionRegistration>(
       paymentMode: { type: String, enum: ['Cash', 'UPI', 'Card', 'Pending'], default: 'Pending' },
       paymentStatus: { type: String, enum: ['Paid', 'Outstanding'], default: 'Outstanding' },
       upiScreenshot: { type: String, default: '' },
+      transactionId: { type: String, default: '' },
     },
 
     consultation: {

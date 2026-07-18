@@ -47,6 +47,7 @@ export default async function RegistrationsAdminPage() {
         paymentMode: r.billing.paymentMode || 'Pending',
         paymentStatus: r.billing.paymentStatus || 'Outstanding',
         upiScreenshot: r.billing.upiScreenshot || '',
+        transactionId: r.billing.transactionId || '',
       } : undefined
     }));
 

@@ -41,6 +41,7 @@ export default async function AdminCalendarPage() {
         samarpanAmount: r.billing.samarpanAmount || 0,
         paymentMode: r.billing.paymentMode || 'Pending',
         paymentStatus: r.billing.paymentStatus || 'Outstanding',
+        transactionId: r.billing.transactionId || '',
       } : undefined
     }));
 

@@ -56,6 +56,7 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
   const [stayDays, setStayDays] = useState('1');
   const [paymentMode, setPaymentMode] = useState<'Pending' | 'UPI'>('Pending');
   const [upiScreenshot, setUpiScreenshot] = useState('');
+  const [transactionId, setTransactionId] = useState('');
   const [uploading, setUploading] = useState(false);
 
   const selectedSession = sessions.find((s) => s.id === selectedSessionId);
@@ -145,6 +146,11 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
       return;
     }
 
+    if (paymentMode === 'UPI' && !transactionId.trim()) {
+      setError('Please enter your UPI Transaction ID / UTR Number.');
+      return;
+    }
+
     if (paymentMode === 'UPI' && !upiScreenshot) {
       setError('Please upload your UPI payment screenshot to complete the booking.');
       return;
@@ -177,6 +183,7 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
           paymentMode: paymentMode,
           paymentStatus: 'Outstanding' as const,
           upiScreenshot: paymentMode === 'UPI' ? upiScreenshot : '',
+          transactionId: paymentMode === 'UPI' ? transactionId.trim() : '',
         }
       };
 
@@ -228,6 +235,11 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
             <p>
               <strong className="font-semibold text-neutral-800">Samarpan Fee:</strong> ₹{parseInt(stayDays, 10) * 500} &bull; <span className="uppercase font-semibold text-neutral-900">{paymentMode === 'UPI' ? 'UPI (Awaiting Verification)' : 'Pay on Arrival'}</span>
             </p>
+            {paymentMode === 'UPI' && transactionId && (
+              <p>
+                <strong className="font-semibold text-neutral-800">Transaction ID:</strong> <span className="font-mono text-neutral-900">{transactionId}</span>
+              </p>
+            )}
           </div>
         </div>
 
@@ -582,49 +594,72 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
 
                 {paymentMode === 'UPI' && (
                   <div className="space-y-4 pt-1">
-                    <div className="flex flex-col md:flex-row gap-4 items-center bg-white p-3 border border-neutral-200">
-                      {/* Scanner frame */}
-                      <div className="w-24 h-24 border-2 border-neutral-900 flex flex-col justify-center items-center shrink-0 relative p-1 bg-neutral-50">
-                        <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-neutral-900"></div>
-                        <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-neutral-900"></div>
-                        <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-neutral-900"></div>
-                        <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-neutral-900"></div>
-                        <span className="text-[7px] text-center font-bold tracking-wider text-neutral-800">UPI PAYMENT</span>
-                        <div className="w-10 h-10 border border-dashed border-neutral-400 mt-1 flex items-center justify-center bg-white font-mono text-[8px] text-neutral-400">QR</div>
+                    <div className="flex flex-col items-center justify-center bg-white p-6 border border-neutral-200 space-y-4 text-center">
+                      {/* Big Scannable Dynamic QR Code */}
+                      <div className="w-48 h-48 border border-neutral-200 p-2 bg-white flex items-center justify-center shadow-sm relative shrink-0">
+                        <img
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
+                            `upi://pay?pa=syhealthcentre@upi&pn=Sahaja%20Yoga%20Health%20Centre&am=${parseInt(stayDays, 10) * 500}&cu=INR`
+                          )}`}
+                          alt="Scan to Pay UPI QR Code"
+                          className="w-full h-full object-contain"
+                        />
                       </div>
                       
-                      <div className="space-y-1.5 flex-1">
-                        <p className="text-xs font-semibold text-neutral-900">UPI ID: <span className="font-mono text-neutral-600 bg-neutral-100 px-1 py-0.5 border">syhealthcentre@upi</span></p>
-                        <p className="text-[10px] text-neutral-500 leading-relaxed font-light">
-                          Please scan the QR or pay to the UPI ID above. Enter amount: <strong>₹{parseInt(stayDays, 10) * 500}</strong>. After successful payment, take a screenshot and upload it below.
+                      <div className="space-y-1.5 w-full">
+                        <p className="text-xs font-bold text-neutral-900 tracking-wide">
+                          UPI ID: <span className="font-mono text-neutral-700 bg-neutral-100 px-1.5 py-0.5 border select-all">syhealthcentre@upi</span>
+                        </p>
+                        <p className="text-xs text-neutral-600 font-medium">
+                          Payable Samarpan: <span className="font-bold font-mono text-neutral-900">₹{parseInt(stayDays, 10) * 500}</span>
+                        </p>
+                        <p className="text-[10px] text-neutral-400 max-w-sm mx-auto leading-relaxed">
+                          Scan the QR code with GPay, PhonePe, Paytm, or any UPI app to pay. Once completed, enter the Transaction ID and upload your receipt screenshot below.
                         </p>
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold">
-                        Upload Payment Screenshot
-                      </label>
-                      <div className="flex items-center space-x-3">
+                    <div className="space-y-4">
+                      <div className="space-y-1">
+                        <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold">
+                          UPI Transaction ID / UTR Number
+                        </label>
                         <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileChange}
-                          disabled={uploading || isPending}
-                          className="text-xs file:mr-4 file:py-1.5 file:px-3 file:border file:border-neutral-200 file:bg-white hover:file:border-neutral-900 file:text-[10px] file:font-semibold file:uppercase cursor-pointer"
+                          type="text"
+                          value={transactionId}
+                          onChange={(e) => setTransactionId(e.target.value)}
+                          disabled={isPending}
+                          className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-white font-mono"
+                          placeholder="12-digit transaction ID / UTR (e.g. 326712345678)"
+                          required={paymentMode === 'UPI'}
                         />
-                        {uploading && (
-                          <span className="text-[10px] text-neutral-500 font-mono animate-pulse">Uploading to Cloudinary...</span>
-                        )}
-                        {!uploading && upiScreenshot && (
-                          <span className="text-[10px] text-green-600 font-bold">✓ Screenshot Staged</span>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold">
+                          Upload Payment Screenshot
+                        </label>
+                        <div className="flex items-center space-x-3">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            disabled={uploading || isPending}
+                            className="text-xs file:mr-4 file:py-1.5 file:px-3 file:border file:border-neutral-200 file:bg-white hover:file:border-neutral-900 file:text-[10px] file:font-semibold file:uppercase cursor-pointer"
+                          />
+                          {uploading && (
+                            <span className="text-[10px] text-neutral-500 font-mono animate-pulse">Uploading to Cloudinary...</span>
+                          )}
+                          {!uploading && upiScreenshot && (
+                            <span className="text-[10px] text-green-600 font-bold">✓ Screenshot Staged</span>
+                          )}
+                        </div>
+                        {upiScreenshot && (
+                          <div className="mt-2 relative w-32 aspect-video border bg-neutral-100 overflow-hidden">
+                            <img src={upiScreenshot} alt="UPI receipt preview" className="object-cover w-full h-full" />
+                          </div>
                         )}
                       </div>
-                      {upiScreenshot && (
-                        <div className="mt-2 relative w-32 aspect-video border bg-neutral-100 overflow-hidden">
-                          <img src={upiScreenshot} alt="UPI receipt preview" className="object-cover w-full h-full" />
-                        </div>
-                      )}
                     </div>
                   </div>
                 )}
