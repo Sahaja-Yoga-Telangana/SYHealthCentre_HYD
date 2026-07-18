@@ -17,6 +17,7 @@ interface SessionItem {
   instructor: string;
   maxParticipants: number;
   registeredCount: number;
+  isActive: boolean;
 }
 
 export default async function BookingPage({
@@ -43,6 +44,7 @@ export default async function BookingPage({
       instructor: session.instructor,
       maxParticipants: session.maxParticipants,
       registeredCount: session.registeredCount,
+      isActive: session.isActive,
     }));
   } catch (error: unknown) {
     console.error('Error loading registration page sessions:', error);

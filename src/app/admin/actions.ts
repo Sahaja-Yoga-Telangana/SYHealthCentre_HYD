@@ -374,7 +374,10 @@ export async function deleteSessionAction(id: string) {
 
 // Session Registration Actions
 export async function createRegistrationAction(payload: {
-  sessionId: string;
+  sessionId?: string;
+  checkInDate?: string;
+  checkOutDate?: string;
+  stayDays?: number;
   name: string;
   age: number;
   gender: 'Male' | 'Female';
@@ -406,12 +409,50 @@ export async function createRegistrationAction(payload: {
   try {
     await dbConnect();
 
-    // Verify session
-    const session = await Session.findById(payload.sessionId);
-    if (!session) throw new Error('Session not found');
+    if (!payload.checkInDate || !payload.checkOutDate) {
+      throw new Error('Please select your check-in and check-out dates.');
+    }
+
+    const checkInDate = new Date(`${payload.checkInDate}T00:00:00.000Z`);
+    const checkOutDate = new Date(`${payload.checkOutDate}T00:00:00.000Z`);
+
+    if (Number.isNaN(checkInDate.getTime()) || Number.isNaN(checkOutDate.getTime())) {
+      throw new Error('Please select valid stay dates.');
+    }
+
+    if (checkOutDate <= checkInDate) {
+      throw new Error('Check-out date must be after check-in date.');
+    }
+
+    const nextDay = new Date(checkInDate);
+    nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+
+    // Admin-created sessions act as optional date controls. If no session exists,
+    // the public site creates a normal open stay slot for that check-in date.
+    let session = payload.sessionId ? await Session.findById(payload.sessionId) : null;
+
+    if (!session) {
+      session = await Session.findOne({
+        date: { $gte: checkInDate, $lt: nextDay },
+      }).sort({ createdAt: 1 });
+    }
+
+    if (!session) {
+      session = await Session.create({
+        title: `Health Centre Stay - ${payload.checkInDate}`,
+        description: 'Open stay booking created from the public website.',
+        date: checkInDate,
+        time: 'Stay admission',
+        instructor: 'Health Centre Admissions',
+        maxParticipants: 500,
+        registeredCount: 0,
+        isActive: true,
+      });
+    }
+
     if (!session.isActive) throw new Error('Session is no longer active');
     if (session.registeredCount >= session.maxParticipants) {
-      throw new Error('This session is fully registered.');
+      throw new Error('This check-in date is fully booked.');
     }
 
     // Auto-generate MRD number: MRD-YYYYMMDD-XXXX
@@ -425,6 +466,10 @@ export async function createRegistrationAction(payload: {
     // Create registration
     const registration = await SessionRegistration.create({
       ...payload,
+      sessionId: session._id,
+      checkInDate,
+      checkOutDate,
+      stayDays: payload.stayDays,
       dob: new Date(payload.dob),
       mrdNumber,
       status: 'Confirmed', // Automatically confirmed for simplicity
@@ -440,7 +485,7 @@ export async function createRegistrationAction(payload: {
       
       const totalPeople = 1 + (payload.familyMembers?.length || 0);
       const computedAmount = payload.billing?.samarpanAmount || 500;
-      const stayDays = Math.round(computedAmount / (500 * totalPeople));
+      const stayDays = payload.stayDays || Math.round(computedAmount / (500 * totalPeople));
 
       let familyHtml = '';
       if (payload.familyMembers && payload.familyMembers.length > 0) {
@@ -489,12 +534,12 @@ export async function createRegistrationAction(payload: {
 
     <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
       <tr style="border-bottom: 1px solid #f5f5f5;">
-        <td style="padding: 6px 0; color: #737373; font-weight: 300;">Stay Date Slot:</td>
-        <td style="padding: 6px 0; font-weight: 600; text-align: right;">${session.title}</td>
+        <td style="padding: 6px 0; color: #737373; font-weight: 300;">Stay Dates:</td>
+        <td style="padding: 6px 0; font-weight: 600; text-align: right;">${payload.checkInDate} to ${payload.checkOutDate}</td>
       </tr>
       <tr style="border-bottom: 1px solid #f5f5f5;">
-        <td style="padding: 6px 0; color: #737373; font-weight: 300;">Consulting Time:</td>
-        <td style="padding: 6px 0; font-weight: 600; text-align: right;">${session.time}</td>
+        <td style="padding: 6px 0; color: #737373; font-weight: 300;">Stay Slot:</td>
+        <td style="padding: 6px 0; font-weight: 600; text-align: right;">${session.title}</td>
       </tr>
       <tr style="border-bottom: 1px solid #f5f5f5;">
         <td style="padding: 6px 0; color: #737373; font-weight: 300;">Stay Duration:</td>
@@ -878,5 +923,4 @@ export async function createWalkInRegistrationAction(payload: {
     return { success: false, error: error.message };
   }
 }
-
 

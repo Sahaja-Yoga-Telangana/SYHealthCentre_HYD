@@ -12,6 +12,9 @@ export interface ISessionRegistration extends Document {
   phone: string;
   email?: string;
   emergencyContact: string;
+  checkInDate?: Date;
+  checkOutDate?: Date;
+  stayDays?: number;
   centerAddress: string;
   coordinatorNumber: string;
   familyMembers?: {
@@ -64,6 +67,9 @@ const SessionRegistrationSchema = new Schema<ISessionRegistration>(
     phone: { type: String, required: true },
     email: { type: String, default: '' },
     emergencyContact: { type: String, required: true },
+    checkInDate: { type: Date },
+    checkOutDate: { type: Date },
+    stayDays: { type: Number, min: 1 },
     centerAddress: { type: String, required: true },
     coordinatorNumber: { type: String, required: true },
     familyMembers: [{

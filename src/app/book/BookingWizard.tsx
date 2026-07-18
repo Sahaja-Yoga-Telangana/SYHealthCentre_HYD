@@ -13,6 +13,7 @@ interface SessionItem {
   instructor: string;
   maxParticipants: number;
   registeredCount: number;
+  isActive?: boolean;
 }
 
 interface FamilyMember {
@@ -26,6 +27,34 @@ interface FamilyMember {
 interface BookingWizardProps {
   sessions: SessionItem[];
   preselectedId?: string;
+}
+
+function toDateInputValue(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function calculateStayNights(checkInDate: string, checkOutDate: string) {
+  if (!checkInDate || !checkOutDate) return 1;
+
+  const start = new Date(`${checkInDate}T00:00:00`);
+  const end = new Date(`${checkOutDate}T00:00:00`);
+  const diff = end.getTime() - start.getTime();
+  const nights = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+  return nights > 0 ? nights : 1;
+}
+
+function formatDisplayDate(dateValue: string) {
+  if (!dateValue) return 'Not selected';
+
+  return new Intl.DateTimeFormat('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(`${dateValue}T00:00:00`));
 }
 
 export default function BookingWizard({ sessions, preselectedId }: BookingWizardProps) {
@@ -54,6 +83,16 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
     }
     return '';
   });
+  const [checkInDate, setCheckInDate] = useState(() => {
+    if (preselectedId) {
+      const match = sessions.find(s => s.id === preselectedId);
+      if (match?.date) {
+        return toDateInputValue(new Date(match.date));
+      }
+    }
+    return '';
+  });
+  const [checkOutDate, setCheckOutDate] = useState('');
 
   // Form States - Step 2: Personal Information & Medical Acknowledgement
   const [name, setName] = useState('');
@@ -74,15 +113,15 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
 
   // Samarpan Payment options
-  const [stayDays, setStayDays] = useState('1');
   const [paymentMode, setPaymentMode] = useState<'Pending' | 'UPI'>('Pending');
   const [transactionId, setTransactionId] = useState('');
 
   const selectedSession = sessions.find((s) => s.id === selectedSessionId);
+  const selectedCheckInSession = sessions.find((s) => s.date && toDateInputValue(new Date(s.date)) === checkInDate);
 
   // Calculations
   const totalPeopleCount = 1 + familyMembers.length;
-  const stayDaysCount = parseInt(stayDays, 10) || 1;
+  const stayDaysCount = calculateStayNights(checkInDate, checkOutDate);
   const computedTotalSamarpan = stayDaysCount * totalPeopleCount * 500;
 
   // Month navigation helpers
@@ -118,18 +157,52 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
     });
   };
 
+  const selectCalendarDay = (day: number) => {
+    const selected = toDateInputValue(new Date(year, month, day));
+    const daySession = getSessionForDay(day);
+    const isAdminBlocked = daySession && (!daySession.isActive || daySession.registeredCount >= daySession.maxParticipants);
+
+    if (isAdminBlocked) {
+      return;
+    }
+
+    if (!checkInDate || (checkInDate && checkOutDate) || selected < checkInDate) {
+      setCheckInDate(selected);
+      setCheckOutDate('');
+      setSelectedSessionId(daySession?.id || '');
+      return;
+    }
+
+    if (selected === checkInDate) {
+      setCheckOutDate('');
+      return;
+    }
+
+    setCheckOutDate(selected);
+  };
+
   const handleNextStep1 = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!selectedSessionId) {
-      setError('Please select a stay date from the calendar.');
+    if (!checkInDate || !checkOutDate) {
+      setError('Please select your check-in and check-out dates.');
       return;
     }
 
-    const session = sessions.find(s => s.id === selectedSessionId);
+    if (new Date(checkOutDate) <= new Date(checkInDate)) {
+      setError('Check-out date must be after check-in date.');
+      return;
+    }
+
+    const session = selectedCheckInSession;
+    if (session && !session.isActive) {
+      setError('This check-in date is currently closed by admin. Please select another date.');
+      return;
+    }
+
     if (session && session.registeredCount >= session.maxParticipants) {
-      setError('This stay date is already fully booked. Please select another date.');
+      setError('This check-in date is fully booked by admin limitation. Please select another date.');
       return;
     }
 
@@ -195,12 +268,6 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
       return;
     }
 
-    const parsedDays = parseInt(stayDays, 10);
-    if (isNaN(parsedDays) || parsedDays <= 0) {
-      setError('Please enter a valid stay duration.');
-      return;
-    }
-
     // Validate family members
     for (let i = 0; i < familyMembers.length; i++) {
       const fm = familyMembers[i];
@@ -235,7 +302,10 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
       }));
 
       const payload = {
-        sessionId: selectedSessionId,
+        sessionId: selectedSessionId || undefined,
+        checkInDate,
+        checkOutDate,
+        stayDays: stayDaysCount,
         name,
         age: parseInt(age, 10),
         gender,
@@ -292,16 +362,16 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
 
           <div className="text-xs space-y-2 text-neutral-600 font-light">
             <p>
-              <strong className="font-semibold text-neutral-800">Stay Slot:</strong> {selectedSession?.title}
+              <strong className="font-semibold text-neutral-800">Stay Dates:</strong> {formatDisplayDate(checkInDate)} to {formatDisplayDate(checkOutDate)}
             </p>
             <p>
-              <strong className="font-semibold text-neutral-800">Consulting Time:</strong> {selectedSession?.time}
+              <strong className="font-semibold text-neutral-800">Stay Slot:</strong> {selectedSession?.title || selectedCheckInSession?.title || 'Health Centre Stay'}
             </p>
             <p>
               <strong className="font-semibold text-neutral-800">Yogi Seeker:</strong> {name}
             </p>
             <p>
-              <strong className="font-semibold text-neutral-800">Duration:</strong> {stayDays} Day(s) of Stay
+              <strong className="font-semibold text-neutral-800">Duration:</strong> {stayDaysCount} Night(s) of Stay
             </p>
             <p>
               <strong className="font-semibold text-neutral-800">Total Seeker(s):</strong> {totalPeopleCount} Person(s)
@@ -355,7 +425,7 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
       {/* Step Indicators */}
       <div className="grid grid-cols-3 border-b border-neutral-200 text-[10px] font-semibold uppercase tracking-wider text-center bg-neutral-50 select-none">
         <div className={`p-4 border-r border-neutral-200 ${step === 1 ? 'bg-white text-neutral-950 font-bold' : 'text-neutral-400'}`}>
-          1. Select Stay Date
+          1. Select Dates
         </div>
         <div className={`p-4 border-r border-neutral-200 ${step === 2 ? 'bg-white text-neutral-950 font-bold' : 'text-neutral-400'}`}>
           2. Personal Details
@@ -372,13 +442,44 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
           </div>
         )}
 
-        {/* STEP 1: Select Stay Slot */}
+        {/* STEP 1: Select Stay Date Range */}
         {step === 1 && (
           <form onSubmit={handleNextStep1} className="space-y-6">
             <div className="space-y-4">
               <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-2">
-                Select Check-In Date
+                Select Stay Dates
               </label>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="border border-neutral-200 bg-neutral-50 p-4">
+                  <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold block mb-2">Check-In</span>
+                  <input
+                    type="date"
+                    value={checkInDate}
+                    onChange={(event) => {
+                      const nextDate = event.target.value;
+                      const session = sessions.find((s) => s.date && toDateInputValue(new Date(s.date)) === nextDate);
+                      setCheckInDate(nextDate);
+                      setSelectedSessionId(session?.id || '');
+                      if (checkOutDate && checkOutDate <= nextDate) {
+                        setCheckOutDate('');
+                      }
+                    }}
+                    className="w-full text-sm p-3 border border-neutral-200 bg-white focus:border-neutral-900 focus:outline-none font-mono"
+                    required
+                  />
+                </div>
+                <div className="border border-neutral-200 bg-neutral-50 p-4">
+                  <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold block mb-2">Check-Out</span>
+                  <input
+                    type="date"
+                    value={checkOutDate}
+                    onChange={(event) => setCheckOutDate(event.target.value)}
+                    className="w-full text-sm p-3 border border-neutral-200 bg-white focus:border-neutral-900 focus:outline-none font-mono"
+                    required
+                  />
+                </div>
+              </div>
 
               {/* Monthly calendar view for date selection */}
               <div className="border border-neutral-200 bg-white p-4 space-y-4">
@@ -420,22 +521,13 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                   {/* Active and Selectable Days */}
                   {Array.from({ length: totalDays }).map((_, index) => {
                     const dayNum = index + 1;
+                    const dateValue = toDateInputValue(new Date(year, month, dayNum));
                     const daySession = getSessionForDay(dayNum);
-                    const isSelected = daySession && selectedSessionId === daySession.id;
-
-                    if (!daySession) {
-                      return (
-                        <div
-                          key={`day-${dayNum}`}
-                          className="p-2.5 border-b border-r border-neutral-100 text-neutral-300 min-h-[50px] flex items-center justify-center cursor-not-allowed bg-neutral-50/20 font-light"
-                        >
-                          {dayNum}
-                        </div>
-                      );
-                    }
-
-                    const spotsLeft = Math.max(0, daySession.maxParticipants - daySession.registeredCount);
-                    const isFull = spotsLeft === 0;
+                    const isCheckIn = checkInDate === dateValue;
+                    const isCheckOut = checkOutDate === dateValue;
+                    const isInRange = Boolean(checkInDate && checkOutDate && dateValue > checkInDate && dateValue < checkOutDate);
+                    const spotsLeft = daySession ? Math.max(0, daySession.maxParticipants - daySession.registeredCount) : null;
+                    const isFull = daySession ? spotsLeft === 0 : false;
 
                     if (isFull) {
                       return (
@@ -450,20 +542,25 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                     }
 
                     return (
-                      <div
+                      <button
                         key={`day-${dayNum}`}
-                        onClick={() => setSelectedSessionId(daySession.id)}
+                        type="button"
+                        onClick={() => selectCalendarDay(dayNum)}
                         className={`p-1 border-b border-r border-neutral-200 min-h-[50px] flex flex-col justify-between items-center cursor-pointer transition-colors hover:bg-neutral-50 ${
-                          isSelected
+                          isCheckIn || isCheckOut
                             ? 'bg-neutral-900 text-white hover:bg-neutral-900 border-2 border-double border-neutral-950 font-bold'
-                            : 'bg-white text-neutral-950 font-bold border-l-2 border-l-neutral-900'
+                            : isInRange
+                              ? 'bg-neutral-100 text-neutral-950 font-bold'
+                              : daySession
+                                ? 'bg-white text-neutral-950 font-bold border-l-2 border-l-neutral-900'
+                                : 'bg-white text-neutral-700 font-semibold'
                         }`}
                       >
                         <span className="text-xs">{dayNum}</span>
-                        <span className={`text-[6px] tracking-wider font-bold block ${isSelected ? 'text-white' : 'text-neutral-500'}`}>
-                          {spotsLeft} LEFT
+                        <span className={`text-[6px] tracking-wider font-bold block ${isCheckIn || isCheckOut ? 'text-white' : 'text-neutral-500'}`}>
+                          {isCheckIn ? 'IN' : isCheckOut ? 'OUT' : spotsLeft !== null ? `${spotsLeft} LEFT` : 'OPEN'}
                         </span>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
@@ -472,13 +569,15 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
 
             {/* Selected Date Summary */}
             <div className="pt-4 border-t border-neutral-100">
-              {selectedSession ? (
+              {checkInDate && checkOutDate ? (
                 <div className="bg-neutral-50 p-4 border border-neutral-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div className="space-y-1">
-                    <span className="text-[8px] uppercase tracking-widest text-neutral-400 font-bold block">Selected Stay Details</span>
-                    <h4 className="text-xs font-bold text-neutral-950">{selectedSession.title}</h4>
+                        <span className="text-[8px] uppercase tracking-widest text-neutral-400 font-bold block">Selected Stay Details</span>
+                    <h4 className="text-xs font-bold text-neutral-950">
+                      {formatDisplayDate(checkInDate)} to {formatDisplayDate(checkOutDate)}
+                    </h4>
                     <p className="text-[10px] text-neutral-500 leading-relaxed font-light">
-                      Time slot: {selectedSession.time} &bull; Consulting Physician: {selectedSession.instructor}
+                      {stayDaysCount} night(s) &bull; {selectedCheckInSession ? `Admin slot: ${selectedCheckInSession.title}` : 'Open booking date'}
                     </p>
                   </div>
                   <button
@@ -490,7 +589,7 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                 </div>
               ) : (
                 <div className="p-4 border border-dashed border-neutral-200 text-center text-[10px] text-neutral-400 font-light italic bg-neutral-50">
-                  Select a highlighted active check-in date from the calendar grid above to continue stay booking.
+                  Select check-in and check-out dates from the fields or calendar above to continue.
                 </div>
               )}
             </div>
@@ -683,18 +782,14 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                 />
               </div>
 
-              <div>
-                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                  Stay Duration (Days)
-                </label>
-                <input
-                  type="number"
-                  value={stayDays}
-                  onChange={(e) => setStayDays(e.target.value)}
-                  min={1}
-                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50 font-semibold text-neutral-900"
-                  required
-                />
+              <div className="flex flex-col justify-end bg-neutral-50 p-3 border border-neutral-200">
+                <span className="text-[8px] uppercase tracking-wider text-neutral-400 font-bold block">Selected Stay Dates</span>
+                <span className="text-xs font-semibold text-neutral-900 mt-1">
+                  {formatDisplayDate(checkInDate)} to {formatDisplayDate(checkOutDate)}
+                </span>
+                <span className="text-[9px] text-neutral-400 block font-light mt-0.5">
+                  {stayDaysCount} night(s)
+                </span>
               </div>
 
               {/* Total Fee Indicator (Responsive & Dynamic) */}
