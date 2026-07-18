@@ -43,6 +43,7 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
   const [bloodGroup, setBloodGroup] = useState('O+');
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [emergencyContact, setEmergencyContact] = useState('');
   const [existingDiseases, setExistingDiseases] = useState('');
 
@@ -83,7 +84,7 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
     e.preventDefault();
     setError('');
 
-    if (!name.trim() || !age || !dob || !bloodGroup.trim() || !address.trim() || !phone.trim() || !emergencyContact.trim()) {
+    if (!name.trim() || !age || !dob || !bloodGroup.trim() || !address.trim() || !phone.trim() || !email.trim() || !emergencyContact.trim()) {
       setError('Please fill in all personal details.');
       return;
     }
@@ -172,6 +173,7 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
         bloodGroup,
         address,
         phone,
+        email: email.trim(),
         emergencyContact,
         centerAddress,
         coordinatorNumber,
@@ -442,6 +444,20 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                   onChange={(e) => setPhone(e.target.value)}
                   className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
                   placeholder="e.g. +91 99999 99999"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
+                  placeholder="e.g. rahul@example.com"
                   required
                 />
               </div>

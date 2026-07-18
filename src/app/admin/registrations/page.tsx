@@ -27,6 +27,7 @@ export default async function RegistrationsAdminPage() {
       bloodGroup: r.bloodGroup,
       address: r.address,
       phone: r.phone,
+      email: r.email || '',
       emergencyContact: r.emergencyContact,
       centerAddress: r.centerAddress,
       coordinatorNumber: r.coordinatorNumber,

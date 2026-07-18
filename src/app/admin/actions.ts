@@ -8,6 +8,7 @@ import SessionRegistration from '@/models/SessionRegistration';
 import Review from '@/models/Review';
 import bcrypt from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
+import { sendEmail } from '@/lib/mail';
 
 // Seeding function
 export async function seedDatabase() {
@@ -381,6 +382,7 @@ export async function createRegistrationAction(payload: {
   bloodGroup: string;
   address: string;
   phone: string;
+  email: string;
   emergencyContact: string;
   centerAddress: string;
   coordinatorNumber: string;
@@ -392,6 +394,7 @@ export async function createRegistrationAction(payload: {
     paymentMode: 'Cash' | 'UPI' | 'Card' | 'Pending';
     paymentStatus: 'Paid' | 'Outstanding';
     upiScreenshot?: string;
+    transactionId?: string;
   };
 }) {
   try {
@@ -424,6 +427,76 @@ export async function createRegistrationAction(payload: {
     // Increment registered count
     session.registeredCount += 1;
     await session.save();
+
+    // Send confirmation email
+    if (payload.email) {
+      const emailSubject = `Booking Confirmation - ${mrdNumber} | Sahaja Yoga Health Centre`;
+      const emailHtml = `
+<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e5e5; color: #171717;">
+  <div style="text-align: center; border-bottom: 1px solid #e5e5e5; padding-bottom: 20px; margin-bottom: 20px;">
+    <h2 style="font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 5px 0; font-size: 18px;">Sahaja Yoga</h2>
+    <p style="margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #737373;">Research & Health Centre, Hyderabad</p>
+  </div>
+  
+  <p style="font-size: 14px; line-height: 1.5; font-weight: 300;">Dear <strong>${payload.name}</strong>,</p>
+  <p style="font-size: 13px; line-height: 1.6; font-weight: 300; color: #404040;">
+    Your stay booking at the Sahaja Yoga Research & Health Centre has been successfully recorded. Below are your booking confirmation details:
+  </p>
+
+  <div style="background-color: #fafafa; border: 1px solid #e5e5e5; padding: 20px; margin: 20px 0; border-radius: 0px;">
+    <div style="border-bottom: 1px solid #e5e5e5; padding-bottom: 10px; margin-bottom: 15px;">
+      <span style="font-size: 9px; font-weight: bold; text-transform: uppercase; color: #a3a3a3; display: block; letter-spacing: 0.05em;">Patient ID (MRD Number)</span>
+      <span style="font-family: monospace; font-size: 18px; font-weight: bold; color: #171717; letter-spacing: 0.05em; display: block; margin-top: 2px;">${mrdNumber}</span>
+    </div>
+
+    <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
+      <tr style="border-bottom: 1px solid #f5f5f5;">
+        <td style="padding: 6px 0; color: #737373; font-weight: 300;">Stay Date Slot:</td>
+        <td style="padding: 6px 0; font-weight: 600; text-align: right;">${session.title}</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f5f5f5;">
+        <td style="padding: 6px 0; color: #737373; font-weight: 300;">Consulting Time:</td>
+        <td style="padding: 6px 0; font-weight: 600; text-align: right;">${session.time}</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f5f5f5;">
+        <td style="padding: 6px 0; color: #737373; font-weight: 300;">Stay Duration:</td>
+        <td style="padding: 6px 0; font-weight: 600; text-align: right;">${payload.billing?.samarpanAmount ? payload.billing.samarpanAmount / 500 : 1} Day(s)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f5f5f5;">
+        <td style="padding: 6px 0; color: #737373; font-weight: 300;">Samarpan Fee:</td>
+        <td style="padding: 6px 0; font-weight: 600; text-align: right; color: #171717;">₹${payload.billing?.samarpanAmount || 500} (${payload.billing?.paymentMode === 'UPI' ? 'UPI' : 'Pay on Arrival'})</td>
+      </tr>
+      ${payload.billing?.paymentMode === 'UPI' && payload.billing?.transactionId ? `
+      <tr style="border-bottom: 1px solid #f5f5f5;">
+        <td style="padding: 6px 0; color: #737373; font-weight: 300;">UPI Transaction ID:</td>
+        <td style="padding: 6px 0; font-family: monospace; font-weight: 600; text-align: right;">${payload.billing.transactionId}</td>
+      </tr>
+      ` : ''}
+      <tr style="border-bottom: 1px solid #f5f5f5;">
+        <td style="padding: 6px 0; color: #737373; font-weight: 300;">Clinic Center Address:</td>
+        <td style="padding: 6px 0; font-weight: 600; text-align: right;">Nirmal Nagari, Hyderabad</td>
+      </tr>
+      <tr>
+        <td style="padding: 6px 0; color: #737373; font-weight: 300;">Coordinator Contact:</td>
+        <td style="padding: 6px 0; font-weight: 600; text-align: right;">${payload.coordinatorNumber}</td>
+      </tr>
+    </table>
+  </div>
+
+  <div style="border-top: 1px solid #e5e5e5; padding-top: 15px; margin-top: 25px; font-size: 10px; color: #737373; line-height: 1.5; font-weight: 300;">
+    <strong style="color: #404040; display: block; margin-bottom: 3px; font-size: 10px; text-transform: uppercase;">Medical Disclaimer Notice:</strong>
+    The Sahaja Yoga Research & Health Centre provides alternative clearing therapies using physical elements (footsoaking, ice packs) and collective meditation. No modern diagnostic machinery or pharmaceutical medicine is practiced here. Emergency or critical patients are advised not to check in.
+  </div>
+
+  <div style="margin-top: 25px; text-align: center;">
+    <p style="font-size: 11px; color: #a3a3a3; margin: 0;">Please keep this email receipt or note down your MRD number to present at the check-in counter on arrival.</p>
+  </div>
+</div>
+      `;
+      sendEmail(payload.email, emailSubject, emailHtml).catch((err) => {
+        console.error('Failed to send confirmation email receipt:', err);
+      });
+    }
 
     revalidatePath('/');
     revalidatePath('/admin');

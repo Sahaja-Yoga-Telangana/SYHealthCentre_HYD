@@ -10,6 +10,7 @@ export interface ISessionRegistration extends Document {
   bloodGroup: string;
   address: string;
   phone: string;
+  email?: string;
   emergencyContact: string;
   centerAddress: string;
   coordinatorNumber: string;
@@ -55,6 +56,7 @@ const SessionRegistrationSchema = new Schema<ISessionRegistration>(
     bloodGroup: { type: String, required: true },
     address: { type: String, required: true },
     phone: { type: String, required: true },
+    email: { type: String, default: '' },
     emergencyContact: { type: String, required: true },
     centerAddress: { type: String, required: true },
     coordinatorNumber: { type: String, required: true },

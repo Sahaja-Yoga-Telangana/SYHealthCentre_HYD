@@ -20,6 +20,7 @@ interface RegistrationItem {
   bloodGroup: string;
   address: string;
   phone: string;
+  email?: string;
   emergencyContact: string;
   centerAddress: string;
   coordinatorNumber: string;
@@ -956,6 +957,9 @@ export default function RegistrationsClient({ initialRegistrations, sessions }: 
                       <p><strong className="text-neutral-500 font-normal">DOB:</strong> <span className="font-mono text-neutral-600">{new Date(selectedReg.dob).toLocaleDateString()}</span></p>
                       <p><strong className="text-neutral-500 font-normal">Blood Group:</strong> {selectedReg.bloodGroup}</p>
                       <p><strong className="text-neutral-500 font-normal">Phone:</strong> {selectedReg.phone}</p>
+                      {selectedReg.email && (
+                        <p><strong className="text-neutral-500 font-normal">Email:</strong> {selectedReg.email}</p>
+                      )}
                       <p><strong className="text-neutral-500 font-normal">Emergency Contact:</strong> {selectedReg.emergencyContact}</p>
                       <p><strong className="text-neutral-500 font-normal">Address:</strong> {selectedReg.address}</p>
                     </div>
