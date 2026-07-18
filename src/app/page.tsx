@@ -93,7 +93,7 @@ export default async function Home() {
               href="/book" 
               className="text-xs font-semibold px-4 py-2 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
             >
-              REGISTER NOW
+              BOOK NOW
             </Link>
           </div>
         </div>
@@ -137,7 +137,7 @@ export default async function Home() {
                 href="/book"
                 className="inline-block text-sm font-medium tracking-wider px-8 py-3 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
               >
-                REGISTER FOR AN UPCOMING SESSION
+                BOOK AN APPOINTMENT
               </Link>
             </div>
           </div>

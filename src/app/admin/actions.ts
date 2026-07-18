@@ -387,6 +387,12 @@ export async function createRegistrationAction(payload: {
   familyLinkage?: string;
   existingDiseases?: string;
   disclaimerAccepted: boolean;
+  billing?: {
+    samarpanAmount: number;
+    paymentMode: 'Cash' | 'UPI' | 'Card' | 'Pending';
+    paymentStatus: 'Paid' | 'Outstanding';
+    upiScreenshot?: string;
+  };
 }) {
   try {
     await dbConnect();
@@ -588,6 +594,7 @@ export async function checkInYogiAction(
       samarpanAmount: data.samarpanAmount,
       paymentMode: data.paymentMode,
       paymentStatus: data.paymentStatus,
+      upiScreenshot: reg.billing?.upiScreenshot || '',
     };
     reg.consultation = {
       chiefComplaint: '',
@@ -618,6 +625,36 @@ export async function collectPaymentAction(id: string) {
       await reg.save();
     }
     
+    revalidatePath('/admin');
+    revalidatePath('/admin/registrations');
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function updateBillingAction(
+  id: string,
+  data: {
+    samarpanAmount: number;
+    paymentMode: 'Cash' | 'UPI' | 'Card' | 'Pending';
+    paymentStatus: 'Paid' | 'Outstanding';
+    upiScreenshot?: string;
+  }
+) {
+  try {
+    await dbConnect();
+    const reg = await SessionRegistration.findById(id);
+    if (!reg) throw new Error('Registration not found');
+
+    reg.billing = {
+      samarpanAmount: data.samarpanAmount,
+      paymentMode: data.paymentMode,
+      paymentStatus: data.paymentStatus,
+      upiScreenshot: data.upiScreenshot !== undefined ? data.upiScreenshot : reg.billing?.upiScreenshot || '',
+    };
+
+    await reg.save();
     revalidatePath('/admin');
     revalidatePath('/admin/registrations');
     return { success: true };

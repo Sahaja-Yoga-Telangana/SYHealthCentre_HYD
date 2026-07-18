@@ -46,6 +46,7 @@ export default async function RegistrationsAdminPage() {
         samarpanAmount: r.billing.samarpanAmount || 0,
         paymentMode: r.billing.paymentMode || 'Pending',
         paymentStatus: r.billing.paymentStatus || 'Outstanding',
+        upiScreenshot: r.billing.upiScreenshot || '',
       } : undefined
     }));
 

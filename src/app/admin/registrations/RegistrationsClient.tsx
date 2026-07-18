@@ -6,7 +6,8 @@ import {
   cancelRegistrationAction, 
   checkInYogiAction, 
   collectPaymentAction,
-  createWalkInRegistrationAction
+  createWalkInRegistrationAction,
+  updateBillingAction
 } from '../actions';
 
 interface RegistrationItem {
@@ -38,6 +39,7 @@ interface RegistrationItem {
     samarpanAmount: number;
     paymentMode: 'Cash' | 'UPI' | 'Card' | 'Pending';
     paymentStatus: 'Paid' | 'Outstanding';
+    upiScreenshot?: string;
   };
 }
 
@@ -52,6 +54,98 @@ export default function RegistrationsClient({ initialRegistrations, sessions }: 
   const [filterSession, setFilterSession] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedReg, setSelectedReg] = useState<RegistrationItem | null>(null);
+  
+  // Edit Billing Form State
+  const [isEditingBilling, setIsEditingBilling] = useState(false);
+  const [editSamarpanAmount, setEditSamarpanAmount] = useState(500);
+  const [editPaymentMode, setEditPaymentMode] = useState<'Cash' | 'UPI' | 'Card' | 'Pending'>('UPI');
+  const [editPaymentStatus, setEditPaymentStatus] = useState<'Paid' | 'Outstanding'>('Paid');
+  const [uploadingScreenshot, setUploadingScreenshot] = useState(false);
+
+  const handleDetailScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedReg) return;
+
+    setUploadingScreenshot(true);
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'df6iivqm6';
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'sahaja_events_unsigned';
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', uploadPreset);
+    formData.append('folder', 'sy-healthcentre-upi');
+
+    try {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.secure_url) {
+        startTransition(async () => {
+          const billingPayload = {
+            samarpanAmount: selectedReg.billing?.samarpanAmount || 500,
+            paymentMode: selectedReg.billing?.paymentMode || 'UPI',
+            paymentStatus: selectedReg.billing?.paymentStatus || 'Outstanding',
+            upiScreenshot: data.secure_url,
+          };
+
+          const updateRes = await updateBillingAction(selectedReg.id, billingPayload);
+          if (updateRes.success) {
+            setRegistrations((prev) =>
+              prev.map((r) =>
+                r.id === selectedReg.id
+                  ? { ...r, billing: { ...r.billing!, upiScreenshot: data.secure_url } }
+                  : r
+              )
+            );
+            setSelectedReg((prev) =>
+              prev ? { ...prev, billing: { ...prev.billing!, upiScreenshot: data.secure_url } } : null
+            );
+          } else {
+            alert(updateRes.error || 'Failed to update database with screenshot.');
+          }
+        });
+      } else {
+        alert('Transaction screenshot upload failed.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Network error while uploading transaction receipt.');
+    } finally {
+      setUploadingScreenshot(false);
+    }
+  };
+
+  const handleSaveBillingEdit = () => {
+    if (!selectedReg) return;
+
+    startTransition(async () => {
+      const billingPayload = {
+        samarpanAmount: Number(editSamarpanAmount),
+        paymentMode: editPaymentMode,
+        paymentStatus: editPaymentStatus,
+        upiScreenshot: selectedReg.billing?.upiScreenshot || '',
+      };
+
+      const res = await updateBillingAction(selectedReg.id, billingPayload);
+      if (res.success) {
+        setRegistrations((prev) =>
+          prev.map((r) =>
+            r.id === selectedReg.id
+              ? { ...r, billing: billingPayload }
+              : r
+          )
+        );
+        setSelectedReg((prev) =>
+          prev ? { ...prev, billing: billingPayload } : null
+        );
+        setIsEditingBilling(false);
+      } else {
+        alert(res.error || 'Failed to update billing configurations.');
+      }
+    });
+  };
   
   // Check-In Form State
   const [showCheckInForm, setShowCheckInForm] = useState(false);
@@ -682,24 +776,154 @@ export default function RegistrationsClient({ initialRegistrations, sessions }: 
 
                     {/* Billing Summary */}
                     {selectedReg.billing && (
-                      <div className="border border-neutral-200 p-3 bg-neutral-50 space-y-1.5">
-                        <div className="flex justify-between items-center text-[10px] uppercase tracking-wider text-neutral-500 border-b border-neutral-100 pb-1">
-                          <strong>Billing / Samarpan</strong>
-                          <span className={selectedReg.billing.paymentStatus === 'Outstanding' ? 'text-red-500 font-bold font-mono' : 'text-green-600 font-bold'}>
+                      <div className="border border-neutral-200 p-4 bg-neutral-50 space-y-3">
+                        <div className="flex justify-between items-center text-[10px] uppercase tracking-wider text-neutral-500 border-b border-neutral-200 pb-1.5">
+                          <strong>Stay Billing Details</strong>
+                          <span className={`inline-block px-1.5 py-0.5 border text-[8px] font-bold tracking-wider uppercase ${
+                            selectedReg.billing.paymentStatus === 'Outstanding'
+                              ? 'border-red-200 bg-red-50 text-red-600 animate-pulse'
+                              : 'border-green-200 bg-green-50 text-green-600'
+                          }`}>
                             {selectedReg.billing.paymentStatus}
                           </span>
                         </div>
-                        <p><strong className="text-neutral-500 font-normal">Samarpan Fee:</strong> ₹{selectedReg.billing.samarpanAmount}</p>
-                        <p><strong className="text-neutral-500 font-normal">Payment Method:</strong> {selectedReg.billing.paymentMode}</p>
-                        
-                        {selectedReg.billing.paymentStatus === 'Outstanding' && (
-                          <button
-                            onClick={() => handleCollectPayment(selectedReg.id)}
-                            disabled={isPending}
-                            className="w-full text-[9px] font-bold py-1.5 border border-neutral-900 bg-neutral-900 text-white hover:bg-neutral-800 tracking-wider uppercase mt-2"
-                          >
-                            Collect Samarpan Payment ✓
-                          </button>
+
+                        {isEditingBilling ? (
+                          <div className="space-y-3 text-xs">
+                            <div>
+                              <label className="block text-[8px] uppercase tracking-wider text-neutral-400 font-semibold mb-1">
+                                Samarpan Amount (₹)
+                              </label>
+                              <input
+                                type="number"
+                                value={editSamarpanAmount}
+                                onChange={(e) => setEditSamarpanAmount(Number(e.target.value))}
+                                className="w-full text-xs p-1 border border-neutral-200 focus:outline-none bg-white font-mono"
+                                min={0}
+                              />
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="block text-[8px] uppercase tracking-wider text-neutral-400 font-semibold mb-1">
+                                  Mode
+                                </label>
+                                <select
+                                  value={editPaymentMode}
+                                  onChange={(e) => setEditPaymentMode(e.target.value as any)}
+                                  className="w-full text-xs p-1 border border-neutral-200 focus:outline-none bg-white"
+                                >
+                                  <option value="Cash">Cash</option>
+                                  <option value="UPI">UPI</option>
+                                  <option value="Card">Card</option>
+                                  <option value="Pending">Pending</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-[8px] uppercase tracking-wider text-neutral-400 font-semibold mb-1">
+                                  Status
+                                </label>
+                                <select
+                                  value={editPaymentStatus}
+                                  onChange={(e) => setEditPaymentStatus(e.target.value as any)}
+                                  className="w-full text-xs p-1 border border-neutral-200 focus:outline-none bg-white"
+                                >
+                                  <option value="Paid">Paid</option>
+                                  <option value="Outstanding">Outstanding</option>
+                                </select>
+                              </div>
+                            </div>
+
+                            <div className="pt-1 flex space-x-2">
+                              <button
+                                type="button"
+                                onClick={handleSaveBillingEdit}
+                                disabled={isPending || uploadingScreenshot}
+                                className="flex-1 text-[9px] font-bold py-1.5 bg-neutral-900 text-white hover:bg-neutral-800 tracking-wider uppercase"
+                              >
+                                Save Changes
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setIsEditingBilling(false)}
+                                className="text-[9px] font-semibold border border-neutral-200 px-3 py-1.5 hover:bg-white"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-2 text-xs">
+                            <p><strong className="text-neutral-500 font-normal">Samarpan Fee:</strong> ₹{selectedReg.billing.samarpanAmount}</p>
+                            <p><strong className="text-neutral-500 font-normal">Payment Method:</strong> {selectedReg.billing.paymentMode}</p>
+                            
+                            {/* UPI Transaction Screenshot Container */}
+                            {selectedReg.billing.upiScreenshot && (
+                              <div className="space-y-1.5 pt-1.5 border-t border-neutral-200">
+                                <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold block">UPI Transaction Receipt</span>
+                                <a 
+                                  href={selectedReg.billing.upiScreenshot} 
+                                  target="_blank" 
+                                  rel="noreferrer" 
+                                  className="block relative aspect-video border bg-neutral-50 overflow-hidden group hover:border-neutral-900 transition-all"
+                                >
+                                  <img 
+                                    src={selectedReg.billing.upiScreenshot} 
+                                    alt="UPI Payment screenshot" 
+                                    className="object-cover w-full h-full" 
+                                  />
+                                  <div className="absolute inset-0 bg-neutral-950/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] text-white font-semibold uppercase tracking-wider transition-opacity animate-fade-in">
+                                    Open Receipt ↗
+                                  </div>
+                                </a>
+                              </div>
+                            )}
+
+                            {/* Option to Upload/Change Screenshot for UPI */}
+                            {selectedReg.billing.paymentMode === 'UPI' && (
+                              <div className="space-y-1.5 pt-1.5 border-t border-neutral-200">
+                                <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold block">
+                                  {selectedReg.billing.upiScreenshot ? 'Change UPI Screenshot' : 'Upload UPI Screenshot'}
+                                </span>
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleDetailScreenshotUpload}
+                                    disabled={uploadingScreenshot || isPending}
+                                    className="text-[9px] file:mr-2 file:py-1 file:px-2 file:border file:border-neutral-200 file:bg-white hover:file:border-neutral-900 file:text-[8px] file:font-semibold file:uppercase cursor-pointer w-full"
+                                  />
+                                </div>
+                                {uploadingScreenshot && (
+                                  <p className="text-[8px] font-mono text-neutral-400 animate-pulse">Uploading screenshot to Cloudinary...</p>
+                                )}
+                              </div>
+                            )}
+
+                            <div className="pt-2 flex space-x-2">
+                              {selectedReg.billing.paymentStatus === 'Outstanding' && (
+                                <button
+                                  onClick={() => handleCollectPayment(selectedReg.id)}
+                                  disabled={isPending}
+                                  className="flex-1 text-[9px] font-bold py-1.5 border border-neutral-900 bg-neutral-900 text-white hover:bg-neutral-800 tracking-wider uppercase"
+                                >
+                                  Mark as Paid ✓
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditSamarpanAmount(selectedReg.billing?.samarpanAmount || 500);
+                                  setEditPaymentMode(selectedReg.billing?.paymentMode || 'UPI');
+                                  setEditPaymentStatus(selectedReg.billing?.paymentStatus || 'Outstanding');
+                                  setIsEditingBilling(true);
+                                }}
+                                className="text-[9px] font-semibold border border-neutral-300 px-3 py-1.5 hover:bg-white"
+                              >
+                                Edit Billing
+                              </button>
+                            </div>
+                          </div>
                         )}
                       </div>
                     )}

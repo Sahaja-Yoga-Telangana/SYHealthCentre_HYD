@@ -27,6 +27,7 @@ export interface ISessionRegistration extends Document {
     samarpanAmount: number;
     paymentMode: 'Cash' | 'UPI' | 'Card' | 'Pending';
     paymentStatus: 'Paid' | 'Outstanding';
+    upiScreenshot?: string;
   };
 
   // Doctor Consultation details
@@ -69,6 +70,7 @@ const SessionRegistrationSchema = new Schema<ISessionRegistration>(
       samarpanAmount: { type: Number, default: 0 },
       paymentMode: { type: String, enum: ['Cash', 'UPI', 'Card', 'Pending'], default: 'Pending' },
       paymentStatus: { type: String, enum: ['Paid', 'Outstanding'], default: 'Outstanding' },
+      upiScreenshot: { type: String, default: '' },
     },
 
     consultation: {

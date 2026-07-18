@@ -45,12 +45,18 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
   const [phone, setPhone] = useState('');
   const [emergencyContact, setEmergencyContact] = useState('');
 
-  // Form States - Step 3: Verification & Additional Details
+  // Form States - Step 3: Stay & Billing details
   const [centerAddress, setCenterAddress] = useState('');
   const [coordinatorNumber, setCoordinatorNumber] = useState('');
   const [familyLinkage, setFamilyLinkage] = useState('');
   const [existingDiseases, setExistingDiseases] = useState('');
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
+
+  // Samarpan Payment options
+  const [stayDays, setStayDays] = useState('1');
+  const [paymentMode, setPaymentMode] = useState<'Pending' | 'UPI'>('Pending');
+  const [upiScreenshot, setUpiScreenshot] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   const selectedSession = sessions.find((s) => s.id === selectedSessionId);
 
@@ -59,13 +65,13 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
     setError('');
 
     if (!selectedSessionId) {
-      setError('Please select a session to attend.');
+      setError('Please select a stay slot to attend.');
       return;
     }
 
     const session = sessions.find(s => s.id === selectedSessionId);
     if (session && session.registeredCount >= session.maxParticipants) {
-      setError('This session is already fully booked. Please select another session.');
+      setError('This stay date is already fully booked. Please select another date.');
       return;
     }
 
@@ -90,6 +96,40 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
     setStep(3);
   };
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setError('');
+    setUploading(true);
+
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'df6iivqm6';
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'sahaja_events_unsigned';
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', uploadPreset);
+    formData.append('folder', 'sy-healthcentre-upi');
+
+    try {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.secure_url) {
+        setUpiScreenshot(data.secure_url);
+      } else {
+        setError('Transaction screenshot upload failed. Please try again.');
+      }
+    } catch (err) {
+      console.error('Screenshot upload error:', err);
+      setError('Connection error. Failed to upload transaction screenshot.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -99,12 +139,24 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
       return;
     }
 
+    const parsedDays = parseInt(stayDays, 10);
+    if (isNaN(parsedDays) || parsedDays <= 0) {
+      setError('Please enter a valid stay duration.');
+      return;
+    }
+
+    if (paymentMode === 'UPI' && !upiScreenshot) {
+      setError('Please upload your UPI payment screenshot to complete the booking.');
+      return;
+    }
+
     if (!disclaimerAccepted) {
-      setError('You must accept the medical disclaimer to register.');
+      setError('You must accept the medical disclaimer to book a stay.');
       return;
     }
 
     startTransition(async () => {
+      const computedAmount = parsedDays * 500;
       const payload = {
         sessionId: selectedSessionId,
         name,
@@ -120,6 +172,12 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
         familyLinkage: familyLinkage.trim() || undefined,
         existingDiseases: existingDiseases.trim() || undefined,
         disclaimerAccepted,
+        billing: {
+          samarpanAmount: computedAmount,
+          paymentMode: paymentMode,
+          paymentStatus: 'Outstanding' as const, // Awaiting admin desk check-in / screenshot verification
+          upiScreenshot: paymentMode === 'UPI' ? upiScreenshot : '',
+        }
       };
 
       const res = await createRegistrationAction(payload);
@@ -128,7 +186,7 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
         setSuccess(true);
         setStep(4);
       } else {
-        setError(res.error || 'Registration failed. Please try again.');
+        setError(res.error || 'Stay booking failed. Please try again.');
       }
     });
   };
@@ -140,9 +198,9 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
           ✓
         </div>
         <div className="space-y-2">
-          <h2 className="text-xl font-light tracking-wide uppercase">Registration Confirmed</h2>
+          <h2 className="text-xl font-light tracking-wide uppercase">Booking Confirmed</h2>
           <p className="text-xs text-neutral-400 font-mono">
-            Thank you! Your seeker registration is successful.
+            Thank you! Your stay booking is successful.
           </p>
         </div>
 
@@ -156,19 +214,25 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
 
           <div className="text-xs space-y-2 text-neutral-600 font-light">
             <p>
-              <strong className="font-semibold text-neutral-800">Session:</strong> {selectedSession?.title}
+              <strong className="font-semibold text-neutral-800">Stay Slot:</strong> {selectedSession?.title}
             </p>
             <p>
-              <strong className="font-semibold text-neutral-800">Time:</strong> {selectedSession?.time}
+              <strong className="font-semibold text-neutral-800">Consulting Time:</strong> {selectedSession?.time}
             </p>
             <p>
-              <strong className="font-semibold text-neutral-800">Seeker:</strong> {name}
+              <strong className="font-semibold text-neutral-800">Yogi Seeker:</strong> {name}
+            </p>
+            <p>
+              <strong className="font-semibold text-neutral-800">Duration:</strong> {stayDays} Day(s) of Stay
+            </p>
+            <p>
+              <strong className="font-semibold text-neutral-800">Samarpan Fee:</strong> ₹{parseInt(stayDays, 10) * 500} &bull; <span className="uppercase font-semibold text-neutral-900">{paymentMode === 'UPI' ? 'UPI (Awaiting Verification)' : 'Pay on Arrival'}</span>
             </p>
           </div>
         </div>
 
         <p className="text-[10px] text-neutral-400 max-w-sm mx-auto leading-relaxed">
-          Please keep this MRD number safe. You will need to show it at the center check-in counter upon arrival.
+          Please keep this Patient ID safe. You will need to present it at the check-in counter upon arrival to receive your Doctor token.
         </p>
 
         <div className="pt-4 flex justify-center space-x-4">
@@ -182,7 +246,7 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
             href="/"
             className="text-[10px] font-semibold tracking-wider bg-neutral-900 text-white px-6 py-2.5 hover:bg-neutral-800 transition-colors"
           >
-            BACK TO HOME
+            BACK TO PORTAL
           </Link>
         </div>
       </div>
@@ -194,13 +258,13 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
       {/* Step Indicators */}
       <div className="grid grid-cols-3 border-b border-neutral-200 text-[10px] font-semibold uppercase tracking-wider text-center bg-neutral-50 select-none">
         <div className={`p-4 border-r border-neutral-200 ${step === 1 ? 'bg-white text-neutral-950 font-bold' : 'text-neutral-400'}`}>
-          1. Session Select
+          1. Select Stay Date
         </div>
         <div className={`p-4 border-r border-neutral-200 ${step === 2 ? 'bg-white text-neutral-950 font-bold' : 'text-neutral-400'}`}>
           2. Personal Details
         </div>
         <div className={`p-4 ${step === 3 ? 'bg-white text-neutral-950 font-bold' : 'text-neutral-400'}`}>
-          3. Verification
+          3. Stay Info & Payment
         </div>
       </div>
 
@@ -211,16 +275,16 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
           </div>
         )}
 
-        {/* STEP 1: Select Session */}
+        {/* STEP 1: Select Stay Slot */}
         {step === 1 && (
           <form onSubmit={handleNextStep1} className="space-y-6">
             <div>
               <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-2">
-                Choose Upcoming Session
+                Choose Stay Date Slot
               </label>
               {sessions.length === 0 ? (
                 <div className="p-4 border border-dashed text-center text-xs text-neutral-400 font-mono bg-neutral-50">
-                  No upcoming sessions available.
+                  No upcoming stay dates scheduled.
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -244,7 +308,7 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                         <div className="space-y-1">
                           <h4 className="text-xs font-bold text-neutral-900">{session.title}</h4>
                           <p className="text-[10px] text-neutral-500 font-light font-mono">
-                            {new Date(session.date).toLocaleDateString()} &bull; {session.time} &bull; {session.instructor}
+                            Date: {new Date(session.date).toLocaleDateString()} &bull; Time: {session.time} &bull; Doctor: {session.instructor}
                           </p>
                         </div>
                         <div className="text-right">
@@ -411,16 +475,41 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                 type="submit"
                 className="text-[10px] font-semibold tracking-wider bg-neutral-900 text-white px-6 py-2.5 hover:bg-neutral-800 transition-colors"
               >
-                CONTINUE TO VERIFICATION →
+                CONTINUE TO STAY INFO →
               </button>
             </div>
           </form>
         )}
 
-        {/* STEP 3: Verification & Additional Details */}
+        {/* STEP 3: Verification & Stay Info / Billing */}
         {step === 3 && (
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              {/* Stay Duration */}
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
+                  Stay Duration (Days)
+                </label>
+                <input
+                  type="number"
+                  value={stayDays}
+                  onChange={(e) => setStayDays(e.target.value)}
+                  min={1}
+                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50 font-semibold text-neutral-900"
+                  required
+                />
+              </div>
+
+              {/* Total Fee Indicator */}
+              <div className="flex flex-col justify-end bg-neutral-50 p-2 border border-neutral-200 text-center">
+                <span className="text-[8px] uppercase tracking-wider text-neutral-400 font-bold block">Total Samarpan Fee</span>
+                <span className="text-xl font-bold font-mono text-neutral-900 mt-1">
+                  ₹{parseInt(stayDays, 10) ? parseInt(stayDays, 10) * 500 : 0}
+                </span>
+                <span className="text-[9px] text-neutral-400 block font-light mt-0.5">Based on ₹500/day daily rate</span>
+              </div>
+
               <div>
                 <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
                   Center Address (Verification)
@@ -447,6 +536,72 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                   placeholder="e.g. +91 95555 12345"
                   required
                 />
+              </div>
+
+              {/* Samarpan Payment selector */}
+              <div className="md:col-span-2 border border-neutral-200 p-4 bg-neutral-50 space-y-4">
+                <div className="border-b pb-2 flex justify-between items-center">
+                  <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-800">
+                    Samarpan (Fee) Payment Method
+                  </h4>
+                  <select
+                    value={paymentMode}
+                    onChange={(e) => setPaymentMode(e.target.value as 'Pending' | 'UPI')}
+                    className="text-xs p-1 px-2 border border-neutral-300 bg-white focus:outline-none"
+                  >
+                    <option value="Pending">Pay on Arrival Check-in</option>
+                    <option value="UPI">Pay Now via UPI (GPay/PhonePe)</option>
+                  </select>
+                </div>
+
+                {paymentMode === 'UPI' && (
+                  <div className="space-y-4 pt-1">
+                    <div className="flex flex-col md:flex-row gap-4 items-center bg-white p-3 border border-neutral-200">
+                      {/* Styled mock QR Code scanner frame */}
+                      <div className="w-24 h-24 border-2 border-neutral-900 flex flex-col justify-center items-center shrink-0 relative p-1 bg-neutral-50">
+                        <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-neutral-900"></div>
+                        <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-neutral-900"></div>
+                        <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-neutral-900"></div>
+                        <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-neutral-900"></div>
+                        <span className="text-[7px] text-center font-bold tracking-wider text-neutral-800">UPI PAYMENT</span>
+                        <div className="w-10 h-10 border border-dashed border-neutral-400 mt-1 flex items-center justify-center bg-white font-mono text-[8px] text-neutral-400">QR</div>
+                      </div>
+                      
+                      <div className="space-y-1.5 flex-1">
+                        <p className="text-xs font-semibold text-neutral-900">UPI ID: <span className="font-mono text-neutral-600 bg-neutral-100 px-1 py-0.5 border">syhealthcentre@upi</span></p>
+                        <p className="text-[10px] text-neutral-500 leading-relaxed font-light">
+                          Please scan the QR or pay to the UPI ID above. Enter amount: <strong>₹{parseInt(stayDays, 10) * 500}</strong>. After successful payment, take a screenshot and upload it below.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold">
+                        Upload Payment Screenshot
+                      </label>
+                      <div className="flex items-center space-x-3">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                          disabled={uploading || isPending}
+                          className="text-xs file:mr-4 file:py-1.5 file:px-3 file:border file:border-neutral-200 file:bg-white hover:file:border-neutral-900 file:text-[10px] file:font-semibold file:uppercase file:tracking-wider cursor-pointer"
+                        />
+                        {uploading && (
+                          <span className="text-[10px] text-neutral-500 font-mono animate-pulse">Uploading to Cloudinary...</span>
+                        )}
+                        {!uploading && upiScreenshot && (
+                          <span className="text-[10px] text-green-600 font-bold">✓ Screenshot Staged</span>
+                        )}
+                      </div>
+                      {upiScreenshot && (
+                        <div className="mt-2 relative w-32 aspect-video border bg-neutral-100 overflow-hidden">
+                          <img src={upiScreenshot} alt="UPI receipt preview" className="object-cover w-full h-full" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="md:col-span-2">
@@ -491,7 +646,7 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                     id="disclaimer"
                     checked={disclaimerAccepted}
                     onChange={(e) => setDisclaimerAccepted(e.target.checked)}
-                    disabled={isPending}
+                    disabled={isPending || uploading}
                     className="mt-0.5 border-neutral-300 focus:ring-neutral-900"
                     required
                   />
@@ -506,17 +661,17 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                disabled={isPending}
+                disabled={isPending || uploading}
                 className="text-[10px] font-semibold tracking-wider border border-neutral-200 px-6 py-2.5 hover:border-neutral-900 transition-colors"
               >
                 ← BACK
               </button>
               <button
                 type="submit"
-                disabled={isPending}
+                disabled={isPending || uploading}
                 className="text-[10px] font-bold tracking-wider bg-neutral-900 text-white px-6 py-2.5 hover:bg-neutral-800 transition-colors disabled:bg-neutral-300"
               >
-                {isPending ? 'REGISTERING...' : 'CONFIRM & REGISTER ✓'}
+                {isPending ? 'BOOKING...' : 'CONFIRM & BOOK ✓'}
               </button>
             </div>
           </form>

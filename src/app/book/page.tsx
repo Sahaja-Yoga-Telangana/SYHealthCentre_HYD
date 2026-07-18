@@ -62,7 +62,7 @@ export default async function BookingPage({
             </span>
           </Link>
           <span className="text-[10px] bg-white border border-neutral-200 px-3 py-1 font-mono text-neutral-500 uppercase">
-            Seeker Registration System
+            Stay Booking & Appointment
           </span>
         </div>
 
@@ -85,12 +85,12 @@ export default async function BookingPage({
               />
             </div>
             <div className="p-6 space-y-3">
-              <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">Yogi Registration Flow</p>
+              <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">Yogi Stay Booking</p>
               <h1 className="text-xl font-light tracking-wide text-neutral-900">
-                Register for Collective Sessions
+                Book Stay at Health Centre
               </h1>
               <p className="text-sm text-neutral-600 leading-relaxed">
-                Guided by the serene atmosphere of the Hyderabad centre, this registration flow captures your seeker details, center affiliation, and signs you up for upcoming collective meditation and clearing sessions.
+                Guided by the serene atmosphere of the Hyderabad centre, this booking system captures your stay details, center affiliation, and books your stay for upcoming collective meditation and clearing periods.
               </p>
             </div>
           </div>
