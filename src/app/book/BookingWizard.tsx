@@ -13,6 +13,7 @@ interface SessionItem {
   instructor: string;
   maxParticipants: number;
   registeredCount: number;
+  stayAvailable?: boolean;
   isActive?: boolean;
 }
 
@@ -442,158 +443,139 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
           </div>
         )}
 
-        {/* STEP 1: Select Stay Date Range */}
+        {/* STEP 1: Select Available Session */}
         {step === 1 && (
-          <form onSubmit={handleNextStep1} className="space-y-6">
-            <div className="space-y-4">
-              <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-2">
-                Select Stay Dates
-              </label>
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-sm font-semibold tracking-wider uppercase text-neutral-900 mb-1">
+                Select Available Health Session
+              </h3>
+              <p className="text-xs text-neutral-500 font-light leading-relaxed">
+                Choose a doctor consultation / health session below. Each session shows doctor details, time slot, remaining seats, and stay accommodation availability.
+              </p>
+            </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="border border-neutral-200 bg-neutral-50 p-4">
-                  <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold block mb-2">Check-In</span>
-                  <input
-                    type="date"
-                    value={checkInDate}
-                    onChange={(event) => {
-                      const nextDate = event.target.value;
-                      const session = sessions.find((s) => s.date && toDateInputValue(new Date(s.date)) === nextDate);
-                      setCheckInDate(nextDate);
-                      setSelectedSessionId(session?.id || '');
-                      if (checkOutDate && checkOutDate <= nextDate) {
-                        setCheckOutDate('');
-                      }
-                    }}
-                    className="w-full text-sm p-3 border border-neutral-200 bg-white focus:border-neutral-900 focus:outline-none font-mono"
-                    required
-                  />
-                </div>
-                <div className="border border-neutral-200 bg-neutral-50 p-4">
-                  <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold block mb-2">Check-Out</span>
-                  <input
-                    type="date"
-                    value={checkOutDate}
-                    onChange={(event) => setCheckOutDate(event.target.value)}
-                    className="w-full text-sm p-3 border border-neutral-200 bg-white focus:border-neutral-900 focus:outline-none font-mono"
-                    required
-                  />
-                </div>
+            {sessions.length === 0 ? (
+              <div className="p-8 border border-dashed border-neutral-200 text-center text-xs text-neutral-400 font-mono">
+                No active sessions currently scheduled. Please check back soon or contact the health centre desk.
               </div>
+            ) : (
+              <div className="space-y-4">
+                {sessions.map((session) => {
+                  const remainingSeats = Math.max(0, session.maxParticipants - session.registeredCount);
+                  const isFull = remainingSeats === 0;
+                  const isSelected = selectedSessionId === session.id;
 
-              {/* Monthly calendar view for date selection */}
-              <div className="border border-neutral-200 bg-white p-4 space-y-4">
-                <div className="flex justify-between items-center border-b border-neutral-100 pb-3">
-                  <h3 className="text-xs font-bold text-neutral-900 tracking-widest uppercase">
-                    {MONTH_NAMES[month]} {year}
-                  </h3>
-                  <div className="flex space-x-1">
-                    <button
-                      type="button"
-                      onClick={handlePrevMonth}
-                      className="p-1.5 border border-neutral-200 hover:border-neutral-900 text-xs font-semibold"
+                  return (
+                    <div
+                      key={session.id}
+                      onClick={() => {
+                        if (isFull) return;
+                        setSelectedSessionId(session.id);
+                        if (session.date) {
+                          setCheckInDate(toDateInputValue(new Date(session.date)));
+                        }
+                      }}
+                      className={`border p-5 transition-all flex flex-col md:flex-row justify-between items-start md:items-center gap-4 cursor-pointer ${
+                        isSelected
+                          ? 'border-neutral-950 bg-neutral-50/80 shadow-sm'
+                          : isFull
+                            ? 'border-neutral-200 bg-neutral-50/40 opacity-60 cursor-not-allowed'
+                            : 'border-neutral-200 hover:border-neutral-400 bg-white'
+                      }`}
                     >
-                      ←
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleNextMonth}
-                      className="p-1.5 border border-neutral-200 hover:border-neutral-900 text-xs font-semibold"
-                    >
-                      →
-                    </button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-7 border-t border-l border-neutral-200 text-neutral-600 text-center select-none text-[10px]">
-                  {/* Day Headers */}
-                  {DAYS_OF_WEEK.map((day) => (
-                    <div key={day} className="p-2.5 border-b border-r border-neutral-200 font-bold bg-neutral-50 text-neutral-400">
-                      {day}
-                    </div>
-                  ))}
-
-                  {/* Empty offsets */}
-                  {Array.from({ length: startDayIndex }).map((_, index) => (
-                    <div key={`empty-${index}`} className="p-2.5 border-b border-r border-neutral-100 bg-neutral-50/10 min-h-[50px]" />
-                  ))}
-
-                  {/* Active and Selectable Days */}
-                  {Array.from({ length: totalDays }).map((_, index) => {
-                    const dayNum = index + 1;
-                    const dateValue = toDateInputValue(new Date(year, month, dayNum));
-                    const daySession = getSessionForDay(dayNum);
-                    const isCheckIn = checkInDate === dateValue;
-                    const isCheckOut = checkOutDate === dateValue;
-                    const isInRange = Boolean(checkInDate && checkOutDate && dateValue > checkInDate && dateValue < checkOutDate);
-                    const spotsLeft = daySession ? Math.max(0, daySession.maxParticipants - daySession.registeredCount) : null;
-                    const isFull = daySession ? spotsLeft === 0 : false;
-
-                    if (isFull) {
-                      return (
-                        <div
-                          key={`day-${dayNum}`}
-                          className="p-1 border-b border-r border-neutral-200 text-red-400 min-h-[50px] flex flex-col justify-between items-center cursor-not-allowed bg-red-50/30 opacity-70"
-                        >
-                          <span className="font-bold">{dayNum}</span>
-                          <span className="text-[7px] font-bold tracking-wider">FULL</span>
+                      <div className="space-y-2 flex-1">
+                        <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+                          <h4 className="text-sm font-bold text-neutral-950">{session.title}</h4>
+                          <span
+                            className={`inline-block px-2 py-0.5 border text-[9px] font-bold tracking-wider uppercase ${
+                              session.stayAvailable !== false
+                                ? 'border-emerald-700 bg-emerald-50 text-emerald-800'
+                                : 'border-amber-700 bg-amber-50 text-amber-800'
+                            }`}
+                          >
+                            {session.stayAvailable !== false ? 'STAY AVAILABLE: YES' : 'DAY VISIT ONLY (NO STAY)'}
+                          </span>
                         </div>
-                      );
-                    }
 
-                    return (
-                      <button
-                        key={`day-${dayNum}`}
-                        type="button"
-                        onClick={() => selectCalendarDay(dayNum)}
-                        className={`p-1 border-b border-r border-neutral-200 min-h-[50px] flex flex-col justify-between items-center cursor-pointer transition-colors hover:bg-neutral-50 ${
-                          isCheckIn || isCheckOut
-                            ? 'bg-neutral-900 text-white hover:bg-neutral-900 border-2 border-double border-neutral-950 font-bold'
-                            : isInRange
-                              ? 'bg-neutral-100 text-neutral-950 font-bold'
-                              : daySession
-                                ? 'bg-white text-neutral-950 font-bold border-l-2 border-l-neutral-900'
-                                : 'bg-white text-neutral-700 font-semibold'
-                        }`}
-                      >
-                        <span className="text-xs">{dayNum}</span>
-                        <span className={`text-[6px] tracking-wider font-bold block ${isCheckIn || isCheckOut ? 'text-white' : 'text-neutral-500'}`}>
-                          {isCheckIn ? 'IN' : isCheckOut ? 'OUT' : spotsLeft !== null ? `${spotsLeft} LEFT` : 'OPEN'}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
+                        <p className="text-xs text-neutral-600 font-light leading-relaxed">
+                          {session.description}
+                        </p>
+
+                        <div className="text-[11px] font-mono text-neutral-600 flex flex-wrap gap-x-4 gap-y-1 pt-1">
+                          <span>Doctor / Specialist: <strong className="text-neutral-900">{session.instructor}</strong></span>
+                          <span>Date: <strong className="text-neutral-900">{new Date(session.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</strong></span>
+                          <span>Time: <strong className="text-neutral-900">{session.time}</strong></span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col items-end shrink-0 w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0 border-neutral-100">
+                        <div className="text-right mb-2">
+                          <span
+                            className={`text-xs font-mono font-bold block ${
+                              isFull ? 'text-red-500' : remainingSeats < 10 ? 'text-amber-600' : 'text-emerald-700'
+                            }`}
+                          >
+                            {isFull ? 'FULLY BOOKED' : `${remainingSeats} SEATS LEFT`}
+                          </span>
+                          <span className="text-[9px] text-neutral-400 font-mono">
+                            Total Capacity: {session.maxParticipants} seats
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          disabled={isFull}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isFull) return;
+                            setSelectedSessionId(session.id);
+                            const sessDate = session.date ? toDateInputValue(new Date(session.date)) : toDateInputValue(new Date());
+                            setCheckInDate(sessDate);
+                            const checkOut = new Date(sessDate);
+                            checkOut.setDate(checkOut.getDate() + 1);
+                            setCheckOutDate(toDateInputValue(checkOut));
+                            setStep(2);
+                          }}
+                          className={`w-full md:w-auto text-[10px] font-bold tracking-widest uppercase py-2.5 px-5 border transition-colors ${
+                            isFull
+                              ? 'border-neutral-200 text-neutral-400 bg-neutral-100 cursor-not-allowed'
+                              : isSelected
+                                ? 'bg-neutral-950 text-white border-neutral-950'
+                                : 'bg-white text-neutral-950 border-neutral-900 hover:bg-neutral-950 hover:text-white'
+                          }`}
+                        >
+                          {isFull ? 'FULL' : isSelected ? 'SELECTED ✓ CONTINUE →' : 'SELECT SESSION →'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
+            )}
 
-            {/* Selected Date Summary */}
-            <div className="pt-4 border-t border-neutral-100">
-              {checkInDate && checkOutDate ? (
-                <div className="bg-neutral-50 p-4 border border-neutral-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div className="space-y-1">
-                        <span className="text-[8px] uppercase tracking-widest text-neutral-400 font-bold block">Selected Stay Details</span>
-                    <h4 className="text-xs font-bold text-neutral-950">
-                      {formatDisplayDate(checkInDate)} to {formatDisplayDate(checkOutDate)}
-                    </h4>
-                    <p className="text-[10px] text-neutral-500 leading-relaxed font-light">
-                      {stayDaysCount} night(s) &bull; {selectedCheckInSession ? `Admin slot: ${selectedCheckInSession.title}` : 'Open booking date'}
-                    </p>
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full sm:w-auto text-[10px] font-bold tracking-wider uppercase py-2.5 px-6 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
-                  >
-                    CONTINUE TO DETAILS →
-                  </button>
-                </div>
-              ) : (
-                <div className="p-4 border border-dashed border-neutral-200 text-center text-[10px] text-neutral-400 font-light italic bg-neutral-50">
-                  Select check-in and check-out dates from the fields or calendar above to continue.
-                </div>
-              )}
-            </div>
-          </form>
+            {selectedSessionId && (
+              <div className="pt-4 border-t border-neutral-200 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!checkInDate && selectedSession?.date) {
+                      setCheckInDate(toDateInputValue(new Date(selectedSession.date)));
+                    }
+                    if (!checkOutDate && checkInDate) {
+                      const checkOut = new Date(checkInDate);
+                      checkOut.setDate(checkOut.getDate() + 1);
+                      setCheckOutDate(toDateInputValue(checkOut));
+                    }
+                    setStep(2);
+                  }}
+                  className="text-[10px] font-bold tracking-widest uppercase py-3 px-8 bg-neutral-950 text-white hover:bg-neutral-800 transition-colors"
+                >
+                  CONTINUE TO PERSONAL DETAILS →
+                </button>
+              </div>
+            )}
+          </div>
         )}
 
         {/* STEP 2: Personal Details & Medical acknowledgement */}

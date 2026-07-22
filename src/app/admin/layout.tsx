@@ -38,16 +38,10 @@ export default async function AdminLayout({
               <span>Dashboard</span>
             </Link>
             <Link
-              href="/admin/doctors"
-              className="whitespace-nowrap flex items-center space-x-3 px-3 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-neutral-50 border border-neutral-200 md:border-transparent md:hover:border-neutral-200 transition-all"
-            >
-              <span>Doctors</span>
-            </Link>
-            <Link
               href="/admin/sessions"
               className="whitespace-nowrap flex items-center space-x-3 px-3 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-neutral-50 border border-neutral-200 md:border-transparent md:hover:border-neutral-200 transition-all"
             >
-              <span>Stay Dates</span>
+              <span>Health Sessions</span>
             </Link>
             <Link
               href="/admin/registrations"
