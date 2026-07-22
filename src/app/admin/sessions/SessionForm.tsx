@@ -8,9 +8,10 @@ export default function SessionForm() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
-  const [time, setTime] = useState('10:00 AM - 11:30 AM');
+  const [time, setTime] = useState('09:00 AM - 01:00 PM');
   const [instructor, setInstructor] = useState('');
-  const [maxParticipants, setMaxParticipants] = useState(50);
+  const [maxParticipants, setMaxParticipants] = useState(45);
+  const [stayAvailable, setStayAvailable] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
@@ -20,7 +21,7 @@ export default function SessionForm() {
     setSuccess(false);
 
     if (!title.trim() || !description.trim() || !date || !time.trim() || !instructor.trim()) {
-      setError('Please fill out all stay date details.');
+      setError('Please fill out all session and doctor details.');
       return;
     }
 
@@ -32,6 +33,7 @@ export default function SessionForm() {
         time,
         instructor,
         maxParticipants: Number(maxParticipants),
+        stayAvailable,
       });
 
       if (res.success) {
@@ -40,7 +42,8 @@ export default function SessionForm() {
         setDescription('');
         setDate('');
         setInstructor('');
-        setMaxParticipants(50);
+        setMaxParticipants(45);
+        setStayAvailable(true);
       } else {
         setError(res.error || 'Failed to create session');
       }
@@ -50,7 +53,7 @@ export default function SessionForm() {
   return (
     <form onSubmit={handleSubmit} className="border border-neutral-200 bg-white p-6 space-y-4">
       <h3 className="text-sm font-semibold tracking-wider uppercase text-neutral-800 border-b border-neutral-100 pb-2">
-        Add Stay Date Limit
+        Add Doctor Session / Stay Slot
       </h3>
 
       {error && (
@@ -61,14 +64,14 @@ export default function SessionForm() {
 
       {success && (
         <div className="p-3 bg-neutral-900 border border-neutral-900 text-white text-xs font-mono text-center">
-          Stay date limit saved successfully!
+          Doctor session saved successfully!
         </div>
       )}
 
       <div className="space-y-3">
         <div>
           <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-            Date Limit Title
+            Session / Doctor Title
           </label>
           <input
             type="text"
@@ -76,14 +79,14 @@ export default function SessionForm() {
             onChange={(e) => setTitle(e.target.value)}
             disabled={isPending}
             className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-            placeholder="e.g. Health Centre Stay"
+            placeholder="e.g. Nadi Clearance & Vibratory Health Session"
             required
           />
         </div>
 
         <div>
           <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-            Description
+            Description / Treatment Focus
           </label>
           <textarea
             value={description}
@@ -91,7 +94,7 @@ export default function SessionForm() {
             disabled={isPending}
             rows={3}
             className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-            placeholder="Describe the stay date, intake notes, or admission limitation..."
+            placeholder="Describe the consultation, chakra treatment notes, or admission guidelines..."
             required
           ></textarea>
         </div>
@@ -113,7 +116,7 @@ export default function SessionForm() {
 
           <div>
             <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-              Time Range
+              Time Slot
             </label>
             <input
               type="text"
@@ -121,7 +124,7 @@ export default function SessionForm() {
               onChange={(e) => setTime(e.target.value)}
               disabled={isPending}
               className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-              placeholder="e.g. 10:00 AM - 11:30 AM"
+              placeholder="e.g. 09:00 AM - 01:00 PM"
               required
             />
           </div>
@@ -130,7 +133,7 @@ export default function SessionForm() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-              Instructor / Doctor
+              Doctor / Instructor Name
             </label>
             <input
               type="text"
@@ -138,14 +141,14 @@ export default function SessionForm() {
               onChange={(e) => setInstructor(e.target.value)}
               disabled={isPending}
               className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-              placeholder="e.g. Dr. Ramesh Sharma"
+              placeholder="e.g. Dr. Ramesh Verma"
               required
             />
           </div>
 
           <div>
             <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-              Max Participants
+              Doctor Max Seats Limit
             </label>
             <input
               type="number"
@@ -158,6 +161,42 @@ export default function SessionForm() {
             />
           </div>
         </div>
+
+        {/* Stay Option (Yes / No) */}
+        <div className="p-3 bg-neutral-50 border border-neutral-200 flex items-center justify-between">
+          <div>
+            <span className="block text-[10px] uppercase tracking-widest text-neutral-700 font-semibold">
+              Overnight Stay Accommodation Option
+            </span>
+            <span className="text-[10px] text-neutral-400">
+              Allow patients to book overnight stay accommodation for this doctor session?
+            </span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={() => setStayAvailable(true)}
+              className={`px-3 py-1 text-[10px] font-bold uppercase border transition-colors ${
+                stayAvailable
+                  ? 'bg-neutral-900 text-white border-neutral-900'
+                  : 'bg-white text-neutral-600 border-neutral-200'
+              }`}
+            >
+              STAY: YES
+            </button>
+            <button
+              type="button"
+              onClick={() => setStayAvailable(false)}
+              className={`px-3 py-1 text-[10px] font-bold uppercase border transition-colors ${
+                !stayAvailable
+                  ? 'bg-neutral-900 text-white border-neutral-900'
+                  : 'bg-white text-neutral-600 border-neutral-200'
+              }`}
+            >
+              STAY: NO
+            </button>
+          </div>
+        </div>
       </div>
 
       <button
@@ -165,7 +204,7 @@ export default function SessionForm() {
         disabled={isPending}
         className="w-full text-[10px] font-bold tracking-widest uppercase py-3 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors disabled:bg-neutral-300"
       >
-        {isPending ? 'SCHEDULING...' : 'SCHEDULE SESSION ✓'}
+        {isPending ? 'SCHEDULING SESSION...' : 'CREATE DOCTOR SESSION ✓'}
       </button>
     </form>
   );

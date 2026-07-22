@@ -131,36 +131,39 @@ export async function seedDatabase() {
       ]);
     }
 
-    // Seed Sessions
+    // Seed Sessions (Doctor Sessions with seat limits and stay options)
     const sessions = await Session.insertMany([
       {
-        title: 'Collective Meditation & Nadi Clearance',
-        description: 'A collective clearing and balancing session using vibratory diagnostic methods under doctor guidance.',
+        title: 'Nadi Clearance & Vibratory Diagnosis Session',
+        description: 'Individual doctor consultation & subtle energy clearing for health centre stay patients.',
         date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days later
-        time: '10:00 AM - 11:30 AM',
-        instructor: 'Dr. Ramesh Sharma',
-        maxParticipants: 50,
-        registeredCount: 2,
+        time: '09:00 AM - 01:00 PM',
+        instructor: 'Dr. Ramesh Sharma (Ayurvedic/Sahaja Doctor)',
+        maxParticipants: 45,
+        registeredCount: 12,
+        stayAvailable: true,
         isActive: true,
       },
       {
-        title: 'Footsoaking Science & Chakra Balancing Workshop',
-        description: 'Understand the elements and how footsoaking clears the subtle system channels (Ida and Pingla Nadis).',
+        title: 'Footsoaking Science & Chakra Treatment Session',
+        description: 'Doctor guided element treatment for Ida and Pingla channels with stay option.',
         date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days later
-        time: '05:00 PM - 06:30 PM',
-        instructor: 'Dr. Jyoti Patel',
-        maxParticipants: 40,
-        registeredCount: 1,
+        time: '10:00 AM - 02:00 PM',
+        instructor: 'Dr. Jyoti Patel (Holistic Specialist)',
+        maxParticipants: 45,
+        registeredCount: 8,
+        stayAvailable: true,
         isActive: true,
       },
       {
-        title: 'Introduction to Thoughtless Awareness',
-        description: 'Free public meditation program for absolute beginners and new seekers of truth.',
+        title: 'Walk-in Subtle System & Meditation OPD Session',
+        description: 'Day-visit OPD consultation for new seekers and local visitors. Stay accommodation not included.',
         date: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // tomorrow
-        time: '11:00 AM - 12:30 PM',
-        instructor: 'Sahaja Yoga Hyderabad Team',
-        maxParticipants: 100,
-        registeredCount: 0,
+        time: '11:00 AM - 01:00 PM',
+        instructor: 'Dr. Sunita Rao (OPD Doctor)',
+        maxParticipants: 50,
+        registeredCount: 5,
+        stayAvailable: false,
         isActive: true,
       },
     ]);
@@ -315,7 +318,6 @@ export async function toggleDoctorActive(id: string, active: boolean) {
   revalidatePath('/admin/doctors');
 }
 
-// Session Actions
 export async function createSessionAction(data: {
   title: string;
   description: string;
@@ -323,12 +325,14 @@ export async function createSessionAction(data: {
   time: string;
   instructor: string;
   maxParticipants: number;
+  stayAvailable?: boolean;
 }) {
   try {
     await dbConnect();
     await Session.create({
       ...data,
       date: new Date(data.date),
+      stayAvailable: data.stayAvailable !== undefined ? data.stayAvailable : true,
       registeredCount: 0,
       isActive: true,
     });
