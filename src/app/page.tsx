@@ -361,7 +361,7 @@ export default async function Home() {
             <div className="border border-neutral-200 bg-white p-4 flex flex-col justify-between">
               <div className="w-full aspect-[4/3] bg-neutral-100 border border-neutral-200 relative overflow-hidden">
                 <iframe 
-                  src="https://maps.google.com/maps?q=Nirmal%20Nagari,%20Ghansimi%20Bazar,%20Hyderabad&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+                  src="https://maps.google.com/maps?q=17.5198654,78.7843353&hl=en&z=16&output=embed" 
                   width="100%" 
                   height="100%" 
                   style={{ border: 0 }} 
