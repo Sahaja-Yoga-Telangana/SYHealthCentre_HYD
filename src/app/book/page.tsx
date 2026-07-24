@@ -44,10 +44,12 @@ export default async function BookingPage({
 
   try {
     await dbConnect();
-    settings = await getSiteSettings();
-    const activeSessions = await Session.find({ isActive: true })
-      .sort({ date: 1 });
+    const [settingsData, activeSessions] = await Promise.all([
+      getSiteSettings(),
+      Session.find({ isActive: true }).sort({ date: 1 }),
+    ]);
 
+    settings = settingsData;
     sessionsList = activeSessions.map((session) => ({
       id: session._id.toString(),
       title: session.title,

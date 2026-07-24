@@ -36,7 +36,14 @@ function LoginForm() {
         if (res?.error) {
           setError(res.error || 'Invalid credentials. Please try again.');
         } else {
-          router.push(callbackUrl);
+          // Fetch current session to check role
+          const sessionRes = await fetch('/api/auth/session');
+          const sessionData = await sessionRes.json();
+          if (sessionData?.user?.role === 'Admin') {
+            router.push('/admin');
+          } else {
+            router.push('/dashboard');
+          }
           router.refresh();
         }
       } catch (err: any) {

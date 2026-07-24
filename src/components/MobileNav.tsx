@@ -36,24 +36,31 @@ export default function MobileNav() {
 
       {open && (
         <nav className="absolute top-full left-0 right-0 bg-cream border-b border-warm-gray px-8 py-6 space-y-4 z-50 shadow-lg">
-          <a href="#hero" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide text-warm-charcoal/70 hover:text-saffron transition-colors">Home</a>
-          <a href="#about" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide text-warm-charcoal/70 hover:text-saffron transition-colors">About</a>
-          <a href="#sessions" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide text-warm-charcoal/70 hover:text-saffron transition-colors">Sessions</a>
-          <a href="#contact" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide text-warm-charcoal/70 hover:text-saffron transition-colors">Contact</a>
+          <Link href="/" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide text-warm-charcoal/70 hover:text-saffron transition-colors">Home</Link>
+          <Link href="/about" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide text-warm-charcoal/70 hover:text-saffron transition-colors">About</Link>
+          <Link href="/sessions" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide text-warm-charcoal/70 hover:text-saffron transition-colors">Sessions</Link>
           
-          <div className="border-t border-warm-gray pt-4 space-y-2">
+          <div className="border-t border-warm-gray pt-4 space-y-3">
             {user ? (
               <>
                 <div className="text-[10px] text-warm-charcoal/50 font-mono">
                   Logged in as: <strong className="text-teal">{user.name}</strong>
                 </div>
-                {user.role === 'Admin' && (
+                {user.role === 'Admin' ? (
                   <Link 
                     href="/admin" 
                     onClick={() => setOpen(false)}
                     className="block text-sm font-semibold text-teal hover:text-teal-dark transition-colors"
                   >
-                    ADMIN PANEL
+                    ADMIN PORTAL
+                  </Link>
+                ) : (
+                  <Link 
+                    href="/dashboard" 
+                    onClick={() => setOpen(false)}
+                    className="block text-sm font-semibold text-teal hover:text-teal-dark transition-colors"
+                  >
+                    MY PORTAL / HISTORY
                   </Link>
                 )}
                 <button
@@ -70,7 +77,7 @@ export default function MobileNav() {
               <Link 
                 href="/login" 
                 onClick={() => setOpen(false)}
-                className="block text-sm font-semibold text-warm-charcoal/60 hover:text-saffron transition-colors"
+                className="block text-sm font-semibold text-warm-charcoal/70 hover:text-saffron transition-colors"
               >
                 LOGIN
               </Link>

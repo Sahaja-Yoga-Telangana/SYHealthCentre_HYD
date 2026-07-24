@@ -35,48 +35,48 @@ export default function ReviewForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="border border-neutral-200 bg-white p-6 space-y-4 max-w-xl mx-auto">
-      <h3 className="text-sm font-semibold tracking-wider uppercase text-neutral-800 border-b border-neutral-100 pb-2">
+    <form onSubmit={handleSubmit} className="border border-warm-gray bg-white p-6 sm:p-8 space-y-4 max-w-xl mx-auto rounded-2xl shadow-sm">
+      <h3 className="text-sm font-semibold tracking-wider uppercase text-teal-dark border-b border-warm-gray pb-2">
         Share Your Experience
       </h3>
 
       {error && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-xs font-mono">
+        <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-xs font-mono rounded-md">
           {error}
         </div>
       )}
 
       {success && (
-        <div className="p-3 bg-neutral-900 border border-neutral-900 text-white text-xs font-mono text-center">
-          Thank you! Your review has been submitted and is pending moderation.
+        <div className="p-3.5 bg-teal text-white text-xs font-mono text-center rounded-md">
+          Thank you! Your experience has been submitted and is pending admin review.
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-            Your Name
+          <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/50 font-semibold mb-1">
+            Your Name *
           </label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={isPending}
-            className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
+            className="w-full text-xs p-2.5 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
             placeholder="e.g. Rahul Sharma"
             required
           />
         </div>
 
         <div>
-          <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-            Rating
+          <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/50 font-semibold mb-1">
+            Rating *
           </label>
           <select
             value={rating}
             onChange={(e) => setRating(Number(e.target.value))}
             disabled={isPending}
-            className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
+            className="w-full text-xs p-2.5 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
           >
             <option value="5">5 Stars (Excellent)</option>
             <option value="4">4 Stars (Good)</option>
@@ -88,15 +88,15 @@ export default function ReviewForm() {
       </div>
 
       <div>
-        <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-          Review / Experience
+        <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/50 font-semibold mb-1">
+          Review / Experience *
         </label>
         <textarea
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           disabled={isPending}
           rows={4}
-          className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
+          className="w-full text-xs p-2.5 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
           placeholder="Describe your spiritual state, vibrations felt, or general experience..."
           required
         ></textarea>
@@ -105,9 +105,9 @@ export default function ReviewForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full text-[10px] font-bold tracking-widest uppercase py-3 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors disabled:bg-neutral-300"
+        className="w-full text-[10px] font-bold tracking-widest uppercase py-3 bg-saffron text-white hover:bg-saffron-dark transition-colors rounded-md shadow-sm disabled:bg-warm-gray"
       >
-        {isPending ? 'SUBMITTING...' : 'SUBMIT REVIEW'}
+        {isPending ? 'SUBMITTING...' : 'SUBMIT EXPERIENCE'}
       </button>
     </form>
   );
