@@ -53,7 +53,7 @@ export default async function DashboardPage() {
         {/* Navigation & Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-warm-gray p-6 rounded-2xl shadow-sm">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-saffron">Seeker Portal</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-saffron">Sahaja Yogi Portal</span>
             <h1 className="text-2xl font-light text-teal-dark mt-0.5">
               Welcome, <span className="font-semibold">{user.name}</span>
             </h1>

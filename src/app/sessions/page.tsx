@@ -25,47 +25,39 @@ export default async function SessionsPage() {
 
   try {
     await dbConnect();
-    const now = new Date();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    const allSessions = await Session.find({ isActive: true }).sort({ date: 1 });
+    const [upcomingDb, pastDb] = await Promise.all([
+      Session.find({ isActive: true, date: { $gte: today } }).sort({ date: 1 }),
+      Session.find({ $or: [{ date: { $lt: today } }, { isActive: false }] }).sort({ date: -1 }).limit(10),
+    ]);
 
-    allSessions.forEach((s) => {
-      const item: SessionItem = {
-        id: s._id.toString(),
-        title: s.title,
-        description: s.description,
-        date: s.date,
-        time: s.time,
-        instructor: s.instructor,
-        maxParticipants: s.maxParticipants,
-        registeredCount: s.registeredCount,
-        stayAvailable: s.stayAvailable ?? true,
-        isActive: s.isActive,
-      };
+    upcomingSessions = upcomingDb.map((s) => ({
+      id: s._id.toString(),
+      title: s.title,
+      description: s.description,
+      date: s.date,
+      time: s.time,
+      instructor: s.instructor,
+      maxParticipants: s.maxParticipants,
+      registeredCount: s.registeredCount,
+      stayAvailable: s.stayAvailable ?? true,
+      isActive: s.isActive,
+    }));
 
-      if (new Date(s.date) >= new Date(now.setHours(0, 0, 0, 0))) {
-        upcomingSessions.push(item);
-      } else {
-        pastSessions.push(item);
-      }
-    });
-
-    // If pastSessions empty, pull some completed ones
-    if (pastSessions.length === 0) {
-      const pastFromDb = await Session.find({ date: { $lt: new Date() } }).sort({ date: -1 }).limit(6);
-      pastSessions = pastFromDb.map((s) => ({
-        id: s._id.toString(),
-        title: s.title,
-        description: s.description,
-        date: s.date,
-        time: s.time,
-        instructor: s.instructor,
-        maxParticipants: s.maxParticipants,
-        registeredCount: s.registeredCount,
-        stayAvailable: s.stayAvailable ?? true,
-        isActive: s.isActive,
-      }));
-    }
+    pastSessions = pastDb.map((s) => ({
+      id: s._id.toString(),
+      title: s.title,
+      description: s.description,
+      date: s.date,
+      time: s.time,
+      instructor: s.instructor,
+      maxParticipants: s.maxParticipants,
+      registeredCount: s.registeredCount,
+      stayAvailable: s.stayAvailable ?? true,
+      isActive: s.isActive,
+    }));
   } catch (error) {
     console.error('Error fetching sessions:', error);
   }

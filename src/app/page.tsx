@@ -46,37 +46,34 @@ export default async function Home() {
       <HeaderNav announcement={settings.announcementBanner} />
 
       {/* 1. Hero Section */}
-      <section id="hero" className="relative h-[60vh] sm:h-[70vh] lg:h-[80vh] scroll-mt-24">
+      <section id="hero" className="relative h-[65vh] sm:h-[75vh] lg:h-[85vh] scroll-mt-24">
         <HeroCarousel />
         
-        {/* Hero Content Overlay */}
+        {/* Clean, Uncluttered Hero Text Overlay */}
         <div className="absolute inset-0 flex flex-col justify-end z-20 px-6 sm:px-10 lg:px-16 pb-12 sm:pb-16 pointer-events-none">
-          <div className="max-w-3xl space-y-4 bg-warm-charcoal/40 backdrop-blur-sm border border-white/10 p-6 sm:p-8 rounded-2xl shadow-2xl pointer-events-auto">
+          <div className="max-w-2xl space-y-3 pointer-events-auto">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-[3px] bg-saffron rounded-full"></div>
-              <p className="text-xs sm:text-sm tracking-[0.3em] uppercase text-saffron font-bold [text-shadow:_0_1px_4px_rgba(0,0,0,0.8)]">
+              <p className="text-xs sm:text-sm tracking-[0.3em] uppercase text-saffron font-bold [text-shadow:_0_1px_4px_rgba(0,0,0,0.9)]">
                 Nirmal Nagar, Telangana
               </p>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light tracking-tight text-white leading-tight [text-shadow:_0_2px_12px_rgba(0,0,0,0.9)]">
               Sahaja Yoga <br />
-              <span className="font-bold text-cream">Health Centre & Meditation Hall</span>
+              <span className="font-bold text-cream">Health Centre Hyderabad</span>
             </h1>
-            <p className="text-sm sm:text-base text-white/90 font-normal max-w-xl leading-relaxed [text-shadow:_0_1px_8px_rgba(0,0,0,0.9)]">
-              A sanctuary of healing and spiritual research where vibratory awareness and Sahaja Yoga meditation help cleanse, balance, and rejuvenate the subtle system.
-            </p>
             <div className="flex flex-wrap gap-3 pt-2">
               <Link
                 href="/book"
                 prefetch={true}
-                className="inline-block text-sm font-bold tracking-wider px-6 py-3 bg-saffron text-white hover:bg-saffron-dark transition-all rounded-md shadow-lg hover:shadow-saffron/20 transform hover:-translate-y-0.5"
+                className="inline-block text-xs sm:text-sm font-bold tracking-wider px-6 py-3 bg-saffron text-white hover:bg-saffron-dark transition-all rounded-md shadow-lg transform hover:-translate-y-0.5"
               >
-                REGISTER FOR SESSION
+                BOOK SESSION
               </Link>
               <Link
                 href="/about"
                 prefetch={true}
-                className="inline-block text-sm font-semibold tracking-wider px-6 py-3 bg-white/15 text-white border border-white/40 hover:bg-white/30 backdrop-blur-md transition-all rounded-md hover:border-white shadow-md"
+                className="inline-block text-xs sm:text-sm font-semibold tracking-wider px-6 py-3 bg-white/20 text-white border border-white/40 hover:bg-white/30 backdrop-blur-md transition-all rounded-md hover:border-white shadow-md"
               >
                 ABOUT US →
               </Link>

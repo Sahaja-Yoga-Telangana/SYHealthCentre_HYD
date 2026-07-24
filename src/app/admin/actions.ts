@@ -791,3 +791,38 @@ export async function getSiteSettings() {
     };
   }
 }
+export async function registerUserAction(data: {
+  name: string;
+  email: string;
+  password: string;
+  phone: string;
+  gender: 'Male' | 'Female';
+}) {
+  try {
+    await dbConnect();
+    const cleanEmail = data.email.trim().toLowerCase();
+
+    const existingUser = await User.findOne({ email: cleanEmail });
+    if (existingUser) {
+      return { success: false, error: 'An account with this email already exists. Please login instead.' };
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(data.password, salt);
+
+    await User.create({
+      name: data.name.trim(),
+      email: cleanEmail,
+      passwordHash,
+      role: 'Patient',
+      contactNumber: data.phone.trim(),
+      gender: data.gender,
+      yogiExperienceMonths: 12,
+      nationality: 'Indian',
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}

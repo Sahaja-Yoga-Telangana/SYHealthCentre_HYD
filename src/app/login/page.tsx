@@ -5,27 +5,41 @@ import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import HeaderNav from '@/components/HeaderNav';
+import { registerUserAction } from '@/app/admin/actions';
 
-function LoginForm() {
+function AuthForms() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
   const urlError = searchParams.get('error');
 
+  const [tab, setTab] = useState<'login' | 'register'>('login');
   const [isPending, startTransition] = useTransition();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+
+  // Login state
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+
+  // Register state
+  const [regName, setRegName] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [regPhone, setRegPhone] = useState('');
+  const [regGender, setRegGender] = useState<'Male' | 'Female'>('Male');
+
   const [error, setError] = useState(
     urlError === 'OAuthCallback' || urlError === 'redirect_uri_mismatch'
-      ? 'Google Sign-in is not configured with this domain yet. Please log in with email/password or use session registration.'
+      ? 'Google Sign-in redirect URI mismatch. Please use email & password login or create an account.'
       : ''
   );
+  const [successMsg, setSuccessMsg] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccessMsg('');
 
-    if (!email.trim() || !password) {
+    if (!loginEmail.trim() || !loginPassword) {
       setError('Please enter both email and password.');
       return;
     }
@@ -33,16 +47,15 @@ function LoginForm() {
     startTransition(async () => {
       try {
         const res = await signIn('credentials', {
-          email,
-          password,
+          email: loginEmail,
+          password: loginPassword,
           redirect: false,
           callbackUrl,
         });
 
         if (res?.error) {
-          setError(res.error || 'Invalid credentials. Please try again.');
+          setError('Invalid email or password. Please try again.');
         } else {
-          // Fetch current session to check role
           const sessionRes = await fetch('/api/auth/session');
           const sessionData = await sessionRes.json();
           if (sessionData?.user?.role === 'Admin') {
@@ -58,57 +71,231 @@ function LoginForm() {
     });
   };
 
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccessMsg('');
+
+    if (!regName.trim() || !regEmail.trim() || !regPassword || !regPhone.trim()) {
+      setError('Please fill in all required registration fields.');
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const res = await registerUserAction({
+          name: regName,
+          email: regEmail,
+          password: regPassword,
+          phone: regPhone,
+          gender: regGender,
+        });
+
+        if (!res.success) {
+          setError(res.error || 'Could not create account.');
+          return;
+        }
+
+        // Auto sign in after registration
+        const signInRes = await signIn('credentials', {
+          email: regEmail,
+          password: regPassword,
+          redirect: false,
+          callbackUrl: '/dashboard',
+        });
+
+        if (signInRes?.error) {
+          setSuccessMsg('Account created successfully! Please login with your credentials.');
+          setTab('login');
+          setLoginEmail(regEmail);
+        } else {
+          router.push('/dashboard');
+          router.refresh();
+        }
+      } catch (err: any) {
+        setError('An unexpected error occurred during registration.');
+      }
+    });
+  };
+
   const handleGoogleSignIn = () => {
     signIn('google', { callbackUrl: '/dashboard' });
   };
 
   return (
     <div className="space-y-6">
+      {/* Tabs */}
+      <div className="flex border-b border-warm-gray">
+        <button
+          type="button"
+          onClick={() => { setTab('login'); setError(''); setSuccessMsg(''); }}
+          className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+            tab === 'login'
+              ? 'border-b-2 border-saffron text-saffron bg-cream-dark/50'
+              : 'text-warm-charcoal/50 hover:text-warm-charcoal'
+          }`}
+        >
+          Sahaja Yogi Login
+        </button>
+        <button
+          type="button"
+          onClick={() => { setTab('register'); setError(''); setSuccessMsg(''); }}
+          className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+            tab === 'register'
+              ? 'border-b-2 border-saffron text-saffron bg-cream-dark/50'
+              : 'text-warm-charcoal/50 hover:text-warm-charcoal'
+          }`}
+        >
+          New Sahaja Yogi Register
+        </button>
+      </div>
+
       {error && (
         <div className="p-3.5 bg-red-50 border border-red-200 text-red-600 text-xs font-mono text-center rounded-lg leading-relaxed">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/60 font-semibold mb-1">
-            Email Address
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isPending}
-            className="w-full text-xs p-3 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
-            placeholder="e.g. yogi@gmail.com"
-            required
-          />
+      {successMsg && (
+        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-mono text-center rounded-lg">
+          {successMsg}
         </div>
+      )}
 
-        <div>
-          <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/60 font-semibold mb-1">
-            Password
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+      {/* LOGIN TAB */}
+      {tab === 'login' && (
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/60 font-semibold mb-1">
+              Email Address *
+            </label>
+            <input
+              type="email"
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+              disabled={isPending}
+              className="w-full text-xs p-3 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
+              placeholder="e.g. yogi@gmail.com"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/60 font-semibold mb-1">
+              Password *
+            </label>
+            <input
+              type="password"
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+              disabled={isPending}
+              className="w-full text-xs p-3 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
             disabled={isPending}
-            className="w-full text-xs p-3 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
-            placeholder="••••••••"
-            required
-          />
-        </div>
+            className="w-full text-xs font-bold tracking-wider uppercase py-3 bg-saffron text-white hover:bg-saffron-dark transition-colors rounded-md shadow-sm disabled:bg-warm-gray"
+          >
+            {isPending ? 'LOGGING IN...' : 'LOGIN TO SAHAJA YOGI PORTAL'}
+          </button>
+        </form>
+      )}
 
-        <button
-          type="submit"
-          disabled={isPending}
-          className="w-full text-xs font-bold tracking-wider uppercase py-3 bg-saffron text-white hover:bg-saffron-dark transition-colors rounded-md shadow-sm disabled:bg-warm-gray"
-        >
-          {isPending ? 'LOGGING IN...' : 'LOGIN TO PORTAL'}
-        </button>
-      </form>
+      {/* REGISTER TAB */}
+      {tab === 'register' && (
+        <form onSubmit={handleRegister} className="space-y-4">
+          <div>
+            <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/60 font-semibold mb-1">
+              Full Name *
+            </label>
+            <input
+              type="text"
+              value={regName}
+              onChange={(e) => setRegName(e.target.value)}
+              disabled={isPending}
+              className="w-full text-xs p-3 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
+              placeholder="e.g. Suresh Kumar"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/60 font-semibold mb-1">
+                Email Address *
+              </label>
+              <input
+                type="email"
+                value={regEmail}
+                onChange={(e) => setRegEmail(e.target.value)}
+                disabled={isPending}
+                className="w-full text-xs p-3 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
+                placeholder="yogi@gmail.com"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/60 font-semibold mb-1">
+                Password *
+              </label>
+              <input
+                type="password"
+                value={regPassword}
+                onChange={(e) => setRegPassword(e.target.value)}
+                disabled={isPending}
+                className="w-full text-xs p-3 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
+                placeholder="Create password"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/60 font-semibold mb-1">
+                Phone Number *
+              </label>
+              <input
+                type="tel"
+                value={regPhone}
+                onChange={(e) => setRegPhone(e.target.value)}
+                disabled={isPending}
+                className="w-full text-xs p-3 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
+                placeholder="+91 98765 43210"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/60 font-semibold mb-1">
+                Gender *
+              </label>
+              <select
+                value={regGender}
+                onChange={(e) => setRegGender(e.target.value as any)}
+                disabled={isPending}
+                className="w-full text-xs p-3 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
+              >
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isPending}
+            className="w-full text-xs font-bold tracking-wider uppercase py-3 bg-teal text-white hover:bg-teal-dark transition-colors rounded-md shadow-sm disabled:bg-warm-gray"
+          >
+            {isPending ? 'CREATING ACCOUNT...' : 'REGISTER SAHAJA YOGI ACCOUNT →'}
+          </button>
+        </form>
+      )}
 
       <div className="relative flex py-1 items-center">
         <div className="flex-grow border-t border-warm-gray"></div>
@@ -142,15 +329,15 @@ function LoginForm() {
         <span>SIGN IN WITH GOOGLE</span>
       </button>
 
-      {/* Clear Distinction: New Seeker Session Registration */}
+      {/* Direct Session Registration Action */}
       <div className="pt-4 border-t border-warm-gray bg-cream p-4 rounded-xl text-center space-y-2">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-saffron block">New Seeker / OPD Registration</span>
-        <p className="text-xs text-warm-charcoal/60 font-light">Register for an upcoming health session without creating an account.</p>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-saffron block">Already Know Which Session to Join?</span>
+        <p className="text-xs text-warm-charcoal/60 font-light">Directly register for an upcoming OPD session or health stay.</p>
         <Link
           href="/book"
-          className="inline-block text-xs font-bold uppercase tracking-wider px-5 py-2.5 bg-teal text-white hover:bg-teal-dark transition-colors rounded-md shadow-sm mt-1"
+          className="inline-block text-xs font-bold uppercase tracking-wider px-5 py-2.5 bg-saffron text-white hover:bg-saffron-dark transition-colors rounded-md shadow-sm mt-1"
         >
-          Register for OPD Session →
+          Book Session Now →
         </Link>
       </div>
     </div>
@@ -170,21 +357,16 @@ export default function LoginPage() {
           <div className="text-center space-y-1 border-b border-warm-gray pb-4">
             <span className="text-[10px] uppercase font-bold tracking-widest text-saffron block">Portal Access</span>
             <h2 className="text-2xl font-light text-teal-dark">
-              Seeker & Admin Login
+              Sahaja Yogi Login
             </h2>
             <p className="text-xs text-warm-charcoal/50 font-light">
               Sahaja Yoga Health Centre, Hyderabad
             </p>
           </div>
 
-          <Suspense fallback={<div className="text-xs text-warm-charcoal/40 font-mono text-center py-8">Loading sign in options...</div>}>
-            <LoginForm />
+          <Suspense fallback={<div className="text-xs text-warm-charcoal/40 font-mono text-center py-8">Loading authentication...</div>}>
+            <AuthForms />
           </Suspense>
-
-          <div className="pt-2 text-center border-t border-warm-gray text-[11px] text-warm-charcoal/40 font-mono space-y-1">
-            <p>Admin Login: <strong className="text-warm-charcoal">admin@syhealthcentre.org</strong></p>
-            <p>Password: <strong className="text-warm-charcoal">password123</strong></p>
-          </div>
         </div>
       </main>
     </div>

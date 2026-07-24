@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
+import { useSession } from 'next-auth/react';
 import { createRegistrationAction } from '../admin/actions';
 import Link from 'next/link';
 
@@ -104,6 +105,8 @@ export default function BookingWizard({
   });
   const [checkOutDate, setCheckOutDate] = useState('');
 
+  const { data: sessionUser } = useSession();
+
   // Form States - Step 2: Personal Information
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
@@ -113,6 +116,14 @@ export default function BookingWizard({
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [existingDiseases, setExistingDiseases] = useState('');
+
+  // Auto pre-fill from logged in Sahaja Yogi session
+  useEffect(() => {
+    if (sessionUser?.user) {
+      if (sessionUser.user.name && !name) setName(sessionUser.user.name);
+      if (sessionUser.user.email && !email) setEmail(sessionUser.user.email);
+    }
+  }, [sessionUser]);
 
   // Form States - Step 3: Stay, Center Affiliation & Billing details
   const [centerAddress, setCenterAddress] = useState('');
@@ -723,7 +734,7 @@ export default function BookingWizard({
 
                 {familyMembers.length === 0 ? (
                   <p className="text-[10px] text-neutral-400 font-light italic">
-                    No family members added yet. Add other seekers checking in together.
+                    No family members added yet. Add other Sahaja Yogis checking in together.
                   </p>
                 ) : (
                   <div className="space-y-4">

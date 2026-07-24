@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import HeaderNav from '@/components/HeaderNav';
-import shriMatajiPortrait from '../../../ShriMatajisPictures/PhotoSM-206.jpg';
 
 export const revalidate = 0;
 
@@ -27,19 +26,19 @@ export default function AboutPage() {
       {/* Main Content */}
       <main className="max-w-5xl mx-auto py-16 px-4 sm:px-6 lg:px-8 space-y-16">
         
-        {/* Founder & Spiritual Foundation */}
-        <div className="grid md:grid-cols-[0.8fr_1.2fr] gap-8 lg:gap-12 items-center bg-white border border-warm-gray rounded-2xl p-6 sm:p-10 shadow-sm">
-          <div className="relative aspect-[3/4] overflow-hidden rounded-xl border border-warm-gray bg-cream-dark shadow-sm">
+        {/* Founder & Divine Approval (Image 3 from PPT) */}
+        <div className="grid md:grid-cols-[0.9fr_1.1fr] gap-8 lg:gap-12 items-center bg-white border border-warm-gray rounded-2xl p-6 sm:p-10 shadow-sm">
+          <div className="relative aspect-[4/3] sm:aspect-[16/11] overflow-hidden rounded-xl border border-warm-gray bg-cream-dark shadow-sm">
             <Image
-              src={shriMatajiPortrait}
-              alt="H.H. Shri Mataji Nirmala Devi"
+              src="/images/ppt/image3.png"
+              alt="Approved by H.H. Shri Mataji Nirmala Devi"
               fill
-              className="object-cover object-[20%_center]"
-              sizes="(max-width: 768px) 100vw, 35vw"
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 40vw"
               priority
             />
           </div>
-          <div className="space-y-5">
+          <div className="space-y-4">
             <div>
               <span className="text-xs font-bold uppercase tracking-widest text-saffron">Divine Guidance</span>
               <h2 className="text-2xl font-light text-teal-dark mt-1">
@@ -47,92 +46,124 @@ export default function AboutPage() {
               </h2>
             </div>
             <div className="border-l-2 border-saffron pl-4 py-1 italic text-sm text-warm-charcoal/70 font-light">
-              &quot;The concept of Sahaja Yoga Resource Centre & Health Centre was envisioned and approved by Param Pujya Shri Mataji Nirmala Devi to benefit all seekers.&quot;
+              &quot;The concept of Sahaja Yoga Resource Centre & Health Centre was envisioned and approved by Param Pujya Shri Mataji Nirmala Devi to benefit all Sahaja Yogis and seekers.&quot;
             </div>
             <p className="text-sm text-warm-charcoal/70 font-light leading-relaxed">
-              Born on March 21, 1923, Shri Mataji discovered the spontaneous method of mass Kundalini awakening (Sahaja Yoga) on May 5, 1970. She established the subtle-system balancing techniques that form the foundation of treatments at this Health Centre.
+              Spanning 3 acres at Nirmal Nagar, Hyderabad, Telangana, this Resource Centre and Health Centre operates under the divine blessings of Shri Mataji to provide vibratory diagnostics, chakra clearance, and collective meditation.
             </p>
           </div>
         </div>
 
-        {/* 3-Acre Resource Centre Infrastructure Details (from PPTX) */}
+        {/* Infrastructure Section (PPT Images Mapping) */}
         <div className="space-y-8">
           <div className="text-center space-y-2">
-            <span className="text-xs font-bold uppercase tracking-[0.3em] text-saffron">Resource Centre</span>
+            <span className="text-xs font-bold uppercase tracking-[0.3em] text-saffron">Resource Centre Campus</span>
             <h2 className="text-2xl sm:text-3xl font-light text-teal-dark">
               Infrastructure
             </h2>
             <p className="text-sm text-warm-charcoal/60 max-w-xl mx-auto font-light">
-              Comprehensive facilities designed specifically for Sahaja Yoga collective clearing and medical evaluation on a 3-acre campus.
+              Comprehensive facilities designed specifically for Sahaja Yoga collective clearing and medical evaluation.
             </p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white border border-warm-gray rounded-xl p-6 space-y-3 shadow-sm">
-              <div className="w-10 h-10 bg-teal/10 rounded-lg flex items-center justify-center text-teal font-bold text-lg">01</div>
-              <h3 className="text-base font-semibold text-teal-dark">Meditation Hall & Glass Altar</h3>
-              <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light">
-                Spacious meditation hall featuring a glass-covered Altar and renovated stage area for collective Havans, pujas, and meditation.
-              </p>
+            {/* Image 4: Meditation Hall */}
+            <div className="bg-white border border-warm-gray rounded-2xl overflow-hidden shadow-sm space-y-3 flex flex-col">
+              <div className="relative aspect-[16/10] bg-cream-dark border-b border-warm-gray">
+                <Image src="/images/ppt/image4.jpeg" alt="Meditation Hall & Glass Altar" fill className="object-cover" />
+                <span className="absolute top-2 right-2 bg-saffron text-white text-[9px] font-bold uppercase px-2.5 py-0.5 rounded-full shadow-sm">
+                  In Construction
+                </span>
+              </div>
+              <div className="p-5 pt-1 space-y-2 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-base font-semibold text-teal-dark">Meditation Hall & Glass Altar</h3>
+                  <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light mt-1">
+                    Spacious meditation hall featuring a glass-covered Altar and renovated stage area for collective Havans, pujas, and meditation.
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div className="bg-white border border-warm-gray rounded-xl p-6 space-y-3 shadow-sm">
-              <div className="w-10 h-10 bg-saffron/10 rounded-lg flex items-center justify-center text-saffron font-bold text-lg">02</div>
-              <h3 className="text-base font-semibold text-teal-dark">Collective Footsoaking Area</h3>
-              <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light">
-                Dedicated collective footsoak facilities equipped for multi-seeker evening clearing sessions to soothe the subtle channels.
-              </p>
+            {/* Image 6: Footsoaking Area */}
+            <div className="bg-white border border-warm-gray rounded-2xl overflow-hidden shadow-sm space-y-3 flex flex-col">
+              <div className="relative aspect-[16/10] bg-cream-dark border-b border-warm-gray">
+                <Image src="/images/ppt/image6.png" alt="Collective Footsoaking Area" fill className="object-cover" />
+              </div>
+              <div className="p-5 pt-1 space-y-2 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-base font-semibold text-teal-dark">Collective Footsoaking Area</h3>
+                  <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light mt-1">
+                    Dedicated collective footsoaking shed equipped for evening element treatment sessions to soothe and clear subtle channels.
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div className="bg-white border border-warm-gray rounded-xl p-6 space-y-3 shadow-sm">
-              <div className="w-10 h-10 bg-sage/10 rounded-lg flex items-center justify-center text-sage font-bold text-lg">03</div>
-              <h3 className="text-base font-semibold text-teal-dark">Shoebeat Ground & Open Lawn</h3>
-              <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light">
-                Open ground area specified for collective shoebeating and nature clearing surrounded by natural greenery and trees.
-              </p>
+            {/* Image 7: Shoebeat Ground */}
+            <div className="bg-white border border-warm-gray rounded-2xl overflow-hidden shadow-sm space-y-3 flex flex-col">
+              <div className="relative aspect-[16/10] bg-cream-dark border-b border-warm-gray">
+                <Image src="/images/ppt/image7.png" alt="Shoebeat Ground & Open Lawn" fill className="object-cover" />
+              </div>
+              <div className="p-5 pt-1 space-y-2 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-base font-semibold text-teal-dark">Shoebeat Ground & Open Lawn</h3>
+                  <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light mt-1">
+                    Open ground area specified for collective shoebeating and nature clearing surrounded by natural greenery and trees.
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div className="bg-white border border-warm-gray rounded-xl p-6 space-y-3 shadow-sm">
-              <div className="w-10 h-10 bg-teal/10 rounded-lg flex items-center justify-center text-teal font-bold text-lg">04</div>
-              <h3 className="text-base font-semibold text-teal-dark">Ground & 1st Floor Chambers</h3>
-              <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light">
-                Health Centre building comprising ground floor OPD treatment chambers and 1st floor accommodation rooms for consulting doctors.
-              </p>
+            {/* Image 8: Layout Plan */}
+            <div className="bg-white border border-warm-gray rounded-2xl overflow-hidden shadow-sm space-y-3 flex flex-col">
+              <div className="relative aspect-[16/10] bg-cream-dark border-b border-warm-gray">
+                <Image src="/images/ppt/image8.jpg" alt="Campus Layout Plan" fill className="object-cover" />
+              </div>
+              <div className="p-5 pt-1 space-y-2 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-base font-semibold text-teal-dark">Resource Centre Master Layout</h3>
+                  <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light mt-1">
+                    Proposed layout plan detailing the stage, meditation hall, kitchen shed, and health centre expansion.
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div className="bg-white border border-warm-gray rounded-xl p-6 space-y-3 shadow-sm">
-              <div className="w-10 h-10 bg-saffron/10 rounded-lg flex items-center justify-center text-saffron font-bold text-lg">05</div>
-              <h3 className="text-base font-semibold text-teal-dark">Kitchen & Dining Shed</h3>
-              <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light">
-                In-house kitchen and covered dining shed providing Mahaprasad and wholesome vegetarian meals for visiting yogis and patients.
-              </p>
+            {/* Image 9 & 10: Health Centre Construction */}
+            <div className="bg-white border border-warm-gray rounded-2xl overflow-hidden shadow-sm space-y-3 flex flex-col">
+              <div className="relative aspect-[16/10] bg-cream-dark border-b border-warm-gray">
+                <Image src="/images/ppt/image9.jpeg" alt="Under Construction Health Centre" fill className="object-cover" />
+                <span className="absolute top-2 right-2 bg-saffron text-white text-[9px] font-bold uppercase px-2.5 py-0.5 rounded-full shadow-sm">
+                  Phase 1 Construction
+                </span>
+              </div>
+              <div className="p-5 pt-1 space-y-2 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-base font-semibold text-teal-dark">Under Construction Chambers</h3>
+                  <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light mt-1">
+                    Construction of 1st floor slab and OPD treatment chambers progressing to welcome Shri Dhanvantari.
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div className="bg-white border border-warm-gray rounded-xl p-6 space-y-3 shadow-sm">
-              <div className="w-10 h-10 bg-sage/10 rounded-lg flex items-center justify-center text-sage font-bold text-lg">06</div>
-              <h3 className="text-base font-semibold text-teal-dark">Officially Named Govt Road</h3>
-              <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light">
-                Road officially named <strong className="font-semibold text-warm-charcoal">&quot;PARAM PUJYA SHRI MATAJI NIRMALA DEVI ROAD&quot;</strong> by Panchayat Raj Dept, Govt of Telangana.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Real PPT Images Showcase */}
-        <div className="space-y-6 bg-white border border-warm-gray rounded-2xl p-6 sm:p-8 shadow-sm">
-          <div className="text-center space-y-1 border-b border-warm-gray pb-4">
-            <span className="text-xs font-bold uppercase tracking-widest text-saffron">Photo Gallery</span>
-            <h3 className="text-xl font-semibold text-teal-dark">Resource Centre & Campus Layout</h3>
-          </div>
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-warm-gray bg-cream-dark">
-              <Image src="/images/ppt/image1.jpg" alt="Health Centre Design Layout" fill className="object-cover" />
-            </div>
-            <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-warm-gray bg-cream-dark">
-              <Image src="/images/ppt/image7.png" alt="Health Centre Construction Progress" fill className="object-cover" />
-            </div>
-            <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-warm-gray bg-cream-dark">
-              <Image src="/images/ppt/image6.png" alt="Health Centre Architecture Plan" fill className="object-cover" />
+            {/* Image 11: Constructed Health Centre */}
+            <div className="bg-white border border-warm-gray rounded-2xl overflow-hidden shadow-sm space-y-3 flex flex-col">
+              <div className="relative aspect-[16/10] bg-cream-dark border-b border-warm-gray">
+                <Image src="/images/ppt/image11.png" alt="Constructed Health Centre Building" fill className="object-cover" />
+                <span className="absolute top-2 right-2 bg-sage text-white text-[9px] font-bold uppercase px-2.5 py-0.5 rounded-full shadow-sm">
+                  Constructed Building
+                </span>
+              </div>
+              <div className="p-5 pt-1 space-y-2 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-base font-semibold text-teal-dark">Constructed Health Centre</h3>
+                  <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light mt-1">
+                    Completed main Health Centre facility featuring ground floor consultation rooms and doctor accommodation.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -187,7 +218,7 @@ export default function AboutPage() {
               href="/book"
               className="inline-block text-xs font-bold uppercase tracking-wider px-8 py-3 bg-saffron text-white rounded-md hover:bg-saffron-dark transition-colors shadow-md"
             >
-              REGISTER FOR SESSION NOW
+              BOOK SESSION NOW
             </Link>
           </div>
         </div>
