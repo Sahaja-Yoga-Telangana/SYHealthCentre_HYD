@@ -10,7 +10,7 @@ import ReviewForm from '@/components/ReviewForm';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getSiteSettings } from '@/app/admin/actions';
-import shriMatajiPortrait from '../../ShriMatajisPictures/1990_Cairns-X3.jpg';
+import shriMatajiPortrait from '../../ShriMatajisPictures/PhotoSM-206.jpg';
 
 export const revalidate = 0;
 
@@ -104,32 +104,32 @@ export default async function Home() {
       <section id="hero" className="relative h-[60vh] sm:h-[70vh] lg:h-[80vh] scroll-mt-24">
         <HeroCarousel />
         
-        {/* Hero Content Overlay */}
-        <div className="absolute inset-0 flex flex-col justify-end z-10 px-6 sm:px-8 lg:px-12 pb-12 sm:pb-16">
-          <div className="max-w-3xl space-y-4">
+        {/* Hero Content Overlay with Superior Contrast */}
+        <div className="absolute inset-0 flex flex-col justify-end z-20 px-6 sm:px-10 lg:px-16 pb-12 sm:pb-16 pointer-events-none">
+          <div className="max-w-3xl space-y-4 bg-warm-charcoal/40 backdrop-blur-sm border border-white/10 p-6 sm:p-8 rounded-2xl shadow-2xl pointer-events-auto">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-[2px] bg-saffron"></div>
-              <p className="text-xs tracking-[0.3em] uppercase text-saffron font-semibold">
+              <div className="w-8 h-[3px] bg-saffron rounded-full"></div>
+              <p className="text-xs sm:text-sm tracking-[0.3em] uppercase text-saffron font-bold [text-shadow:_0_1px_4px_rgba(0,0,0,0.8)]">
                 Nirmal Nagar, Telangana
               </p>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light tracking-tight text-white leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light tracking-tight text-white leading-tight [text-shadow:_0_2px_12px_rgba(0,0,0,0.9)]">
               Sahaja Yoga <br />
-              <span className="font-semibold">Health Centre</span>
+              <span className="font-bold text-cream">Health Centre & Meditation Hall</span>
             </h1>
-            <p className="text-sm sm:text-base text-white/80 font-light max-w-xl leading-relaxed">
+            <p className="text-sm sm:text-base text-white/90 font-normal max-w-xl leading-relaxed [text-shadow:_0_1px_8px_rgba(0,0,0,0.9)]">
               A sanctuary of healing and spiritual research where vibratory awareness and Sahaja Yoga meditation help cleanse, balance, and rejuvenate the subtle system.
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
               <Link
                 href="/book"
-                className="inline-block text-sm font-semibold tracking-wider px-6 py-3 bg-saffron text-white hover:bg-saffron-dark transition-colors rounded-md shadow-md"
+                className="inline-block text-sm font-bold tracking-wider px-6 py-3 bg-saffron text-white hover:bg-saffron-dark transition-all rounded-md shadow-lg hover:shadow-saffron/20 transform hover:-translate-y-0.5"
               >
                 REGISTER FOR SESSION
               </Link>
               <a
                 href="#sessions"
-                className="inline-block text-sm font-medium tracking-wider px-6 py-3 bg-white/10 text-white border border-white/30 hover:bg-white/20 backdrop-blur-sm transition-colors rounded-md"
+                className="inline-block text-sm font-semibold tracking-wider px-6 py-3 bg-white/15 text-white border border-white/40 hover:bg-white/30 backdrop-blur-md transition-all rounded-md hover:border-white shadow-md"
               >
                 VIEW SESSIONS
               </a>

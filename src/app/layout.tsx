@@ -6,6 +6,13 @@ export const metadata: Metadata = {
   title: "Sahaja Yoga Research & Health Centre — Hyderabad",
   description: "Book OPD consultations, day stays, and inpatient accommodation at the Sahaja Yoga Research & Health Centre in Nirmal Nagari, Hyderabad. Treatment through vibratory awareness and Sahaja Yoga meditation.",
   keywords: ["Sahaja Yoga", "Health Centre", "Hyderabad", "Nirmal Nagari", "Vibratory Awareness", "Chakra Therapy", "Meditation"],
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/icon.svg",
+    apple: "/apple-icon.svg",
+  },
 };
 
 export default function RootLayout({

@@ -4,7 +4,7 @@ import dbConnect from '@/lib/db';
 import Session from '@/models/Session';
 import BookingWizard from './BookingWizard';
 import Link from 'next/link';
-import shriMatajiPortrait from '../../../ShriMatajisPictures/1990_Cairns-X3.jpg';
+import shriMatajiPortrait from '../../../ShriMatajisPictures/PhotoSM-206.jpg';
 
 import { getSiteSettings } from '@/app/admin/actions';
 
