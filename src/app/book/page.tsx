@@ -8,6 +8,8 @@ import shriMatajiPortrait from '../../../ShriMatajisPictures/PhotoSM-206.jpg';
 
 import { getSiteSettings } from '@/app/admin/actions';
 
+import HeaderNav from '@/components/HeaderNav';
+
 export const revalidate = 0;
 
 interface SessionItem {
@@ -68,8 +70,9 @@ export default async function BookingPage({
   }
 
   return (
-    <div className="min-h-screen bg-cream text-warm-charcoal font-sans selection:bg-saffron selection:text-white py-8 sm:py-12 px-4 sm:px-6">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-cream text-warm-charcoal font-sans selection:bg-saffron selection:text-white">
+      <HeaderNav />
+      <div className="max-w-4xl mx-auto space-y-8 py-8 sm:py-12 px-4 sm:px-6">
         
         {/* Logo Navigation */}
         <div className="flex justify-between items-center max-w-2xl mx-auto">

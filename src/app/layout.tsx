@@ -8,10 +8,10 @@ export const metadata: Metadata = {
   keywords: ["Sahaja Yoga", "Health Centre", "Hyderabad", "Nirmal Nagari", "Vibratory Awareness", "Chakra Therapy", "Meditation"],
   icons: {
     icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon.png", type: "image/png" },
     ],
-    shortcut: "/icon.svg",
-    apple: "/apple-icon.svg",
+    shortcut: "/icon.png",
+    apple: "/apple-icon.png",
   },
 };
 

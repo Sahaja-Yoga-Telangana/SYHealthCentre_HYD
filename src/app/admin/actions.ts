@@ -11,24 +11,17 @@ import bcrypt from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
 import { sendEmail } from '@/lib/mail';
 
-// Seeding function
+// Seeding function (Creates Admin user if none exists and clears test data)
 export async function seedDatabase() {
   try {
     await dbConnect();
 
-    // Clear existing data
-    await User.deleteMany({});
-    await Doctor.deleteMany({});
-    await Session.deleteMany({});
-    await SessionRegistration.deleteMany({});
-    await Review.deleteMany({});
-
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash('password123', salt);
-
-    // Create default users
-    const users = await User.insertMany([
-      {
+    // Check if admin user already exists
+    let admin = await User.findOne({ role: 'Admin' });
+    if (!admin) {
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash('password123', salt);
+      admin = await User.create({
         name: 'Admin User',
         email: 'admin@syhealthcentre.org',
         passwordHash,
@@ -37,226 +30,17 @@ export async function seedDatabase() {
         nationality: 'Indian',
         contactNumber: '+919999999999',
         gender: 'Male',
-      },
-      {
-        name: 'Dr. Ramesh Sharma',
-        email: 'dr.sharma@syhealthcentre.org',
-        passwordHash,
-        role: 'Doctor',
-        yogiExperienceMonths: 120,
-        nationality: 'Indian',
-        contactNumber: '+919888888888',
-        gender: 'Male',
-      },
-      {
-        name: 'Dr. Jyoti Patel',
-        email: 'dr.patel@syhealthcentre.org',
-        passwordHash,
-        role: 'Doctor',
-        yogiExperienceMonths: 96,
-        nationality: 'Indian',
-        contactNumber: '+919777777777',
-        gender: 'Female',
-      },
-      {
-        name: 'Receptionist Lakshmi',
-        email: 'receptionist@syhealthcentre.org',
-        passwordHash,
-        role: 'Receptionist',
-        yogiExperienceMonths: 24,
-        nationality: 'Indian',
-        contactNumber: '+919666666666',
-        gender: 'Female',
-      },
-      {
-        name: 'Yogi Suresh Kumar',
-        email: 'suresh@gmail.com',
-        passwordHash,
-        role: 'Patient',
-        yogiExperienceMonths: 18,
-        nationality: 'Indian',
-        contactNumber: '+919555555555',
-        gender: 'Male',
-      },
-      {
-        name: 'Yogi Sarah Brown',
-        email: 'sarah@gmail.com',
-        passwordHash,
-        role: 'Patient',
-        yogiExperienceMonths: 8,
-        nationality: 'Non-Indian',
-        contactNumber: '+14155552671',
-        gender: 'Female',
-      },
-      {
-        name: 'Yogi Jean-Pierre',
-        email: 'jp@gmail.com',
-        passwordHash,
-        role: 'Patient',
-        yogiExperienceMonths: 14,
-        nationality: 'Non-Indian',
-        contactNumber: '+33612345678',
-        gender: 'Male',
-      },
-    ]);
-
-    // Doctors mapping
-    const drSharmaUser = users.find(u => u.email === 'dr.sharma@syhealthcentre.org');
-    const drPatelUser = users.find(u => u.email === 'dr.patel@syhealthcentre.org');
-
-    if (drSharmaUser && drPatelUser) {
-      await Doctor.insertMany([
-        {
-          userId: drSharmaUser._id,
-          specialty: 'Vibratory Diagnosis & Nadi Clearance',
-          availability: [
-            { dayOfWeek: 1, startTime: '10:00', endTime: '12:30' },
-            { dayOfWeek: 2, startTime: '10:00', endTime: '12:30' },
-            { dayOfWeek: 3, startTime: '10:00', endTime: '12:30' },
-            { dayOfWeek: 4, startTime: '10:00', endTime: '12:30' },
-            { dayOfWeek: 5, startTime: '10:00', endTime: '12:30' },
-            { dayOfWeek: 6, startTime: '10:00', endTime: '12:30' },
-          ],
-          active: true,
-        },
-        {
-          userId: drPatelUser._id,
-          specialty: 'Chakra Therapy & Footsoaking Science',
-          availability: [
-            { dayOfWeek: 1, startTime: '10:00', endTime: '12:30' },
-            { dayOfWeek: 3, startTime: '10:00', endTime: '12:30' },
-            { dayOfWeek: 5, startTime: '10:00', endTime: '12:30' },
-          ],
-          active: true,
-        },
-      ]);
+      });
     }
 
-    // Seed Sessions (Doctor Sessions with seat limits and stay options)
-    const sessions = await Session.insertMany([
-      {
-        title: 'Nadi Clearance & Vibratory Diagnosis Session',
-        description: 'Individual doctor consultation & subtle energy clearing for health centre stay patients.',
-        date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days later
-        time: '09:00 AM - 01:00 PM',
-        instructor: 'Dr. Ramesh Sharma (Ayurvedic/Sahaja Doctor)',
-        maxParticipants: 45,
-        registeredCount: 12,
-        stayAvailable: true,
-        isActive: true,
-      },
-      {
-        title: 'Footsoaking Science & Chakra Treatment Session',
-        description: 'Doctor guided element treatment for Ida and Pingla channels with stay option.',
-        date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days later
-        time: '10:00 AM - 02:00 PM',
-        instructor: 'Dr. Jyoti Patel (Holistic Specialist)',
-        maxParticipants: 45,
-        registeredCount: 8,
-        stayAvailable: true,
-        isActive: true,
-      },
-      {
-        title: 'Walk-in Subtle System & Meditation OPD Session',
-        description: 'Day-visit OPD consultation for new seekers and local visitors. Stay accommodation not included.',
-        date: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // tomorrow
-        time: '11:00 AM - 01:00 PM',
-        instructor: 'Dr. Sunita Rao (OPD Doctor)',
-        maxParticipants: 50,
-        registeredCount: 5,
-        stayAvailable: false,
-        isActive: true,
-      },
-    ]);
+    // Clear fake/dummy test data
+    await SessionRegistration.deleteMany({ email: { $in: ['suresh@gmail.com', 'sarah@gmail.com', 'jp@gmail.com'] } });
+    await Review.deleteMany({});
+    await Session.deleteMany({ instructor: { $regex: /Ayurvedic|Specialist/i } });
 
-    // Seed Reviews
-    await Review.insertMany([
-      {
-        name: 'Suresh Kumar',
-        rating: 5,
-        comment: 'A heavenly sanctuary. The vibratory diagnostics helped me clear my Agnya chakra completely.',
-        isApproved: true,
-      },
-      {
-        name: 'Sarah Brown',
-        rating: 5,
-        comment: 'I felt deep silence and thoughtless awareness during my first footsoak session here.',
-        isApproved: true,
-      },
-      {
-        name: 'Jean-Pierre',
-        rating: 4,
-        comment: 'Very peaceful atmosphere, perfect for balancing the left side channels.',
-        isApproved: false, // Pending moderation
-      },
-    ]);
-
-    // Seed Registrations
-    await SessionRegistration.insertMany([
-      {
-        sessionId: sessions[0]._id,
-        mrdNumber: 'MRD-20260717-001',
-        name: 'Yogi Suresh Kumar',
-        age: 32,
-        gender: 'Male',
-        dob: new Date('1994-05-15'),
-        bloodGroup: 'O+',
-        address: 'Secunderabad, Hyderabad, India',
-        phone: '+919555555555',
-        emergencyContact: 'Vijay Kumar (+919555555556)',
-        centerAddress: 'Secunderabad Sahaja Yoga Center',
-        coordinatorNumber: '+919988776655',
-        familyLinkage: 'Vijay Kumar (Brother)',
-        existingDiseases: 'Migraine on right side',
-        disclaimerAccepted: true,
-        status: 'Confirmed',
-      },
-      {
-        sessionId: sessions[0]._id,
-        mrdNumber: 'MRD-20260717-002',
-        name: 'Yogi Sarah Brown',
-        age: 28,
-        gender: 'Female',
-        dob: new Date('1998-09-20'),
-        bloodGroup: 'A-',
-        address: 'San Francisco, CA, USA',
-        phone: '+14155552671',
-        emergencyContact: 'John Brown (+14155552672)',
-        centerAddress: 'San Francisco Center',
-        coordinatorNumber: '+14155550000',
-        familyLinkage: '',
-        existingDiseases: 'Anxiety issues',
-        disclaimerAccepted: true,
-        status: 'Confirmed',
-      },
-      {
-        sessionId: sessions[1]._id,
-        mrdNumber: 'MRD-20260717-003',
-        name: 'Yogi Jean-Pierre',
-        age: 45,
-        gender: 'Male',
-        dob: new Date('1981-12-05'),
-        bloodGroup: 'B+',
-        address: 'Paris, France',
-        phone: '+33612345678',
-        emergencyContact: 'Marie Pierre (+33612345679)',
-        centerAddress: 'Paris Center',
-        coordinatorNumber: '+33600000000',
-        familyLinkage: '',
-        existingDiseases: '',
-        disclaimerAccepted: true,
-        status: 'Pending',
-      },
-    ]);
-
-    revalidatePath('/');
     revalidatePath('/admin');
-    revalidatePath('/admin/sessions');
-    revalidatePath('/admin/registrations');
-    revalidatePath('/admin/reviews');
-    return { success: true };
+    return { success: true, message: 'Database reset to clean state with Admin user.' };
   } catch (error: any) {
-    console.error('Seeding Action failed:', error);
     return { success: false, error: error.message };
   }
 }

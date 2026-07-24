@@ -2,6 +2,7 @@ import React from 'react';
 import dbConnect from '@/lib/db';
 import Session from '@/models/Session';
 import Link from 'next/link';
+import HeaderNav from '@/components/HeaderNav';
 
 export const revalidate = 0;
 
@@ -72,21 +73,7 @@ export default async function SessionsPage() {
   return (
     <div className="min-h-screen bg-cream text-warm-charcoal font-sans">
       {/* Navigation */}
-      <header className="border-b border-warm-gray py-4 px-4 sm:px-6 lg:px-8 sticky top-0 bg-cream/95 backdrop-blur-md z-50">
-        <div className="max-w-6xl mx-auto flex justify-between items-center gap-3">
-          <Link href="/" className="flex flex-col group">
-            <span className="font-semibold text-sm sm:text-lg tracking-widest text-teal-dark">SAHAJA YOGA</span>
-            <span className="text-[10px] sm:text-xs text-warm-charcoal/50 tracking-wider truncate">Health Sessions</span>
-          </Link>
-          <nav className="flex items-center space-x-6 sm:space-x-8 text-xs sm:text-sm font-medium tracking-wide">
-            <Link href="/" className="text-warm-charcoal/70 hover:text-saffron transition-colors">Home</Link>
-            <Link href="/about" className="text-warm-charcoal/70 hover:text-saffron transition-colors">About</Link>
-            <Link href="/sessions" className="text-saffron font-semibold">Sessions</Link>
-            <Link href="/book" className="text-warm-charcoal/70 hover:text-saffron transition-colors">Register</Link>
-            <Link href="/login" className="text-warm-charcoal/70 hover:text-saffron transition-colors">Login</Link>
-          </nav>
-        </div>
-      </header>
+      <HeaderNav />
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8 space-y-16">

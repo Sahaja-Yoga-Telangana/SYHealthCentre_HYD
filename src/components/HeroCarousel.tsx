@@ -9,6 +9,10 @@ const slides = [
     alt: 'Sahaja Yoga Research & Health Centre — Main Building',
   },
   {
+    src: '/images/ppt/image1.jpg',
+    alt: 'Sahaja Yoga Health Centre — Architectural Rendering & Campus Layout',
+  },
+  {
     src: '/images/health-centre-front.jpg',
     alt: 'Sahaja Yoga Health Centre — Campus & Surroundings',
   },

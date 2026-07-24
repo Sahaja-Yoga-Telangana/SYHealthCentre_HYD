@@ -443,8 +443,19 @@ export default function BookingWizard({
             </div>
 
             {sessions.length === 0 ? (
-              <div className="p-8 border border-dashed border-neutral-200 text-center text-xs text-neutral-400 font-mono">
-                No active sessions currently scheduled. Please check back soon or contact the health centre desk.
+              <div className="p-8 border border-warm-gray bg-cream rounded-xl text-center space-y-3">
+                <div className="w-10 h-10 bg-saffron/10 text-saffron rounded-full flex items-center justify-center mx-auto text-base font-bold">
+                  !
+                </div>
+                <h4 className="text-sm font-semibold text-teal-dark">No Events Currently Available</h4>
+                <p className="text-xs text-warm-charcoal/60 leading-relaxed max-w-sm mx-auto">
+                  No active health sessions or events are scheduled at this time. Registration is disabled until an admin schedules an upcoming session.
+                </p>
+                <div className="pt-2">
+                  <Link href="/" className="inline-block text-xs font-semibold px-5 py-2 bg-saffron text-white rounded-md hover:bg-saffron-dark transition-colors">
+                    Back to Home
+                  </Link>
+                </div>
               </div>
             ) : (
               <div className="space-y-4">
@@ -541,12 +552,17 @@ export default function BookingWizard({
               </div>
             )}
 
-            {selectedSessionId && (
-              <div className="pt-4 border-t border-neutral-200 flex justify-end">
+            {sessions.length > 0 && (
+              <div className="pt-4 border-t border-warm-gray flex justify-end">
                 <button
                   type="button"
                   onClick={() => {
-                    if (!checkInDate && selectedSession?.date) {
+                    setError('');
+                    if (!selectedSessionId) {
+                      setError('Please select an active health session from above.');
+                      return;
+                    }
+                    if (selectedSession && selectedSession.date) {
                       setCheckInDate(toDateInputValue(new Date(selectedSession.date)));
                     }
                     if (!checkOutDate && checkInDate) {
@@ -556,7 +572,7 @@ export default function BookingWizard({
                     }
                     setStep(2);
                   }}
-                  className="text-[10px] font-bold tracking-widest uppercase py-3 px-8 bg-neutral-950 text-white hover:bg-neutral-800 transition-colors"
+                  className="text-xs font-bold tracking-wider uppercase py-3 px-8 bg-saffron text-white hover:bg-saffron-dark transition-colors rounded-md shadow-sm"
                 >
                   CONTINUE TO PERSONAL DETAILS →
                 </button>

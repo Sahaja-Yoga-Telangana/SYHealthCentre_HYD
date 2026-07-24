@@ -4,16 +4,22 @@ import React, { useState, useTransition, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import HeaderNav from '@/components/HeaderNav';
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const urlError = searchParams.get('error');
 
   const [isPending, startTransition] = useTransition();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(
+    urlError === 'OAuthCallback' || urlError === 'redirect_uri_mismatch'
+      ? 'Google Sign-in is not configured with this domain yet. Please log in with email/password or use session registration.'
+      : ''
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,20 +59,20 @@ function LoginForm() {
   };
 
   const handleGoogleSignIn = () => {
-    signIn('google', { callbackUrl });
+    signIn('google', { callbackUrl: '/dashboard' });
   };
 
   return (
     <div className="space-y-6">
       {error && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-xs font-mono text-center">
+        <div className="p-3.5 bg-red-50 border border-red-200 text-red-600 text-xs font-mono text-center rounded-lg leading-relaxed">
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
+          <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/60 font-semibold mb-1">
             Email Address
           </label>
           <input
@@ -74,14 +80,14 @@ function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isPending}
-            className="w-full text-xs p-2.5 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
+            className="w-full text-xs p-3 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
             placeholder="e.g. yogi@gmail.com"
             required
           />
         </div>
 
         <div>
-          <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
+          <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/60 font-semibold mb-1">
             Password
           </label>
           <input
@@ -89,7 +95,7 @@ function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={isPending}
-            className="w-full text-xs p-2.5 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
+            className="w-full text-xs p-3 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
             placeholder="••••••••"
             required
           />
@@ -98,22 +104,22 @@ function LoginForm() {
         <button
           type="submit"
           disabled={isPending}
-          className="w-full text-[10px] font-bold tracking-widest uppercase py-3 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors disabled:bg-neutral-300"
+          className="w-full text-xs font-bold tracking-wider uppercase py-3 bg-saffron text-white hover:bg-saffron-dark transition-colors rounded-md shadow-sm disabled:bg-warm-gray"
         >
-          {isPending ? 'LOGGING IN...' : 'LOGIN WITH EMAIL'}
+          {isPending ? 'LOGGING IN...' : 'LOGIN TO PORTAL'}
         </button>
       </form>
 
-      <div className="relative flex py-2 items-center">
-        <div className="flex-grow border-t border-neutral-200"></div>
-        <span className="flex-shrink mx-4 text-[10px] text-neutral-400 font-bold uppercase font-mono">OR</span>
-        <div className="flex-grow border-t border-neutral-200"></div>
+      <div className="relative flex py-1 items-center">
+        <div className="flex-grow border-t border-warm-gray"></div>
+        <span className="flex-shrink mx-4 text-[10px] text-warm-charcoal/40 font-bold uppercase font-mono">OR</span>
+        <div className="flex-grow border-t border-warm-gray"></div>
       </div>
 
       <button
         type="button"
         onClick={handleGoogleSignIn}
-        className="w-full text-[10px] font-bold tracking-widest uppercase py-3 border border-neutral-200 hover:border-neutral-900 transition-colors flex items-center justify-center space-x-2 bg-neutral-50 hover:bg-white"
+        className="w-full text-xs font-semibold tracking-wider uppercase py-3 border border-warm-gray hover:border-saffron transition-colors flex items-center justify-center space-x-2 bg-cream hover:bg-cream-dark text-warm-charcoal rounded-md"
       >
         <svg className="w-4 h-4" viewBox="0 0 24 24">
           <path
@@ -135,43 +141,52 @@ function LoginForm() {
         </svg>
         <span>SIGN IN WITH GOOGLE</span>
       </button>
+
+      {/* Clear Distinction: New Seeker Session Registration */}
+      <div className="pt-4 border-t border-warm-gray bg-cream p-4 rounded-xl text-center space-y-2">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-saffron block">New Seeker / OPD Registration</span>
+        <p className="text-xs text-warm-charcoal/60 font-light">Register for an upcoming health session without creating an account.</p>
+        <Link
+          href="/book"
+          className="inline-block text-xs font-bold uppercase tracking-wider px-5 py-2.5 bg-teal text-white hover:bg-teal-dark transition-colors rounded-md shadow-sm mt-1"
+        >
+          Register for OPD Session →
+        </Link>
+      </div>
     </div>
   );
 }
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-6">
-      <div className="max-w-md w-full border border-neutral-200 bg-white p-8 space-y-6">
-        
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <Link href="/" className="font-bold tracking-widest text-sm text-neutral-900 block hover:text-neutral-500 transition-colors">
-            SAHAJA YOGA
-          </Link>
-          <h2 className="text-xl font-light tracking-wide text-neutral-800 uppercase">
-            Seeker Portal Login
-          </h2>
-          <p className="text-[10px] text-neutral-400 uppercase tracking-wider font-mono">
-            Research & Health Centre, Hyderabad
-          </p>
+    <div className="min-h-screen bg-cream text-warm-charcoal font-sans flex flex-col">
+      {/* Universal Header */}
+      <HeaderNav />
+
+      <main className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6">
+        <div className="max-w-md w-full border border-warm-gray bg-white p-8 space-y-6 rounded-2xl shadow-sm">
+          
+          {/* Header */}
+          <div className="text-center space-y-1 border-b border-warm-gray pb-4">
+            <span className="text-[10px] uppercase font-bold tracking-widest text-saffron block">Portal Access</span>
+            <h2 className="text-2xl font-light text-teal-dark">
+              Seeker & Admin Login
+            </h2>
+            <p className="text-xs text-warm-charcoal/50 font-light">
+              Sahaja Yoga Health Centre, Hyderabad
+            </p>
+          </div>
+
+          <Suspense fallback={<div className="text-xs text-warm-charcoal/40 font-mono text-center py-8">Loading sign in options...</div>}>
+            <LoginForm />
+          </Suspense>
+
+          <div className="pt-2 text-center border-t border-warm-gray text-[11px] text-warm-charcoal/40 font-mono space-y-1">
+            <p>Admin Login: <strong className="text-warm-charcoal">admin@syhealthcentre.org</strong></p>
+            <p>Password: <strong className="text-warm-charcoal">password123</strong></p>
+          </div>
         </div>
-
-        <Suspense fallback={<div className="text-xs text-neutral-400 font-mono text-center py-8">Loading session provider...</div>}>
-          <LoginForm />
-        </Suspense>
-
-        <p className="text-[10px] text-neutral-400 text-center font-light leading-relaxed">
-          Default Admin Credentials:<br />
-          <span className="font-mono font-semibold text-neutral-700">admin@syhealthcentre.org</span> &bull; Password: <span className="font-mono font-semibold text-neutral-700">password123</span>
-        </p>
-
-        <div className="pt-2 text-center border-t border-neutral-100">
-          <Link href="/" className="text-[10px] text-neutral-500 hover:text-neutral-900 underline uppercase tracking-wider">
-            ← Back to Home
-          </Link>
-        </div>
-      </div>
+      </main>
     </div>
   );
 }

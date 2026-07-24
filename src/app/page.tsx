@@ -10,6 +10,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getSiteSettings } from '@/app/admin/actions';
 
+import HeaderNav from '@/components/HeaderNav';
+
 export const revalidate = 0;
 
 export default async function Home() {
@@ -40,71 +42,8 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-cream text-warm-charcoal font-sans selection:bg-saffron selection:text-white">
-      {/* Announcement Banner (if configured in Admin) */}
-      {settings.announcementBanner && (
-        <div className="bg-saffron text-white text-xs font-semibold py-2 px-4 text-center tracking-wide shadow-inner">
-          {settings.announcementBanner}
-        </div>
-      )}
-
-      {/* Header */}
-      <header className="border-b border-warm-gray py-4 px-4 sm:px-6 lg:px-8 sticky top-0 bg-cream/95 backdrop-blur-md z-50">
-        <div className="max-w-6xl mx-auto flex justify-between items-center gap-3">
-          <Link href="/" className="flex flex-col group">
-            <span className="font-semibold text-sm sm:text-lg tracking-widest text-teal-dark">SAHAJA YOGA</span>
-            <span className="text-[10px] sm:text-xs text-warm-charcoal/50 tracking-wider truncate">Health Centre & Meditation Hall</span>
-          </Link>
-
-          <nav className="hidden md:flex items-center space-x-8 text-sm font-medium tracking-wide">
-            <Link href="/" className="text-saffron font-semibold">Home</Link>
-            <Link href="/about" prefetch={true} className="text-warm-charcoal/70 hover:text-saffron transition-colors">About</Link>
-            <Link href="/sessions" prefetch={true} className="text-warm-charcoal/70 hover:text-saffron transition-colors">Sessions</Link>
-          </nav>
-
-          <MobileNav />
-
-          <div className="flex items-center gap-2 sm:gap-4">
-            {user ? (
-              <>
-                {user.role === 'Admin' ? (
-                  <Link 
-                    href="/admin"
-                    prefetch={true}
-                    className="text-xs font-semibold px-4 py-2 border border-teal text-teal hover:bg-teal hover:text-white transition-colors rounded-md"
-                  >
-                    ADMIN PORTAL
-                  </Link>
-                ) : (
-                  <Link 
-                    href="/dashboard"
-                    prefetch={true}
-                    className="text-xs font-semibold px-4 py-2 border border-teal text-teal hover:bg-teal hover:text-white transition-colors rounded-md"
-                  >
-                    MY PORTAL
-                  </Link>
-                )}
-                <LogoutButton />
-              </>
-            ) : (
-              <Link 
-                href="/login" 
-                prefetch={true}
-                className="hidden md:inline-block text-xs font-semibold px-4 py-2 border border-warm-gray hover:border-saffron text-warm-charcoal transition-colors rounded-md"
-              >
-                LOGIN
-              </Link>
-            )}
-
-            <Link 
-              href="/book" 
-              prefetch={true}
-              className="text-[10px] sm:text-xs font-semibold px-3 sm:px-5 py-2 bg-saffron text-white hover:bg-saffron-dark transition-colors whitespace-nowrap rounded-md shadow-sm"
-            >
-              REGISTER NOW
-            </Link>
-          </div>
-        </div>
-      </header>
+      {/* Universal Header */}
+      <HeaderNav announcement={settings.announcementBanner} />
 
       {/* 1. Hero Section */}
       <section id="hero" className="relative h-[60vh] sm:h-[70vh] lg:h-[80vh] scroll-mt-24">

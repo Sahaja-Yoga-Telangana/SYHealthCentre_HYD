@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import HeaderNav from '@/components/HeaderNav';
 import shriMatajiPortrait from '../../../ShriMatajisPictures/PhotoSM-206.jpg';
 
 export const revalidate = 0;
@@ -7,22 +8,8 @@ export const revalidate = 0;
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-cream text-warm-charcoal font-sans">
-      {/* Header / Navigation */}
-      <header className="border-b border-warm-gray py-4 px-4 sm:px-6 lg:px-8 sticky top-0 bg-cream/95 backdrop-blur-md z-50">
-        <div className="max-w-6xl mx-auto flex justify-between items-center gap-3">
-          <Link href="/" className="flex flex-col group">
-            <span className="font-semibold text-sm sm:text-lg tracking-widest text-teal-dark">SAHAJA YOGA</span>
-            <span className="text-[10px] sm:text-xs text-warm-charcoal/50 tracking-wider truncate">Health Centre & Meditation Hall</span>
-          </Link>
-          <nav className="flex items-center space-x-6 sm:space-x-8 text-xs sm:text-sm font-medium tracking-wide">
-            <Link href="/" className="text-warm-charcoal/70 hover:text-saffron transition-colors">Home</Link>
-            <Link href="/about" className="text-saffron font-semibold">About</Link>
-            <Link href="/sessions" className="text-warm-charcoal/70 hover:text-saffron transition-colors">Sessions</Link>
-            <Link href="/book" className="text-warm-charcoal/70 hover:text-saffron transition-colors">Register</Link>
-            <Link href="/login" className="text-warm-charcoal/70 hover:text-saffron transition-colors">Login</Link>
-          </nav>
-        </div>
-      </header>
+      {/* Universal Shared Header */}
+      <HeaderNav />
 
       {/* Hero Banner */}
       <section className="bg-teal-dark text-white py-16 px-6 sm:px-12 text-center relative overflow-hidden">
@@ -42,12 +29,12 @@ export default function AboutPage() {
         
         {/* Founder & Spiritual Foundation */}
         <div className="grid md:grid-cols-[0.8fr_1.2fr] gap-8 lg:gap-12 items-center bg-white border border-warm-gray rounded-2xl p-6 sm:p-10 shadow-sm">
-          <div className="relative aspect-[3/4] overflow-hidden rounded-xl border border-warm-gray bg-cream-dark">
+          <div className="relative aspect-[3/4] overflow-hidden rounded-xl border border-warm-gray bg-cream-dark shadow-sm">
             <Image
               src={shriMatajiPortrait}
               alt="H.H. Shri Mataji Nirmala Devi"
               fill
-              className="object-cover"
+              className="object-cover object-[20%_center]"
               sizes="(max-width: 768px) 100vw, 35vw"
               priority
             />
@@ -68,15 +55,15 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* 3-Acre Resource Centre Campus Details (from PPTX) */}
+        {/* 3-Acre Resource Centre Infrastructure Details (from PPTX) */}
         <div className="space-y-8">
           <div className="text-center space-y-2">
-            <span className="text-xs font-bold uppercase tracking-[0.3em] text-saffron">Campus Infrastructure</span>
+            <span className="text-xs font-bold uppercase tracking-[0.3em] text-saffron">Resource Centre</span>
             <h2 className="text-2xl sm:text-3xl font-light text-teal-dark">
-              3-Acre Campus & <span className="font-semibold">Facilities</span>
+              Infrastructure
             </h2>
             <p className="text-sm text-warm-charcoal/60 max-w-xl mx-auto font-light">
-              Comprehensive facilities designed specifically for Sahaja Yoga collective clearing and medical evaluation.
+              Comprehensive facilities designed specifically for Sahaja Yoga collective clearing and medical evaluation on a 3-acre campus.
             </p>
           </div>
 
@@ -127,6 +114,25 @@ export default function AboutPage() {
               <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light">
                 Road officially named <strong className="font-semibold text-warm-charcoal">&quot;PARAM PUJYA SHRI MATAJI NIRMALA DEVI ROAD&quot;</strong> by Panchayat Raj Dept, Govt of Telangana.
               </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Real PPT Images Showcase */}
+        <div className="space-y-6 bg-white border border-warm-gray rounded-2xl p-6 sm:p-8 shadow-sm">
+          <div className="text-center space-y-1 border-b border-warm-gray pb-4">
+            <span className="text-xs font-bold uppercase tracking-widest text-saffron">Photo Gallery</span>
+            <h3 className="text-xl font-semibold text-teal-dark">Resource Centre & Campus Layout</h3>
+          </div>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-warm-gray bg-cream-dark">
+              <Image src="/images/ppt/image1.jpg" alt="Health Centre Design Layout" fill className="object-cover" />
+            </div>
+            <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-warm-gray bg-cream-dark">
+              <Image src="/images/ppt/image7.png" alt="Health Centre Construction Progress" fill className="object-cover" />
+            </div>
+            <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-warm-gray bg-cream-dark">
+              <Image src="/images/ppt/image6.png" alt="Health Centre Architecture Plan" fill className="object-cover" />
             </div>
           </div>
         </div>
