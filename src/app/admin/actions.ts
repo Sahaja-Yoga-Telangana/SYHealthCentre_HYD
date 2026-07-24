@@ -6,6 +6,7 @@ import Doctor from '@/models/Doctor';
 import Session from '@/models/Session';
 import SessionRegistration from '@/models/SessionRegistration';
 import Review from '@/models/Review';
+import SiteSettings from '@/models/SiteSettings';
 import bcrypt from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
 import { sendEmail } from '@/lib/mail';
@@ -937,5 +938,72 @@ export async function createWalkInRegistrationAction(payload: {
     return { success: true, mrdNumber };
   } catch (error: any) {
     return { success: false, error: error.message };
+  }
+}
+
+// ========== Site Settings ==========
+export async function updateSiteSettingsAction(data: {
+  reviewsEnabled: boolean;
+  bookingEnabled: boolean;
+  helpdeskPhone: string;
+  contactEmail: string;
+  upiId: string;
+  upiQrCodeUrl: string;
+  upiPayeeName: string;
+  announcementBanner: string;
+}) {
+  try {
+    await dbConnect();
+    let settings = await SiteSettings.findOne({});
+    if (!settings) {
+      settings = new SiteSettings(data);
+    } else {
+      settings.reviewsEnabled = data.reviewsEnabled;
+      settings.bookingEnabled = data.bookingEnabled;
+      settings.helpdeskPhone = data.helpdeskPhone;
+      settings.contactEmail = data.contactEmail;
+      settings.upiId = data.upiId;
+      settings.upiQrCodeUrl = data.upiQrCodeUrl;
+      settings.upiPayeeName = data.upiPayeeName;
+      settings.announcementBanner = data.announcementBanner;
+    }
+    await settings.save();
+    revalidatePath('/');
+    revalidatePath('/book');
+    revalidatePath('/admin/settings');
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function getSiteSettings() {
+  try {
+    await dbConnect();
+    let settings = await SiteSettings.findOne({});
+    if (!settings) {
+      settings = await SiteSettings.create({});
+    }
+    return {
+      reviewsEnabled: settings.reviewsEnabled,
+      bookingEnabled: settings.bookingEnabled,
+      helpdeskPhone: settings.helpdeskPhone || '',
+      contactEmail: settings.contactEmail || 'syhydhealthcentre@gmail.com',
+      upiId: settings.upiId || '',
+      upiQrCodeUrl: settings.upiQrCodeUrl || '',
+      upiPayeeName: settings.upiPayeeName || 'Sahaja Yoga Health Centre',
+      announcementBanner: settings.announcementBanner || '',
+    };
+  } catch (error) {
+    return {
+      reviewsEnabled: true,
+      bookingEnabled: true,
+      helpdeskPhone: '',
+      contactEmail: 'syhydhealthcentre@gmail.com',
+      upiId: '',
+      upiQrCodeUrl: '',
+      upiPayeeName: 'Sahaja Yoga Health Centre',
+      announcementBanner: '',
+    };
   }
 }

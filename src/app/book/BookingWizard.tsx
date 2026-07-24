@@ -28,6 +28,9 @@ interface FamilyMember {
 interface BookingWizardProps {
   sessions: SessionItem[];
   preselectedId?: string;
+  upiId?: string;
+  upiQrCodeUrl?: string;
+  upiPayeeName?: string;
 }
 
 function toDateInputValue(date: Date) {
@@ -58,7 +61,13 @@ function formatDisplayDate(dateValue: string) {
   }).format(new Date(`${dateValue}T00:00:00`));
 }
 
-export default function BookingWizard({ sessions, preselectedId }: BookingWizardProps) {
+export default function BookingWizard({ 
+  sessions, 
+  preselectedId,
+  upiId = '',
+  upiQrCodeUrl = '',
+  upiPayeeName = 'Sahaja Yoga Health Centre'
+}: BookingWizardProps) {
   const [isPending, startTransition] = useTransition();
   const [step, setStep] = useState(1);
   const [success, setSuccess] = useState(false);
@@ -95,16 +104,14 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
   });
   const [checkOutDate, setCheckOutDate] = useState('');
 
-  // Form States - Step 2: Personal Information & Medical Acknowledgement
+  // Form States - Step 2: Personal Information
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [gender, setGender] = useState<'Male' | 'Female'>('Male');
   const [dob, setDob] = useState('');
   const [bloodGroup, setBloodGroup] = useState('O+');
-  const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [emergencyContact, setEmergencyContact] = useState('');
   const [existingDiseases, setExistingDiseases] = useState('');
 
   // Form States - Step 3: Stay, Center Affiliation & Billing details
@@ -214,8 +221,8 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
     e.preventDefault();
     setError('');
 
-    if (!name.trim() || !age || !dob || !bloodGroup.trim() || !address.trim() || !phone.trim() || !email.trim() || !emergencyContact.trim()) {
-      setError('Please fill in all personal details.');
+    if (!name.trim() || !age || !dob || !bloodGroup.trim() || !phone.trim()) {
+      setError('Please fill in all required fields (Name, Age, DOB, Blood Group, Phone).');
       return;
     }
 
@@ -232,11 +239,13 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
       return;
     }
 
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      setError('Please enter a valid email address.');
-      return;
+    // Email validation (optional)
+    if (email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.trim())) {
+        setError('Please enter a valid email address.');
+        return;
+      }
     }
 
     setStep(3);
@@ -312,10 +321,10 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
         gender,
         dob,
         bloodGroup,
-        address,
+        address: '',
         phone,
-        email: email.trim(),
-        emergencyContact,
+        email: email.trim() || '',
+        emergencyContact: '',
         centerAddress,
         coordinatorNumber,
         familyMembers: formattedFamily.length > 0 ? formattedFamily : undefined,
@@ -342,79 +351,57 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
 
   if (success) {
     return (
-      <div className="max-w-2xl mx-auto border border-neutral-200 bg-white p-8 text-center space-y-6">
-        <div className="w-12 h-12 bg-neutral-900 text-white rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+      <div className="max-w-2xl mx-auto border border-warm-gray bg-white p-8 text-center space-y-6 rounded-xl">
+        <div className="w-14 h-14 bg-teal text-white rounded-full flex items-center justify-center mx-auto text-2xl font-bold">
           ✓
         </div>
         <div className="space-y-2">
-          <h2 className="text-xl font-light tracking-wide uppercase">Booking Confirmed</h2>
-          <p className="text-xs text-neutral-400 font-mono">
-            Thank you! Your stay booking is successful.
+          <h2 className="text-xl font-light tracking-wide text-teal-dark">Registration Confirmed</h2>
+          <p className="text-xs text-warm-charcoal/50 font-mono">
+            Thank you! Your session registration is successful.
           </p>
         </div>
 
-        <div className="border border-neutral-200 p-6 bg-neutral-50 space-y-4 max-w-md mx-auto text-left">
-          <div className="border-b border-neutral-200 pb-2">
-            <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold block">Patient ID (MRD Number)</span>
-            <span className="text-lg font-mono font-bold text-neutral-900 tracking-wider block mt-0.5">
+        <div className="border border-warm-gray p-6 bg-cream rounded-lg space-y-4 max-w-md mx-auto text-left">
+          <div className="border-b border-warm-gray pb-2">
+            <span className="text-[9px] uppercase tracking-widest text-saffron font-bold block">Patient ID (MRD Number)</span>
+            <span className="text-lg font-mono font-bold text-teal-dark tracking-wider block mt-0.5">
               {generatedMrd}
             </span>
           </div>
 
-          <div className="text-xs space-y-2 text-neutral-600 font-light">
-            <p>
-              <strong className="font-semibold text-neutral-800">Stay Dates:</strong> {formatDisplayDate(checkInDate)} to {formatDisplayDate(checkOutDate)}
-            </p>
-            <p>
-              <strong className="font-semibold text-neutral-800">Stay Slot:</strong> {selectedSession?.title || selectedCheckInSession?.title || 'Health Centre Stay'}
-            </p>
-            <p>
-              <strong className="font-semibold text-neutral-800">Yogi Seeker:</strong> {name}
-            </p>
-            <p>
-              <strong className="font-semibold text-neutral-800">Duration:</strong> {stayDaysCount} Night(s) of Stay
-            </p>
-            <p>
-              <strong className="font-semibold text-neutral-800">Total Seeker(s):</strong> {totalPeopleCount} Person(s)
-            </p>
-            <p>
-              <strong className="font-semibold text-neutral-800">Samarpan Fee:</strong> ₹{computedTotalSamarpan} &bull; <span className="uppercase font-semibold text-neutral-900">{paymentMode === 'UPI' ? 'UPI (Awaiting Verification)' : 'Pay on Arrival'}</span>
-            </p>
+          <div className="text-xs space-y-2 text-warm-charcoal/70 font-light">
+            <p><strong className="font-semibold text-warm-charcoal">Session:</strong> {selectedSession?.title || selectedCheckInSession?.title || 'Health Centre Session'}</p>
+            <p><strong className="font-semibold text-warm-charcoal">Dates:</strong> {formatDisplayDate(checkInDate)} to {formatDisplayDate(checkOutDate)}</p>
+            <p><strong className="font-semibold text-warm-charcoal">Participant:</strong> {name}</p>
+            <p><strong className="font-semibold text-warm-charcoal">Phone:</strong> {phone}</p>
+            <p><strong className="font-semibold text-warm-charcoal">Duration:</strong> {stayDaysCount} Night(s)</p>
+            <p><strong className="font-semibold text-warm-charcoal">Total Participants:</strong> {totalPeopleCount}</p>
+            <p><strong className="font-semibold text-warm-charcoal">Samarpan Fee:</strong> ₹{computedTotalSamarpan} &bull; <span className="uppercase font-semibold text-teal">{paymentMode === 'UPI' ? 'UPI (Awaiting Verification)' : 'Pay on Arrival'}</span></p>
             {paymentMode === 'UPI' && transactionId && (
-              <p>
-                <strong className="font-semibold text-neutral-800">Transaction ID:</strong> <span className="font-mono text-neutral-900">{transactionId}</span>
-              </p>
+              <p><strong className="font-semibold text-warm-charcoal">Transaction ID:</strong> <span className="font-mono">{transactionId}</span></p>
             )}
-            
             {familyMembers.length > 0 && (
-              <div className="pt-2 border-t border-neutral-200 mt-2 space-y-1">
-                <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-bold block">Family Members Registered:</span>
-                <ul className="list-disc list-inside text-neutral-600 pl-1">
-                  {familyMembers.map((fm, i) => (
-                    <li key={i}>{fm.name} ({fm.age} yrs, {fm.gender})</li>
-                  ))}
+              <div className="pt-2 border-t border-warm-gray mt-2 space-y-1">
+                <span className="text-[9px] uppercase tracking-wider text-saffron font-bold block">Family Members:</span>
+                <ul className="list-disc list-inside pl-1">
+                  {familyMembers.map((fm, i) => (<li key={i}>{fm.name} ({fm.age} yrs, {fm.gender})</li>))}
                 </ul>
               </div>
             )}
           </div>
         </div>
 
-        <p className="text-[10px] text-neutral-400 max-w-sm mx-auto leading-relaxed">
-          Please keep this Patient ID safe. You will need to present it at the check-in counter upon arrival to receive your Doctor token.
+        <p className="text-[10px] text-warm-charcoal/40 max-w-sm mx-auto leading-relaxed">
+          Please keep this Patient ID safe. Present it at check-in to receive your consultation token.
         </p>
 
         <div className="pt-4 flex justify-center space-x-4">
-          <button
-            onClick={() => window.print()}
-            className="text-[10px] font-semibold tracking-wider border border-neutral-200 px-6 py-2.5 hover:border-neutral-900 transition-colors"
-          >
-            PRINT CONFIRMATION
+          <button onClick={() => window.print()} className="text-[10px] font-semibold tracking-wider border border-warm-gray px-6 py-2.5 hover:border-saffron text-warm-charcoal transition-colors rounded-md">
+            PRINT RECEIPT
           </button>
-          <Link
-            href="/"
-            className="text-[10px] font-semibold tracking-wider bg-neutral-900 text-white px-6 py-2.5 hover:bg-neutral-800 transition-colors"
-          >
-            BACK TO PORTAL
+          <Link href="/" className="text-[10px] font-semibold tracking-wider bg-saffron text-white px-6 py-2.5 hover:bg-saffron-dark transition-colors rounded-md">
+            BACK TO HOME
           </Link>
         </div>
       </div>
@@ -422,23 +409,23 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
   }
 
   return (
-    <div className="max-w-2xl mx-auto border border-neutral-200 bg-white overflow-hidden">
+    <div className="max-w-2xl mx-auto border border-warm-gray bg-white overflow-hidden rounded-xl shadow-sm">
       {/* Step Indicators */}
-      <div className="grid grid-cols-3 border-b border-neutral-200 text-[10px] font-semibold uppercase tracking-wider text-center bg-neutral-50 select-none">
-        <div className={`p-4 border-r border-neutral-200 ${step === 1 ? 'bg-white text-neutral-950 font-bold' : 'text-neutral-400'}`}>
-          1. Select Dates
+      <div className="grid grid-cols-3 border-b border-warm-gray text-[10px] font-semibold uppercase tracking-wider text-center bg-cream select-none">
+        <div className={`p-4 border-r border-warm-gray transition-colors ${step === 1 ? 'bg-white text-saffron font-bold border-b-2 border-b-saffron' : step > 1 ? 'text-teal' : 'text-warm-charcoal/40'}`}>
+          1. Select Session
         </div>
-        <div className={`p-4 border-r border-neutral-200 ${step === 2 ? 'bg-white text-neutral-950 font-bold' : 'text-neutral-400'}`}>
-          2. Personal Details
+        <div className={`p-4 border-r border-warm-gray transition-colors ${step === 2 ? 'bg-white text-saffron font-bold border-b-2 border-b-saffron' : step > 2 ? 'text-teal' : 'text-warm-charcoal/40'}`}>
+          2. Your Details
         </div>
-        <div className={`p-4 ${step === 3 ? 'bg-white text-neutral-950 font-bold' : 'text-neutral-400'}`}>
-          3. Stay Info & Payment
+        <div className={`p-4 transition-colors ${step === 3 ? 'bg-white text-saffron font-bold border-b-2 border-b-saffron' : 'text-warm-charcoal/40'}`}>
+          3. Stay & Payment
         </div>
       </div>
 
-      <div className="p-8">
+      <div className="p-6 sm:p-8">
         {error && (
-          <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-xs font-mono">
+          <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-xs font-mono rounded-md">
             {error}
           </div>
         )}
@@ -578,153 +565,71 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
           </div>
         )}
 
-        {/* STEP 2: Personal Details & Medical acknowledgement */}
+        {/* STEP 2: Personal Details */}
         {step === 2 && (
           <form onSubmit={handleNextStep2} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                  placeholder="e.g. Rahul Sharma"
-                  required
-                />
-              </div>
+            <div>
+              <h3 className="text-sm font-semibold tracking-wider uppercase text-teal-dark mb-1">Your Details</h3>
+              <p className="text-xs text-warm-charcoal/50 font-light">Phone number is mandatory. Email is optional (for receiving confirmation).</p>
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                  Age
-                </label>
-                <input
-                  type="number"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                  placeholder="e.g. 35"
-                  required
-                />
+                <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/50 font-semibold mb-1">Phone Number *</label>
+                <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
+                  className="w-full text-sm p-2.5 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
+                  placeholder="+91 99999 99999" required />
               </div>
-
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                  Gender
-                </label>
-                <select
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value as any)}
-                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                >
+                <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/50 font-semibold mb-1">Full Name *</label>
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)}
+                  className="w-full text-sm p-2.5 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
+                  placeholder="e.g. Rahul Sharma" required />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/50 font-semibold mb-1">Age *</label>
+                <input type="number" value={age} onChange={(e) => setAge(e.target.value)}
+                  className="w-full text-sm p-2.5 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
+                  placeholder="e.g. 35" required />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/50 font-semibold mb-1">Gender *</label>
+                <select value={gender} onChange={(e) => setGender(e.target.value as any)}
+                  className="w-full text-sm p-2.5 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md">
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                 </select>
               </div>
-
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                  Date of Birth
-                </label>
-                <input
-                  type="date"
-                  value={dob}
-                  onChange={(e) => setDob(e.target.value)}
-                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50 font-mono"
-                  required
-                />
+                <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/50 font-semibold mb-1">Date of Birth *</label>
+                <input type="date" value={dob} onChange={(e) => setDob(e.target.value)}
+                  className="w-full text-sm p-2.5 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md font-mono" required />
               </div>
-
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                  Blood Group
-                </label>
-                <select
-                  value={bloodGroup}
-                  onChange={(e) => setBloodGroup(e.target.value)}
-                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                >
-                  <option value="O+">O+</option>
-                  <option value="O-">O-</option>
-                  <option value="A+">A+</option>
-                  <option value="A-">A-</option>
-                  <option value="B+">B+</option>
-                  <option value="B-">B-</option>
-                  <option value="AB+">AB+</option>
-                  <option value="AB-">AB-</option>
+                <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/50 font-semibold mb-1">Blood Group *</label>
+                <select value={bloodGroup} onChange={(e) => setBloodGroup(e.target.value)}
+                  className="w-full text-sm p-2.5 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md">
+                  <option value="O+">O+</option><option value="O-">O-</option>
+                  <option value="A+">A+</option><option value="A-">A-</option>
+                  <option value="B+">B+</option><option value="B-">B-</option>
+                  <option value="AB+">AB+</option><option value="AB-">AB-</option>
                 </select>
               </div>
-
-              <div>
-                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                  placeholder="e.g. +91 99999 99999"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                  placeholder="e.g. rahul@example.com"
-                  required
-                />
-              </div>
-
               <div className="md:col-span-2">
-                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                  Emergency Contact Details
-                </label>
-                <input
-                  type="text"
-                  value={emergencyContact}
-                  onChange={(e) => setEmergencyContact(e.target.value)}
-                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                  placeholder="e.g. Spouse Name, Phone (+91 98888 88888)"
-                  required
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mb-1">
-                  Advance Acknowledgement of Existing Diseases (Optional)
-                </label>
-                <textarea
-                  value={existingDiseases}
-                  onChange={(e) => setExistingDiseases(e.target.value)}
-                  rows={3}
-                  className="w-full text-xs p-2 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-neutral-50"
-                  placeholder="List any acute or chronic illnesses, allergies, or physical constraints..."
-                ></textarea>
+                <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/50 font-semibold mb-1">Email Address <span className="text-warm-charcoal/30">(Optional — for receipt)</span></label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                  className="w-full text-sm p-2.5 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
+                  placeholder="e.g. rahul@example.com" />
               </div>
             </div>
 
-            <div className="pt-4 border-t border-neutral-100 flex justify-between">
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                className="text-[10px] font-semibold tracking-wider border border-neutral-200 px-6 py-2.5 hover:border-neutral-900 transition-colors"
-              >
+            <div className="pt-4 border-t border-warm-gray flex justify-between">
+              <button type="button" onClick={() => setStep(1)}
+                className="text-[10px] font-semibold tracking-wider border border-warm-gray px-6 py-2.5 hover:border-saffron text-warm-charcoal transition-colors rounded-md">
                 ← BACK
               </button>
-              <button
-                type="submit"
-                className="text-[10px] font-semibold tracking-wider bg-neutral-900 text-white px-6 py-2.5 hover:bg-neutral-800 transition-colors"
-              >
+              <button type="submit"
+                className="text-[10px] font-semibold tracking-wider bg-saffron text-white px-6 py-2.5 hover:bg-saffron-dark transition-colors rounded-md">
                 CONTINUE TO STAY INFO →
               </button>
             </div>
@@ -905,11 +810,11 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                 {paymentMode === 'UPI' && (
                   <div className="space-y-4 pt-1">
                     <div className="flex flex-col items-center justify-center bg-white p-6 border border-neutral-200 space-y-4 text-center">
-                      {/* Big Scannable Dynamic QR Code */}
+                      {/* Scannable Dynamic or Admin-Provided QR Code */}
                       <div className="w-48 h-48 border border-neutral-200 p-2 bg-white flex items-center justify-center shadow-sm relative shrink-0">
                         <img
-                          src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-                            `upi://pay?pa=syhealthcentre@upi&pn=Sahaja%20Yoga%20Health%20Centre&am=${computedTotalSamarpan}&cu=INR`
+                          src={upiQrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
+                            `upi://pay?pa=${upiId || 'syhealthcentre@upi'}&pn=${encodeURIComponent(upiPayeeName)}&am=${computedTotalSamarpan}&cu=INR`
                           )}`}
                           alt="Scan to Pay UPI QR Code"
                           className="w-full h-full object-contain"
@@ -917,9 +822,11 @@ export default function BookingWizard({ sessions, preselectedId }: BookingWizard
                       </div>
                       
                       <div className="space-y-1.5 w-full">
-                        <p className="text-xs font-bold text-neutral-900 tracking-wide">
-                          UPI ID: <span className="font-mono text-neutral-700 bg-neutral-100 px-1.5 py-0.5 border select-all">syhealthcentre@upi</span>
-                        </p>
+                        {upiId && (
+                          <p className="text-xs font-bold text-neutral-900 tracking-wide">
+                            UPI ID: <span className="font-mono text-neutral-700 bg-neutral-100 px-1.5 py-0.5 border select-all">{upiId}</span>
+                          </p>
+                        )}
                         <p className="text-xs text-neutral-600 font-medium">
                           Payable Samarpan: <span className="font-bold font-mono text-neutral-900">₹{computedTotalSamarpan}</span>
                         </p>

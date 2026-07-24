@@ -13,7 +13,7 @@ export default function MobileNav() {
     <div className="md:hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="p-2 border border-neutral-200 hover:border-neutral-900 transition-colors"
+        className="p-2 border border-warm-gray hover:border-saffron transition-colors rounded-md"
         aria-label="Toggle navigation menu"
       >
         <svg
@@ -24,7 +24,7 @@ export default function MobileNav() {
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
-          className="text-neutral-900"
+          className="text-warm-charcoal"
         >
           {open ? (
             <path d="M18 6L6 18M6 6l12 12" />
@@ -35,28 +35,23 @@ export default function MobileNav() {
       </button>
 
       {open && (
-        <nav className="absolute top-full left-0 right-0 bg-white border-b border-neutral-200 px-8 py-6 space-y-4 z-50 shadow-md">
-          <a href="#hero" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">Home</a>
-          <div className="space-y-2">
-            <span className="block text-xs uppercase tracking-wider text-neutral-400 font-semibold">About</span>
-            <a href="#shri-mataji" onClick={() => setOpen(false)} className="block pl-4 text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">Shri Mataji</a>
-            <a href="#sahaja-yoga" onClick={() => setOpen(false)} className="block pl-4 text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">Sahaja Yoga</a>
-            <a href="#about-us" onClick={() => setOpen(false)} className="block pl-4 text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">About Us</a>
-          </div>
-          <Link href="/book" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">Stay Booking</Link>
-          <a href="#reviews" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide hover:text-neutral-500 transition-colors">Reviews</a>
+        <nav className="absolute top-full left-0 right-0 bg-cream border-b border-warm-gray px-8 py-6 space-y-4 z-50 shadow-lg">
+          <a href="#hero" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide text-warm-charcoal/70 hover:text-saffron transition-colors">Home</a>
+          <a href="#about" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide text-warm-charcoal/70 hover:text-saffron transition-colors">About</a>
+          <a href="#sessions" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide text-warm-charcoal/70 hover:text-saffron transition-colors">Sessions</a>
+          <a href="#contact" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide text-warm-charcoal/70 hover:text-saffron transition-colors">Contact</a>
           
-          <div className="border-t border-neutral-100 pt-4 space-y-2">
+          <div className="border-t border-warm-gray pt-4 space-y-2">
             {user ? (
               <>
-                <div className="text-[10px] text-neutral-400 font-mono">
-                  Logged in as: <strong className="text-neutral-700">{user.name}</strong>
+                <div className="text-[10px] text-warm-charcoal/50 font-mono">
+                  Logged in as: <strong className="text-teal">{user.name}</strong>
                 </div>
                 {user.role === 'Admin' && (
                   <Link 
                     href="/admin" 
                     onClick={() => setOpen(false)}
-                    className="block text-sm font-semibold hover:text-neutral-500 transition-colors"
+                    className="block text-sm font-semibold text-teal hover:text-teal-dark transition-colors"
                   >
                     ADMIN PANEL
                   </Link>
@@ -66,7 +61,7 @@ export default function MobileNav() {
                     setOpen(false);
                     signOut({ callbackUrl: '/' });
                   }}
-                  className="block w-full text-left text-sm font-semibold text-neutral-500 hover:text-neutral-900 transition-colors"
+                  className="block w-full text-left text-sm font-semibold text-warm-charcoal/50 hover:text-saffron transition-colors"
                 >
                   LOGOUT
                 </button>
@@ -75,7 +70,7 @@ export default function MobileNav() {
               <Link 
                 href="/login" 
                 onClick={() => setOpen(false)}
-                className="block text-sm font-semibold hover:text-neutral-500 transition-colors"
+                className="block text-sm font-semibold text-warm-charcoal/60 hover:text-saffron transition-colors"
               >
                 LOGIN
               </Link>
@@ -84,7 +79,7 @@ export default function MobileNav() {
             <Link 
               href="/book" 
               onClick={() => setOpen(false)}
-              className="block text-sm font-bold text-center py-2.5 bg-neutral-900 text-white tracking-widest uppercase hover:bg-neutral-800 transition-colors"
+              className="block text-sm font-bold text-center py-2.5 bg-saffron text-white tracking-widest uppercase hover:bg-saffron-dark transition-colors rounded-md"
             >
               Register Now
             </Link>
