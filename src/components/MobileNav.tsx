@@ -41,7 +41,7 @@ export default function MobileNav() {
           <Link href="/sessions" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide text-warm-charcoal/70 hover:text-saffron transition-colors">Sessions</Link>
           
           <div className="border-t border-warm-gray pt-4 space-y-3">
-            {user ? (
+            {user && (
               <>
                 <div className="text-[10px] text-warm-charcoal/50 font-mono">
                   Logged in as: <strong className="text-teal">{user.name}</strong>
@@ -73,22 +73,13 @@ export default function MobileNav() {
                   LOGOUT
                 </button>
               </>
-            ) : (
-              <Link 
-                href="/login" 
-                onClick={() => setOpen(false)}
-                className="block text-sm font-semibold text-warm-charcoal/70 hover:text-saffron transition-colors"
-              >
-                LOGIN
-              </Link>
             )}
-            
             <Link 
               href="/book" 
               onClick={() => setOpen(false)}
-              className="block text-sm font-bold text-center py-2.5 bg-saffron text-white tracking-widest uppercase hover:bg-saffron-dark transition-colors rounded-md"
+              className="block text-xs font-bold text-center py-2.5 bg-saffron text-white tracking-wider uppercase hover:bg-saffron-dark transition-colors rounded-md"
             >
-              Register Now
+              Register for Session
             </Link>
           </div>
         </nav>

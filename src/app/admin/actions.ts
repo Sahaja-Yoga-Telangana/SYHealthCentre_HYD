@@ -33,13 +33,16 @@ export async function seedDatabase() {
       });
     }
 
-    // Clear fake/dummy test data
-    await SessionRegistration.deleteMany({ email: { $in: ['suresh@gmail.com', 'sarah@gmail.com', 'jp@gmail.com'] } });
+    // Clear all dummy seed data completely
+    await SessionRegistration.deleteMany({});
     await Review.deleteMany({});
-    await Session.deleteMany({ instructor: { $regex: /Ayurvedic|Specialist/i } });
+    await Session.deleteMany({});
 
+    revalidatePath('/');
     revalidatePath('/admin');
-    return { success: true, message: 'Database reset to clean state with Admin user.' };
+    revalidatePath('/sessions');
+    revalidatePath('/book');
+    return { success: true, message: 'Database reset to 100% clean state with only Admin user.' };
   } catch (error: any) {
     return { success: false, error: error.message };
   }

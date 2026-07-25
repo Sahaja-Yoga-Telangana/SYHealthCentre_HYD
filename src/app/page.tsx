@@ -45,40 +45,77 @@ export default async function Home() {
       {/* Universal Header */}
       <HeaderNav announcement={settings.announcementBanner} />
 
-      {/* 1. Hero Section */}
-      <section id="hero" className="relative h-[65vh] sm:h-[75vh] lg:h-[85vh] scroll-mt-24">
-        <HeroCarousel />
-        
-        {/* Clean, Uncluttered Hero Text Overlay */}
-        <div className="absolute inset-0 flex flex-col justify-end z-20 px-6 sm:px-10 lg:px-16 pb-12 sm:pb-16 pointer-events-none">
-          <div className="max-w-2xl space-y-3 pointer-events-auto">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-[3px] bg-saffron rounded-full"></div>
-              <p className="text-xs sm:text-sm tracking-[0.3em] uppercase text-saffron font-bold [text-shadow:_0_1px_4px_rgba(0,0,0,0.9)]">
-                Nirmal Nagar, Telangana
+      {/* 1. Split Hero Section: 50% Shri Dhanvantari Portrait & 50% Slide Show */}
+      <section id="hero" className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-mt-24">
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-stretch">
+          
+          {/* Left 50%: Shri Dhanvantari Divine Portrait Card */}
+          <div className="relative min-h-[400px] sm:min-h-[480px] lg:min-h-[560px] rounded-2xl overflow-hidden border border-warm-gray bg-teal-dark shadow-md flex flex-col justify-end group">
+            <Image
+              src="/images/shri-dhanvantari.jpg"
+              alt="Shri Dhanvantari — Lord of Healing & Health"
+              fill
+              className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
+              priority
+            />
+            {/* Scrim Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-teal-dark/95 via-teal-dark/40 to-transparent pointer-events-none" />
+
+            {/* Title & Badge Overlay */}
+            <div className="relative z-10 p-6 sm:p-8 space-y-2 text-white">
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-saffron bg-warm-charcoal/60 px-3 py-1 rounded-full backdrop-blur-md inline-block">
+                Presiding Deity of Divine Healing
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-light text-white leading-tight">
+                Shri <span className="font-semibold text-cream">Dhanvantari</span>
+              </h2>
+              <p className="text-xs sm:text-sm text-white/80 font-light max-w-md leading-relaxed">
+                Divine aspect of God presiding over health, medicine, and vibratory cleansing in Sahaja Yoga.
               </p>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light tracking-tight text-white leading-tight [text-shadow:_0_2px_12px_rgba(0,0,0,0.9)]">
-              Sahaja Yoga <br />
-              <span className="font-bold text-cream">Health Centre Hyderabad</span>
-            </h1>
-            <div className="flex flex-wrap gap-3 pt-2">
-              <Link
-                href="/book"
-                prefetch={true}
-                className="inline-block text-xs sm:text-sm font-bold tracking-wider px-6 py-3 bg-saffron text-white hover:bg-saffron-dark transition-all rounded-md shadow-lg transform hover:-translate-y-0.5"
-              >
-                BOOK SESSION
-              </Link>
-              <Link
-                href="/about"
-                prefetch={true}
-                className="inline-block text-xs sm:text-sm font-semibold tracking-wider px-6 py-3 bg-white/20 text-white border border-white/40 hover:bg-white/30 backdrop-blur-md transition-all rounded-md hover:border-white shadow-md"
-              >
-                ABOUT US →
-              </Link>
+          </div>
+
+          {/* Right 50%: Slide Show & Hero Action Card */}
+          <div className="relative min-h-[400px] sm:min-h-[480px] lg:min-h-[560px] rounded-2xl overflow-hidden border border-warm-gray shadow-md flex flex-col justify-between bg-warm-charcoal text-white">
+            {/* Slideshow */}
+            <div className="absolute inset-0">
+              <HeroCarousel />
+            </div>
+
+            {/* Gradient Scrim for Legibility */}
+            <div className="absolute inset-0 bg-gradient-to-t from-warm-charcoal/90 via-warm-charcoal/30 to-transparent pointer-events-none z-10" />
+
+            {/* Hero Overlay Details & CTAs */}
+            <div className="relative z-20 p-6 sm:p-8 lg:p-10 mt-auto space-y-4">
+              <div className="space-y-2">
+                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] text-saffron block">
+                  Nirmal Nagar, Telangana
+                </span>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-light tracking-tight text-white leading-tight">
+                  National Sahaja Yoga <br />
+                  <span className="font-bold text-cream">Health Centre Hyderabad</span>
+                </h1>
+              </div>
+
+              <div className="flex flex-wrap gap-3 pt-2">
+                <Link
+                  href="/book"
+                  prefetch={true}
+                  className="inline-block text-xs sm:text-sm font-bold tracking-wider px-6 py-3 bg-saffron text-white hover:bg-saffron-dark transition-all rounded-md shadow-lg uppercase"
+                >
+                  Register for Session
+                </Link>
+                <Link
+                  href="/about"
+                  prefetch={true}
+                  className="inline-block text-xs sm:text-sm font-semibold tracking-wider px-6 py-3 bg-white/20 text-white border border-white/40 hover:bg-white/30 backdrop-blur-md transition-all rounded-md hover:border-white shadow-md uppercase"
+                >
+                  About Us →
+                </Link>
+              </div>
             </div>
           </div>
+
         </div>
       </section>
 

@@ -12,24 +12,26 @@ export default function HeaderNav({ announcement }: { announcement?: string }) {
   const user = session?.user;
 
   return (
-    <header className="sticky top-0 z-50 bg-cream/95 backdrop-blur-md border-b border-warm-gray">
+    <header className="sticky top-0 z-50 bg-cream/95 backdrop-blur-md border-b border-warm-gray shadow-sm">
       {announcement && (
         <div className="bg-saffron text-white text-xs font-semibold py-2 px-4 text-center tracking-wide shadow-inner">
           {announcement}
         </div>
       )}
 
-      <div className="max-w-6xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center gap-3">
-        {/* Single Line Brand Logo — No subtext, right next to title */}
-        <Link href="/" prefetch={true} className="flex items-center gap-2 group">
-          <span className="font-bold text-sm sm:text-base tracking-widest text-teal-dark">SAHAJA YOGA</span>
-          <span className="text-[11px] sm:text-xs font-medium text-warm-charcoal/60 group-hover:text-saffron transition-colors">
+      <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8 flex justify-between items-center gap-4">
+        {/* Header Branding: Small Font top line + Big Font bottom line */}
+        <Link href="/" prefetch={true} className="flex flex-col group leading-tight">
+          <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-warm-charcoal/70 group-hover:text-saffron transition-colors">
+            National Sahaja Yoga Resource Centre
+          </span>
+          <span className="text-base sm:text-xl font-bold text-teal-dark tracking-tight">
             Health Centre Hyderabad
           </span>
         </Link>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center space-x-7 text-sm font-medium tracking-wide">
+        <nav className="hidden md:flex items-center space-x-8 text-sm font-medium tracking-wide">
           <Link
             href="/"
             prefetch={true}
@@ -62,15 +64,15 @@ export default function HeaderNav({ announcement }: { announcement?: string }) {
         {/* Mobile Navigation */}
         <MobileNav />
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {user ? (
+        {/* Action Button: Register for Session */}
+        <div className="flex items-center gap-3">
+          {user && (
             <>
               {user.role === 'Admin' ? (
                 <Link
                   href="/admin"
                   prefetch={true}
-                  className="text-xs font-semibold px-3 sm:px-4 py-2 border border-teal text-teal hover:bg-teal hover:text-white transition-colors rounded-md"
+                  className="text-xs font-semibold px-3 py-2 border border-teal text-teal hover:bg-teal hover:text-white transition-colors rounded-md"
                 >
                   ADMIN PORTAL
                 </Link>
@@ -78,7 +80,7 @@ export default function HeaderNav({ announcement }: { announcement?: string }) {
                 <Link
                   href="/dashboard"
                   prefetch={true}
-                  className="text-xs font-semibold px-3 sm:px-4 py-2 border border-teal text-teal hover:bg-teal hover:text-white transition-colors rounded-md"
+                  className="text-xs font-semibold px-3 py-2 border border-teal text-teal hover:bg-teal hover:text-white transition-colors rounded-md"
                 >
                   MY PORTAL
                 </Link>
@@ -90,24 +92,14 @@ export default function HeaderNav({ announcement }: { announcement?: string }) {
                 LOGOUT
               </button>
             </>
-          ) : (
-            <Link
-              href="/login"
-              prefetch={true}
-              className={`hidden md:inline-block text-xs font-semibold px-3.5 py-2 border border-warm-gray text-warm-charcoal hover:border-saffron transition-colors rounded-md ${
-                pathname === '/login' ? 'bg-cream-dark font-bold' : ''
-              }`}
-            >
-              LOGIN
-            </Link>
           )}
 
           <Link
             href="/book"
             prefetch={true}
-            className="text-[10px] sm:text-xs font-semibold px-3 sm:px-4 py-2 bg-saffron text-white hover:bg-saffron-dark transition-colors whitespace-nowrap rounded-md shadow-sm"
+            className="text-[11px] sm:text-xs font-bold px-4 py-2.5 bg-saffron text-white hover:bg-saffron-dark transition-colors whitespace-nowrap rounded-md shadow-sm tracking-wide uppercase"
           >
-            REGISTER NOW
+            Register for Session
           </Link>
         </div>
       </div>
