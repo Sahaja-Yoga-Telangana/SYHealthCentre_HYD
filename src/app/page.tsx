@@ -58,9 +58,6 @@ export default async function Home() {
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight [text-shadow:_0_2px_12px_rgba(0,0,0,0.9)]">
               Health Centre <span className="font-light text-cream">Hyderabad</span>
             </h1>
-            <p className="text-xs sm:text-sm text-white/90 font-light max-w-xl [text-shadow:_0_1px_4px_rgba(0,0,0,0.9)]">
-              Nirmal Nagar, Telangana — Approved by H.H. Shri Mataji Nirmala Devi.
-            </p>
             <div className="pt-2">
               <Link
                 href="/book"

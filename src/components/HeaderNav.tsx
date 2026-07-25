@@ -20,12 +20,9 @@ export default function HeaderNav({ announcement }: { announcement?: string }) {
       )}
 
       <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8 flex justify-between items-center gap-4">
-        {/* Header Branding: Small Font top line + Sahaja Yoga Hyderabad bottom line */}
-        <Link href="/" prefetch={true} className="flex flex-col group leading-tight">
-          <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-warm-charcoal/70 group-hover:text-saffron transition-colors">
-            National Sahaja Yoga Resource Centre
-          </span>
-          <span className="text-base sm:text-xl font-bold text-teal-dark tracking-tight">
+        {/* Header Branding */}
+        <Link href="/" prefetch={true} className="group leading-tight">
+          <span className="text-base sm:text-xl font-bold text-teal-dark tracking-tight group-hover:text-saffron transition-colors">
             Sahaja Yoga Hyderabad
           </span>
         </Link>
