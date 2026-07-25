@@ -17,13 +17,13 @@ export async function seedDatabase() {
     await dbConnect();
 
     // Check if admin user already exists
-    let admin = await User.findOne({ role: 'Admin' });
+    let admin = await User.findOne({ role: 'Admin', email: 'admin' });
     if (!admin) {
       const salt = await bcrypt.genSalt(10);
-      const passwordHash = await bcrypt.hash('password123', salt);
+      const passwordHash = await bcrypt.hash('admin@1970', salt);
       admin = await User.create({
         name: 'Admin User',
-        email: 'admin@syhealthcentre.org',
+        email: 'admin',
         passwordHash,
         role: 'Admin',
         yogiExperienceMonths: 36,

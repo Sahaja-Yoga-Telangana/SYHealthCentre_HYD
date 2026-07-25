@@ -167,15 +167,15 @@ function AuthForms() {
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-[10px] uppercase tracking-widest text-warm-charcoal/60 font-semibold mb-1">
-              Email Address *
+              Username / Email *
             </label>
             <input
-              type="email"
+              type="text"
               value={loginEmail}
               onChange={(e) => setLoginEmail(e.target.value)}
               disabled={isPending}
               className="w-full text-xs p-3 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
-              placeholder="e.g. yogi@gmail.com"
+              placeholder="Username or Email"
               required
             />
           </div>

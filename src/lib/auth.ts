@@ -52,11 +52,13 @@ export const authOptions: AuthOptions = {
         }
 
         await dbConnect();
-        
-        // Find user by email
-        const user = await User.findOne({ email: credentials.email.toLowerCase() });
+        // Find user by email or username
+        const input = credentials.email.trim();
+        const user = await User.findOne({
+          $or: [{ email: input }, { email: input.toLowerCase() }],
+        });
         if (!user) {
-          throw new Error('No user found with this email');
+          throw new Error('No account found with these credentials');
         }
 
         if (!user.passwordHash) {
