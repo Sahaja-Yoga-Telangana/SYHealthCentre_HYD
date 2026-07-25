@@ -9,10 +9,6 @@ const slides = [
     alt: 'Sahaja Yoga Health Centre — Main Building',
   },
   {
-    src: '/images/ppt/image11.png',
-    alt: 'Sahaja Yoga Health Centre — Constructed Building',
-  },
-  {
     src: '/images/ppt/image4.jpeg',
     alt: 'Meditation Hall & Glass Altar (In Construction)',
   },
