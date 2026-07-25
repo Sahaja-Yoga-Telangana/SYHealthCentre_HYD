@@ -6,16 +6,16 @@ export async function middleware(req: NextRequest) {
   const url = req.nextUrl;
   const hostname = req.headers.get('host') || '';
 
-  // Check if request comes from admin subdomain (e.g. admin.sahajahealthcentrehyd.com)
-  const isAdminSubdomain = hostname.startsWith('admin.');
+  // Check if request comes from Vercel URL (.vercel.app) or admin subdomain
+  const isVercelOrAdminHost = hostname.includes('.vercel.app') || hostname.startsWith('admin.');
 
-  // If visiting root of admin subdomain, rewrite to /admin
-  if (isAdminSubdomain && url.pathname === '/') {
+  // If visiting root on Vercel URL or admin subdomain, rewrite to /admin
+  if (isVercelOrAdminHost && url.pathname === '/') {
     return NextResponse.rewrite(new URL('/admin', req.url));
   }
 
-  // Protect /admin routes and admin subdomain
-  if (url.pathname.startsWith('/admin') || (isAdminSubdomain && url.pathname !== '/login')) {
+  // Protect /admin routes and Vercel/admin host
+  if (url.pathname.startsWith('/admin') || (isVercelOrAdminHost && url.pathname !== '/login')) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     
     // If not authenticated or not Admin role, redirect to login page with callback to /admin
