@@ -13,10 +13,6 @@ const slides = [
     alt: 'Sahaja Yoga Health Centre — Constructed Building',
   },
   {
-    src: '/images/ppt/image1.jpg',
-    alt: 'Sahaja Yoga Health Centre — Architectural Rendering',
-  },
-  {
     src: '/images/ppt/image4.jpeg',
     alt: 'Meditation Hall & Glass Altar (In Construction)',
   },
@@ -27,18 +23,6 @@ const slides = [
   {
     src: '/images/ppt/image7.png',
     alt: 'Shoebeat Ground & Open Lawn',
-  },
-  {
-    src: '/images/ppt/image8.jpg',
-    alt: 'Campus Layout Plan',
-  },
-  {
-    src: '/images/ppt/image9.jpeg',
-    alt: 'Health Centre Under Construction',
-  },
-  {
-    src: '/images/ppt/image10.jpeg',
-    alt: 'Health Centre Under Construction Phase',
   },
   {
     src: '/images/health-centre-front.jpg',
