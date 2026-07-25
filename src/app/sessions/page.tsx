@@ -2,6 +2,7 @@ import React from 'react';
 import dbConnect from '@/lib/db';
 import Session from '@/models/Session';
 import Link from 'next/link';
+import Image from 'next/image';
 import HeaderNav from '@/components/HeaderNav';
 
 export const revalidate = 0;
@@ -13,6 +14,8 @@ interface SessionItem {
   date: Date;
   time: string;
   instructor: string;
+  imageUrl?: string;
+  limitSeats?: boolean;
   maxParticipants: number;
   registeredCount: number;
   stayAvailable: boolean;
@@ -40,6 +43,8 @@ export default async function SessionsPage() {
       date: s.date,
       time: s.time,
       instructor: s.instructor,
+      imageUrl: s.imageUrl || '',
+      limitSeats: s.limitSeats !== undefined ? s.limitSeats : true,
       maxParticipants: s.maxParticipants,
       registeredCount: s.registeredCount,
       stayAvailable: s.stayAvailable ?? true,
@@ -53,6 +58,8 @@ export default async function SessionsPage() {
       date: s.date,
       time: s.time,
       instructor: s.instructor,
+      imageUrl: s.imageUrl || '',
+      limitSeats: s.limitSeats !== undefined ? s.limitSeats : true,
       maxParticipants: s.maxParticipants,
       registeredCount: s.registeredCount,
       stayAvailable: s.stayAvailable ?? true,
@@ -95,56 +102,70 @@ export default async function SessionsPage() {
                 return (
                   <div
                     key={sess.id}
-                    className={`bg-white border rounded-2xl p-6 space-y-4 shadow-sm transition-all hover:shadow-md ${
+                    className={`bg-white border rounded-2xl overflow-hidden shadow-sm transition-all hover:shadow-md flex flex-col justify-between ${
                       isFull ? 'border-warm-gray opacity-60' : 'border-warm-gray hover:border-saffron/50'
                     }`}
                   >
-                    <div className="space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="text-base font-semibold text-teal-dark leading-snug">{sess.title}</h3>
-                        <span
-                          className={`shrink-0 px-2.5 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded-full ${
-                            sess.stayAvailable
-                              ? 'bg-sage/10 text-sage border border-sage/30'
-                              : 'bg-saffron/10 text-saffron border border-saffron/30'
+                    {sess.imageUrl && (
+                      <div className="relative w-full aspect-[16/9] bg-cream-dark border-b border-warm-gray">
+                        <Image src={sess.imageUrl} alt={sess.title} fill className="object-cover" />
+                      </div>
+                    )}
+
+                    <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
+                      <div className="space-y-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="text-base font-semibold text-teal-dark leading-snug">{sess.title}</h3>
+                          <span
+                            className={`shrink-0 px-2.5 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded-full ${
+                              sess.stayAvailable
+                                ? 'bg-sage/10 text-sage border border-sage/30'
+                                : 'bg-saffron/10 text-saffron border border-saffron/30'
+                            }`}
+                          >
+                            {sess.stayAvailable ? 'Stay Available' : 'Day Visit'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-warm-charcoal/60 font-light leading-relaxed line-clamp-3">
+                          {sess.description}
+                        </p>
+                      </div>
+
+                      <div className="space-y-1.5 text-xs font-mono text-warm-charcoal/60 pt-2 border-t border-warm-gray">
+                        <div className="flex items-center gap-2">
+                          <span>Coordinator / Dr. <strong className="text-warm-charcoal">{sess.instructor}</strong></span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span>{new Date(sess.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                          <span>•</span>
+                          <span>{sess.time}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-3 border-t border-warm-gray">
+                        <div>
+                          {sess.limitSeats === false ? (
+                            <span className="text-xs font-bold text-sage">UNLIMITED SEATS</span>
+                          ) : (
+                            <>
+                              <span className={`text-xs font-bold ${isFull ? 'text-red-500' : remaining < 10 ? 'text-saffron' : 'text-sage'}`}>
+                                {isFull ? 'FULLY BOOKED' : `${remaining} seats left`}
+                              </span>
+                              <span className="text-[10px] text-warm-charcoal/40 block font-mono">{sess.maxParticipants} capacity</span>
+                            </>
+                          )}
+                        </div>
+                        <Link
+                          href={isFull && sess.limitSeats !== false ? '#' : `/book?sessionId=${sess.id}`}
+                          className={`text-[10px] font-bold tracking-wider uppercase px-4 py-2 rounded-md transition-colors ${
+                            isFull && sess.limitSeats !== false
+                              ? 'bg-warm-gray text-warm-charcoal/40 cursor-not-allowed'
+                              : 'bg-saffron text-white hover:bg-saffron-dark shadow-sm'
                           }`}
                         >
-                          {sess.stayAvailable ? 'Stay: Yes' : 'Day Visit'}
-                        </span>
+                          {isFull && sess.limitSeats !== false ? 'FULL' : 'REGISTER →'}
+                        </Link>
                       </div>
-                      <p className="text-xs text-warm-charcoal/60 font-light leading-relaxed line-clamp-3">
-                        {sess.description}
-                      </p>
-                    </div>
-
-                    <div className="space-y-1.5 text-xs font-mono text-warm-charcoal/60">
-                      <div className="flex items-center gap-2">
-                        <span>Dr. <strong className="text-warm-charcoal">{sess.instructor}</strong></span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span>{new Date(sess.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                        <span>•</span>
-                        <span>{sess.time}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-3 border-t border-warm-gray">
-                      <div>
-                        <span className={`text-xs font-bold ${isFull ? 'text-red-500' : remaining < 10 ? 'text-saffron' : 'text-sage'}`}>
-                          {isFull ? 'FULLY BOOKED' : `${remaining} seats left`}
-                        </span>
-                        <span className="text-[10px] text-warm-charcoal/40 block font-mono">{sess.maxParticipants} max capacity</span>
-                      </div>
-                      <Link
-                        href={isFull ? '#' : `/book?sessionId=${sess.id}`}
-                        className={`text-[10px] font-bold tracking-wider uppercase px-4 py-2 rounded-md transition-colors ${
-                          isFull
-                            ? 'bg-warm-gray text-warm-charcoal/40 cursor-not-allowed'
-                            : 'bg-saffron text-white hover:bg-saffron-dark shadow-sm'
-                        }`}
-                      >
-                        {isFull ? 'FULL' : 'REGISTER →'}
-                      </Link>
                     </div>
                   </div>
                 );

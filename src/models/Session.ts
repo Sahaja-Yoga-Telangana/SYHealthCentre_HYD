@@ -5,8 +5,10 @@ export interface ISession extends Document {
   description: string;
   date: Date;
   time: string; // e.g. "10:00 AM - 12:00 PM"
-  instructor: string; // Doctor or Instructor Name
-  maxParticipants: number; // Total Doctor Seat Capacity (e.g. 45)
+  instructor: string; // Doctor or Coordinator Name
+  imageUrl?: string; // Event / Session picture URL
+  limitSeats: boolean; // Seats limit ON/OFF toggle
+  maxParticipants: number; // Seat Capacity if limitSeats is true
   registeredCount: number; // Booked Seats
   stayAvailable: boolean; // Stay/Accommodation Allowed: Yes or No
   isActive: boolean;
@@ -21,6 +23,8 @@ const SessionSchema = new Schema<ISession>(
     date: { type: Date, required: true },
     time: { type: String, required: true },
     instructor: { type: String, required: true },
+    imageUrl: { type: String, default: '' },
+    limitSeats: { type: Boolean, default: true },
     maxParticipants: { type: Number, default: 45 },
     registeredCount: { type: Number, default: 0 },
     stayAvailable: { type: Boolean, default: true },

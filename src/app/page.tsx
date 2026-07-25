@@ -197,68 +197,80 @@ export default async function Home() {
           {hasSessions ? (
             <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {sessions.map((sess) => {
+                const isUnlimited = sess.limitSeats === false;
                 const remaining = Math.max(0, sess.maxParticipants - sess.registeredCount);
-                const isFull = remaining === 0;
+                const isFull = !isUnlimited && remaining === 0;
                 return (
                   <div
                     key={sess._id.toString()}
-                    className={`bg-white border rounded-2xl p-6 space-y-4 transition-all hover:shadow-md ${
+                    className={`bg-white border rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between transition-all hover:shadow-md ${
                       isFull ? 'border-warm-gray opacity-60' : 'border-warm-gray hover:border-saffron/50'
                     }`}
                   >
-                    <div className="space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="text-base font-semibold text-teal-dark leading-snug">{sess.title}</h3>
-                        <span
-                          className={`shrink-0 px-2.5 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded-full ${
-                            sess.stayAvailable
-                              ? 'bg-sage/20 text-sage-dark'
-                              : 'bg-warm-gray text-warm-charcoal/60'
-                          }`}
-                        >
-                          {sess.stayAvailable ? 'Stay Included' : 'Day Visit'}
-                        </span>
+                    {sess.imageUrl && (
+                      <div className="relative w-full aspect-[16/9] bg-cream-dark border-b border-warm-gray">
+                        <Image src={sess.imageUrl} alt={sess.title} fill className="object-cover" />
                       </div>
-                      <p className="text-xs text-warm-charcoal/70 font-light line-clamp-3">{sess.description}</p>
-                    </div>
+                    )}
 
-                    <div className="text-xs space-y-1 text-warm-charcoal/70 pt-2 border-t border-warm-gray font-light">
-                      <p>
-                        <strong className="font-semibold text-warm-charcoal">Doctor:</strong> {sess.instructor}
-                      </p>
-                      <p>
-                        <strong className="font-semibold text-warm-charcoal">Date:</strong>{' '}
-                        {new Date(sess.date).toLocaleDateString('en-IN', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
-                      </p>
-                      <p>
-                        <strong className="font-semibold text-warm-charcoal">Seats Left:</strong>{' '}
-                        <span className={isFull ? 'text-red-500 font-bold' : 'text-teal font-bold'}>
-                          {remaining}
-                        </span>{' '}
-                        / {sess.maxParticipants}
-                      </p>
-                    </div>
+                    <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
+                      <div className="space-y-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="text-base font-semibold text-teal-dark leading-snug">{sess.title}</h3>
+                          <span
+                            className={`shrink-0 px-2.5 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded-full ${
+                              sess.stayAvailable
+                                ? 'bg-sage/20 text-sage-dark'
+                                : 'bg-warm-gray text-warm-charcoal/60'
+                            }`}
+                          >
+                            {sess.stayAvailable ? 'Stay Included' : 'Day Visit'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-warm-charcoal/70 font-light line-clamp-3">{sess.description}</p>
+                      </div>
 
-                    <div className="pt-2">
-                      {isFull ? (
-                        <button
-                          disabled
-                          className="w-full text-center text-xs font-bold uppercase tracking-wider py-2.5 bg-warm-gray text-warm-charcoal/40 rounded-md cursor-not-allowed"
-                        >
-                          Session Full
-                        </button>
-                      ) : (
-                        <Link
-                          href={`/book?sessionId=${sess._id.toString()}`}
-                          className="block text-center text-xs font-bold uppercase tracking-wider py-2.5 bg-saffron text-white hover:bg-saffron-dark transition-colors rounded-md shadow-sm"
-                        >
-                          Select & Register →
-                        </Link>
-                      )}
+                      <div className="text-xs space-y-1 text-warm-charcoal/70 pt-2 border-t border-warm-gray font-light">
+                        <p>
+                          <strong className="font-semibold text-warm-charcoal">Coordinator / Doctor:</strong> {sess.instructor}
+                        </p>
+                        <p>
+                          <strong className="font-semibold text-warm-charcoal">Date:</strong>{' '}
+                          {new Date(sess.date).toLocaleDateString('en-IN', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
+                        </p>
+                        <p>
+                          <strong className="font-semibold text-warm-charcoal">Seat Availability:</strong>{' '}
+                          {isUnlimited ? (
+                            <span className="text-sage font-bold">Unlimited Seats</span>
+                          ) : (
+                            <span className={isFull ? 'text-red-500 font-bold' : 'text-teal font-bold'}>
+                              {remaining} / {sess.maxParticipants} left
+                            </span>
+                          )}
+                        </p>
+                      </div>
+
+                      <div className="pt-2">
+                        {isFull ? (
+                          <button
+                            disabled
+                            className="w-full text-center text-xs font-bold uppercase tracking-wider py-2.5 bg-warm-gray text-warm-charcoal/40 rounded-md cursor-not-allowed"
+                          >
+                            Session Full
+                          </button>
+                        ) : (
+                          <Link
+                            href={`/book?sessionId=${sess._id.toString()}`}
+                            className="block text-center text-xs font-bold uppercase tracking-wider py-2.5 bg-saffron text-white hover:bg-saffron-dark transition-colors rounded-md shadow-sm"
+                          >
+                            Select & Register →
+                          </Link>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );

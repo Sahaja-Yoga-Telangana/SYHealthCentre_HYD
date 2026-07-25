@@ -112,7 +112,9 @@ export async function createSessionAction(data: {
   date: string;
   time: string;
   instructor: string;
-  maxParticipants: number;
+  imageUrl?: string;
+  limitSeats?: boolean;
+  maxParticipants?: number;
   stayAvailable?: boolean;
 }) {
   try {
@@ -120,6 +122,9 @@ export async function createSessionAction(data: {
     await Session.create({
       ...data,
       date: new Date(data.date),
+      imageUrl: data.imageUrl || '',
+      limitSeats: data.limitSeats !== undefined ? data.limitSeats : true,
+      maxParticipants: data.maxParticipants || 45,
       stayAvailable: data.stayAvailable !== undefined ? data.stayAvailable : true,
       registeredCount: 0,
       isActive: true,

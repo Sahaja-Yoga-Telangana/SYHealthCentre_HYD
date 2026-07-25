@@ -14,6 +14,7 @@ export default async function AdminLayout({
   if (!session || session.user.role !== 'Admin') {
     redirect('/login?callbackUrl=/admin');
   }
+
   return (
     <div className="min-h-screen bg-white text-neutral-900 font-sans md:flex">
       {/* Sidebar */}
@@ -24,7 +25,7 @@ export default async function AdminLayout({
             <Link href="/" className="flex flex-col group">
               <span className="font-semibold tracking-widest text-sm text-neutral-900">SAHAJA YOGA</span>
               <span className="text-[10px] text-neutral-400 uppercase tracking-wider group-hover:text-neutral-900 transition-colors">
-                ← Back to Portal
+                ← Back to Website
               </span>
             </Link>
           </div>
@@ -41,25 +42,13 @@ export default async function AdminLayout({
               href="/admin/sessions"
               className="whitespace-nowrap flex items-center space-x-3 px-3 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-neutral-50 border border-neutral-200 md:border-transparent md:hover:border-neutral-200 transition-all"
             >
-              <span>Health Sessions</span>
+              <span>Sessions</span>
             </Link>
             <Link
               href="/admin/registrations"
               className="whitespace-nowrap flex items-center space-x-3 px-3 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-neutral-50 border border-neutral-200 md:border-transparent md:hover:border-neutral-200 transition-all"
             >
               <span>Registrations</span>
-            </Link>
-            <Link
-              href="/admin/calendar"
-              className="whitespace-nowrap flex items-center space-x-3 px-3 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-neutral-50 border border-neutral-200 md:border-transparent md:hover:border-neutral-200 transition-all"
-            >
-              <span>Calendar</span>
-            </Link>
-            <Link
-              href="/admin/consultations"
-              className="whitespace-nowrap flex items-center space-x-3 px-3 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-neutral-50 border border-neutral-200 md:border-transparent md:hover:border-neutral-200 transition-all"
-            >
-              <span>Consultations</span>
             </Link>
             <Link
               href="/admin/reviews"
@@ -71,7 +60,7 @@ export default async function AdminLayout({
               href="/admin/settings"
               className="whitespace-nowrap flex items-center space-x-3 px-3 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-neutral-50 border border-neutral-200 md:border-transparent md:hover:border-neutral-200 transition-all"
             >
-              <span>Settings</span>
+              <span>Settings & Flags</span>
             </Link>
             <Link
               href="/admin/admins"
@@ -84,8 +73,8 @@ export default async function AdminLayout({
 
         {/* Footer info */}
         <div className="hidden md:block p-6 border-t border-neutral-200 text-[10px] text-neutral-400">
-          <div>SYHC Hyderabad Admin Panel</div>
-          <div className="mt-1">v1.0.0</div>
+          <div>SYHC Admin Panel</div>
+          <div className="mt-1">v2.0.0</div>
         </div>
       </aside>
 
@@ -99,9 +88,8 @@ export default async function AdminLayout({
             </span>
           </div>
         </header>
-        <div className="p-4 md:p-8 max-w-6xl mx-auto">
-          {children}
-        </div>
+
+        <div className="p-4 md:p-8">{children}</div>
       </main>
     </div>
   );
