@@ -72,13 +72,10 @@ export default async function SessionsPage() {
         
         {/* Header */}
         <div className="text-center space-y-3">
-          <span className="text-xs font-bold uppercase tracking-[0.3em] text-saffron">Collective Seminars & OPD</span>
+          <span className="text-xs font-bold uppercase tracking-[0.3em] text-saffron">Collective Seminars</span>
           <h1 className="text-3xl sm:text-4xl font-light text-teal-dark">
             Health Centre <span className="font-semibold">Sessions</span>
           </h1>
-          <p className="text-sm text-warm-charcoal/60 max-w-xl mx-auto font-light">
-            Explore upcoming doctor consultations and past collective clearance workshops held at Nirmal Nagar.
-          </p>
         </div>
 
         {/* Upcoming Sessions Section */}

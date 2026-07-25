@@ -1,15 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import MobileNav from '@/components/MobileNav';
 import HeroCarousel from '@/components/HeroCarousel';
-import LogoutButton from '@/components/LogoutButton';
 import dbConnect from '@/lib/db';
 import Session from '@/models/Session';
 import ReviewForm from '@/components/ReviewForm';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getSiteSettings } from '@/app/admin/actions';
-
 import HeaderNav from '@/components/HeaderNav';
 
 export const revalidate = 0;
@@ -45,7 +42,7 @@ export default async function Home() {
       {/* Universal Header */}
       <HeaderNav announcement={settings.announcementBanner} />
 
-      {/* 1. Hero Section (Full-width Slideshow) */}
+      {/* 1. Hero Section */}
       <section id="hero" className="relative h-[65vh] sm:h-[75vh] lg:h-[85vh] scroll-mt-24">
         <HeroCarousel />
         
@@ -64,37 +61,140 @@ export default async function Home() {
             <p className="text-xs sm:text-sm text-white/90 font-light max-w-xl [text-shadow:_0_1px_4px_rgba(0,0,0,0.9)]">
               Nirmal Nagar, Telangana — Approved by H.H. Shri Mataji Nirmala Devi.
             </p>
-            <div className="flex flex-wrap gap-3 pt-2">
+            <div className="pt-2">
               <Link
                 href="/book"
                 prefetch={true}
-                className="inline-block text-xs sm:text-sm font-bold tracking-wider px-6 py-3 bg-saffron text-white hover:bg-saffron-dark transition-all rounded-md shadow-lg uppercase"
+                className="inline-block text-xs sm:text-sm font-bold tracking-wider px-8 py-3.5 bg-saffron text-white hover:bg-saffron-dark transition-all rounded-md shadow-lg uppercase"
               >
                 Register for Session
-              </Link>
-              <Link
-                href="/about"
-                prefetch={true}
-                className="inline-block text-xs sm:text-sm font-semibold tracking-wider px-6 py-3 bg-white/20 text-white border border-white/40 hover:bg-white/30 backdrop-blur-md transition-all rounded-md hover:border-white shadow-md uppercase"
-              >
-                About Us →
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 2. Upcoming Health Sessions Section */}
+      {/* 2. Combined Divine Approval & Foundation Section */}
+      <section id="about" className="py-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-warm-gray">
+        <div className="max-w-5xl mx-auto space-y-12">
+          
+          {/* Founder & Divine Approval Card */}
+          <div className="grid md:grid-cols-[0.9fr_1.1fr] gap-8 lg:gap-12 items-center bg-cream border border-warm-gray rounded-2xl p-6 sm:p-10 shadow-sm">
+            <div className="relative aspect-[4/3] sm:aspect-[16/11] overflow-hidden rounded-xl border border-warm-gray bg-cream-dark shadow-sm">
+              <Image
+                src="/images/ppt/image3.png"
+                alt="Approved by H.H. Shri Mataji Nirmala Devi"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 40vw"
+                priority
+              />
+            </div>
+            <div className="space-y-4">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-widest text-saffron">Divine Guidance</span>
+                <h2 className="text-2xl font-light text-teal-dark mt-1">
+                  Approved by <span className="font-semibold">H.H. Shri Mataji Nirmala Devi</span>
+                </h2>
+              </div>
+              <div className="border-l-2 border-saffron pl-4 py-1 italic text-sm text-warm-charcoal/70 font-light">
+                &quot;The concept of Sahaja Yoga Resource Centre & Health Centre was envisioned and approved by Param Pujya Shri Mataji Nirmala Devi to benefit all Sahaja Yogis.&quot;
+              </div>
+              <p className="text-sm text-warm-charcoal/70 font-light leading-relaxed">
+                Spanning 3 acres at Nirmal Nagar, Hyderabad, Telangana, this Resource Centre and Health Centre operates under the divine blessings of Shri Mataji to provide vibratory diagnostics, chakra clearance, and collective meditation.
+              </p>
+            </div>
+          </div>
+
+          {/* Infrastructure Facility Cards */}
+          <div className="space-y-8">
+            <div className="text-center space-y-2">
+              <span className="text-xs font-bold uppercase tracking-[0.3em] text-saffron">Resource Centre Campus</span>
+              <h2 className="text-2xl sm:text-3xl font-light text-teal-dark">
+                Infrastructure
+              </h2>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {/* Image 4: Meditation Hall */}
+              <div className="bg-cream border border-warm-gray rounded-2xl overflow-hidden shadow-sm space-y-3 flex flex-col">
+                <div className="relative aspect-[16/10] bg-cream-dark border-b border-warm-gray">
+                  <Image src="/images/ppt/image4.jpeg" alt="Meditation Hall & Glass Altar" fill className="object-cover" />
+                  <span className="absolute top-2 right-2 bg-saffron text-white text-[9px] font-bold uppercase px-2.5 py-0.5 rounded-full shadow-sm">
+                    In Construction
+                  </span>
+                </div>
+                <div className="p-4 pt-1 space-y-2 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-teal-dark">Meditation Hall & Glass Altar</h3>
+                    <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light mt-1">
+                      Spacious meditation hall featuring a glass-covered Altar and renovated stage area for collective Havans, pujas, and meditation.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Image 6: Footsoaking Area */}
+              <div className="bg-cream border border-warm-gray rounded-2xl overflow-hidden shadow-sm space-y-3 flex flex-col">
+                <div className="relative aspect-[16/10] bg-cream-dark border-b border-warm-gray">
+                  <Image src="/images/ppt/image6.png" alt="Collective Footsoaking Area" fill className="object-cover" />
+                </div>
+                <div className="p-4 pt-1 space-y-2 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-teal-dark">Collective Footsoaking Area</h3>
+                    <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light mt-1">
+                      Dedicated collective footsoaking shed equipped for evening element treatment sessions to soothe and clear subtle channels.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Image 7: Shoebeat Ground */}
+              <div className="bg-cream border border-warm-gray rounded-2xl overflow-hidden shadow-sm space-y-3 flex flex-col">
+                <div className="relative aspect-[16/10] bg-cream-dark border-b border-warm-gray">
+                  <Image src="/images/ppt/image7.png" alt="Shoebeat Ground & Open Lawn" fill className="object-cover" />
+                </div>
+                <div className="p-4 pt-1 space-y-2 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-teal-dark">Shoebeat Ground & Open Lawn</h3>
+                    <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light mt-1">
+                      Open ground area specified for collective shoebeating and nature clearing surrounded by natural greenery and trees.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Constructed Health Centre Card: Updated to health-centre-main.jpg */}
+              <div className="bg-cream border border-warm-gray rounded-2xl overflow-hidden shadow-sm space-y-3 flex flex-col">
+                <div className="relative aspect-[16/10] bg-cream-dark border-b border-warm-gray">
+                  <Image src="/images/health-centre-main.jpg" alt="Constructed Health Centre Building" fill className="object-cover" />
+                  <span className="absolute top-2 right-2 bg-sage text-white text-[9px] font-bold uppercase px-2.5 py-0.5 rounded-full shadow-sm">
+                    Constructed Building
+                  </span>
+                </div>
+                <div className="p-4 pt-1 space-y-2 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-teal-dark">Constructed Health Centre</h3>
+                    <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light mt-1">
+                      Completed main Health Centre facility featuring ground floor consultation rooms and doctor accommodation.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 3. Upcoming Health Sessions Section */}
       <section id="sessions" className="py-16 px-4 sm:px-6 lg:px-8 bg-cream-dark scroll-mt-24">
         <div className="max-w-6xl mx-auto space-y-10">
-          <div className="text-center space-y-3">
+          <div className="text-center space-y-2">
             <p className="text-xs tracking-[0.3em] uppercase text-saffron font-semibold">Upcoming Health Sessions</p>
             <h2 className="text-2xl sm:text-3xl font-light tracking-tight text-teal-dark">
               Register for a <span className="font-semibold">Session</span>
             </h2>
-            <p className="text-sm text-warm-charcoal/60 font-light max-w-xl mx-auto">
-              Choose an upcoming doctor consultation or health session below. Limited seats per session.
-            </p>
           </div>
 
           {hasSessions ? (
@@ -115,159 +215,87 @@ export default async function Home() {
                         <span
                           className={`shrink-0 px-2.5 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded-full ${
                             sess.stayAvailable
-                              ? 'bg-sage/10 text-sage border border-sage/30'
-                              : 'bg-saffron/10 text-saffron border border-saffron/30'
+                              ? 'bg-sage/20 text-sage-dark'
+                              : 'bg-warm-gray text-warm-charcoal/60'
                           }`}
                         >
-                          {sess.stayAvailable ? 'Stay: Yes' : 'Day Visit'}
+                          {sess.stayAvailable ? 'Stay Included' : 'Day Visit'}
                         </span>
                       </div>
-                      <p className="text-xs text-warm-charcoal/60 font-light leading-relaxed line-clamp-2">
-                        {sess.description}
+                      <p className="text-xs text-warm-charcoal/70 font-light line-clamp-3">{sess.description}</p>
+                    </div>
+
+                    <div className="text-xs space-y-1 text-warm-charcoal/70 pt-2 border-t border-warm-gray font-light">
+                      <p>
+                        <strong className="font-semibold text-warm-charcoal">Doctor:</strong> {sess.instructor}
+                      </p>
+                      <p>
+                        <strong className="font-semibold text-warm-charcoal">Date:</strong>{' '}
+                        {new Date(sess.date).toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </p>
+                      <p>
+                        <strong className="font-semibold text-warm-charcoal">Seats Left:</strong>{' '}
+                        <span className={isFull ? 'text-red-500 font-bold' : 'text-teal font-bold'}>
+                          {remaining}
+                        </span>{' '}
+                        / {sess.maxParticipants}
                       </p>
                     </div>
 
-                    <div className="space-y-1.5 text-xs font-mono text-warm-charcoal/60">
-                      <div className="flex items-center gap-2">
-                        <span>Dr. <strong className="text-warm-charcoal">{sess.instructor}</strong></span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span>{new Date(sess.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                        <span className="text-warm-charcoal/30">•</span>
-                        <span>{sess.time}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-3 border-t border-warm-gray">
-                      <div>
-                        <span className={`text-xs font-bold ${isFull ? 'text-red-500' : remaining < 10 ? 'text-saffron' : 'text-sage'}`}>
-                          {isFull ? 'FULLY BOOKED' : `${remaining} seats left`}
-                        </span>
-                        <span className="text-[10px] text-warm-charcoal/40 block font-mono">{sess.maxParticipants} total capacity</span>
-                      </div>
-                      <Link
-                        href={isFull ? '#' : `/book?sessionId=${sess._id.toString()}`}
-                        prefetch={true}
-                        className={`text-[10px] font-bold tracking-wider uppercase px-4 py-2 rounded-md transition-colors ${
-                          isFull
-                            ? 'bg-warm-gray text-warm-charcoal/40 cursor-not-allowed'
-                            : 'bg-saffron text-white hover:bg-saffron-dark shadow-sm'
-                        }`}
-                      >
-                        {isFull ? 'FULL' : 'REGISTER →'}
-                      </Link>
+                    <div className="pt-2">
+                      {isFull ? (
+                        <button
+                          disabled
+                          className="w-full text-center text-xs font-bold uppercase tracking-wider py-2.5 bg-warm-gray text-warm-charcoal/40 rounded-md cursor-not-allowed"
+                        >
+                          Session Full
+                        </button>
+                      ) : (
+                        <Link
+                          href={`/book?sessionId=${sess._id.toString()}`}
+                          className="block text-center text-xs font-bold uppercase tracking-wider py-2.5 bg-saffron text-white hover:bg-saffron-dark transition-colors rounded-md shadow-sm"
+                        >
+                          Select & Register →
+                        </Link>
+                      )}
                     </div>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <div className="text-center py-12 bg-white border border-warm-gray rounded-2xl">
-              <p className="text-sm text-warm-charcoal/50 font-light">No active sessions currently scheduled. Please check back soon.</p>
+            <div className="bg-white border border-warm-gray rounded-2xl p-10 text-center space-y-3 shadow-sm max-w-lg mx-auto">
+              <div className="w-12 h-12 bg-saffron/10 text-saffron rounded-full flex items-center justify-center mx-auto text-lg font-bold">
+                !
+              </div>
+              <h3 className="text-base font-semibold text-teal-dark">No Active Sessions Scheduled</h3>
+              <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light">
+                There are no active health sessions scheduled at this moment. Please check back later or contact our desk.
+              </p>
             </div>
           )}
-
-          <div className="text-center pt-4">
-            <Link
-              href="/sessions"
-              prefetch={true}
-              className="inline-block text-xs font-semibold text-teal hover:text-teal-dark border border-teal px-6 py-2.5 rounded-md transition-colors"
-            >
-              VIEW ALL SESSIONS (UPCOMING & PAST) →
-            </Link>
-          </div>
         </div>
       </section>
 
-      {/* Share Experience Review Form (If feature-flagged or directly accessible) */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-cream border-t border-warm-gray">
-        <div className="max-w-xl mx-auto space-y-4">
-          <ReviewForm />
-        </div>
-      </section>
-
-      {/* 3. Plan Your Visit / Contact Section */}
-      <section id="contact" className="py-16 px-4 sm:px-6 lg:px-8 bg-teal-dark text-white scroll-mt-24">
-        <div className="max-w-5xl mx-auto space-y-10">
-          <div className="text-center space-y-3">
-            <p className="text-xs tracking-[0.3em] uppercase text-saffron font-semibold">Plan Your Visit</p>
-            <h2 className="text-2xl sm:text-3xl font-light tracking-tight">
-              Visit the <span className="font-semibold">Centre</span>
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 items-stretch">
-            {/* Contact Info */}
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 space-y-6">
-              <div>
-                <h4 className="text-xs uppercase tracking-wider text-saffron font-semibold mb-2">Location & Address</h4>
-                <p className="text-sm text-white/80 font-light leading-relaxed">
-                  Sahaja Yoga Health Centre & Meditation Hall<br />
-                  Nirmal Nagar, Jainepally Village,<br />
-                  Bibi Nagar Mandal, Yadadri Dst,<br />
-                  Telangana — 508126
-                </p>
-                <p className="text-[11px] text-white/50 font-mono mt-2">
-                  Plus Code: GQ9M+WPW, Tirmalagiri
-                </p>
-                <p className="text-[11px] text-white/50 font-mono mt-0.5">
-                  Landmark: Param Pujya Shri Mataji Nirmala Devi Road
-                </p>
-              </div>
-
-              {settings.helpdeskPhone && (
-                <div>
-                  <h4 className="text-xs uppercase tracking-wider text-saffron font-semibold mb-2">General Helpdesk</h4>
-                  <p className="text-sm text-white/80 font-light">{settings.helpdeskPhone}</p>
-                </div>
-              )}
-
-              <div>
-                <h4 className="text-xs uppercase tracking-wider text-saffron font-semibold mb-2">Email Address</h4>
-                <a href={`mailto:${settings.contactEmail || 'syhydhealthcentre@gmail.com'}`} className="text-sm text-white/80 hover:text-saffron transition-colors font-light">
-                  {settings.contactEmail || 'syhydhealthcentre@gmail.com'}
-                </a>
-              </div>
-
-              <div>
-                <h4 className="text-xs uppercase tracking-wider text-saffron font-semibold mb-2">Organized By</h4>
-                <p className="text-sm text-white/80 font-light leading-relaxed">
-                  H.H. Shri Mataji Nirmala Devi<br />
-                  Sahaja Yoga National Trust
-                </p>
-              </div>
-
-              <div className="pt-4 border-t border-white/10 text-[11px] text-white/40">
-                Seekers must follow the general Sahaja Yoga code of conduct.
-              </div>
+      {/* 4. Experience Reviews Section (if enabled by Admin) */}
+      {settings.reviewsEnabled && (
+        <section id="reviews" className="py-16 px-4 sm:px-6 lg:px-8 bg-white border-t border-warm-gray scroll-mt-24">
+          <div className="max-w-4xl mx-auto space-y-8">
+            <div className="text-center space-y-2">
+              <p className="text-xs tracking-[0.3em] uppercase text-saffron font-semibold">Sahaja Yogi Feedback</p>
+              <h2 className="text-2xl sm:text-3xl font-light tracking-tight text-teal-dark">
+                Share Your <span className="font-semibold">Experience</span>
+              </h2>
             </div>
 
-            {/* Map */}
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 flex flex-col justify-between">
-              <div className="w-full aspect-[4/3] bg-warm-charcoal/20 border border-white/10 relative overflow-hidden rounded-xl">
-                <iframe 
-                  src="https://maps.google.com/maps?q=17.5198654,78.7843353&hl=en&z=16&output=embed" 
-                  width="100%" 
-                  height="100%" 
-                  style={{ border: 0 }} 
-                  allowFullScreen 
-                  loading="lazy"
-                ></iframe>
-              </div>
-              <div className="mt-4">
-                <a 
-                  href="https://maps.app.goo.gl/QNu14TFmGcJaZ3cn6" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="inline-block text-center text-xs font-semibold px-4 py-2.5 bg-saffron text-white hover:bg-saffron-dark transition-all w-full rounded-md shadow-md"
-                >
-                  OPEN IN GOOGLE MAPS
-                </a>
-              </div>
-            </div>
+            <ReviewForm />
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-warm-gray py-10 px-8 bg-cream">
@@ -277,7 +305,6 @@ export default async function Home() {
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-warm-charcoal/50 justify-center">
             <Link href="/" prefetch={true} className="hover:text-saffron transition-colors">Home</Link>
-            <Link href="/about" prefetch={true} className="hover:text-saffron transition-colors">About</Link>
             <Link href="/sessions" prefetch={true} className="hover:text-saffron transition-colors">Sessions</Link>
             <Link href="/book" prefetch={true} className="hover:text-saffron transition-colors">Register for Session</Link>
           </div>

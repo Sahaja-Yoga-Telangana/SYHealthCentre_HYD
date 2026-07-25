@@ -37,7 +37,6 @@ export default function MobileNav() {
       {open && (
         <nav className="absolute top-full left-0 right-0 bg-cream border-b border-warm-gray px-8 py-6 space-y-4 z-50 shadow-lg">
           <Link href="/" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide text-warm-charcoal/70 hover:text-saffron transition-colors">Home</Link>
-          <Link href="/about" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide text-warm-charcoal/70 hover:text-saffron transition-colors">About</Link>
           <Link href="/sessions" onClick={() => setOpen(false)} className="block text-sm font-medium tracking-wide text-warm-charcoal/70 hover:text-saffron transition-colors">Sessions</Link>
           
           <div className="border-t border-warm-gray pt-4 space-y-3">

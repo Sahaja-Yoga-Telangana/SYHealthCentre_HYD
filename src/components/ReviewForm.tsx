@@ -63,7 +63,6 @@ export default function ReviewForm() {
             onChange={(e) => setName(e.target.value)}
             disabled={isPending}
             className="w-full text-xs p-2.5 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
-            placeholder="e.g. Rahul Sharma"
             required
           />
         </div>
@@ -97,7 +96,6 @@ export default function ReviewForm() {
           disabled={isPending}
           rows={4}
           className="w-full text-xs p-2.5 border border-warm-gray focus:border-saffron focus:outline-none bg-cream rounded-md"
-          placeholder="Describe your spiritual state, vibrations felt, or general experience..."
           required
         ></textarea>
       </div>
