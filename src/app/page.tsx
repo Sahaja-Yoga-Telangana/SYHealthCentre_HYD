@@ -314,8 +314,7 @@ export default async function Home() {
             <Link href="/" prefetch={true} className="hover:text-saffron transition-colors">Home</Link>
             <Link href="/about" prefetch={true} className="hover:text-saffron transition-colors">About</Link>
             <Link href="/sessions" prefetch={true} className="hover:text-saffron transition-colors">Sessions</Link>
-            <Link href="/book" prefetch={true} className="hover:text-saffron transition-colors">Register</Link>
-            <Link href="/login" prefetch={true} className="hover:text-saffron transition-colors">Login</Link>
+            <Link href="/book" prefetch={true} className="hover:text-saffron transition-colors">Register for Session</Link>
           </div>
         </div>
       </footer>
