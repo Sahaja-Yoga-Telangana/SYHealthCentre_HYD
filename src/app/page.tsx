@@ -43,11 +43,11 @@ export default async function Home() {
       <HeaderNav announcement={settings.announcementBanner} />
 
       {/* 1. Hero Section */}
-      <section id="hero" className="relative h-[65vh] sm:h-[75vh] lg:h-[85vh] scroll-mt-24">
+      <section id="hero" className="relative h-[42vh] sm:h-[50vh] lg:h-[58vh] max-h-[560px] scroll-mt-24">
         <HeroCarousel />
         
         {/* Clean Hero Text Overlay */}
-        <div className="absolute inset-0 flex flex-col justify-end z-20 px-6 sm:px-10 lg:px-16 pb-12 sm:pb-16 pointer-events-none">
+        <div className="absolute inset-0 flex flex-col justify-end z-20 px-6 sm:px-10 lg:px-16 pb-8 sm:pb-10 pointer-events-none">
           <div className="max-w-3xl space-y-3 pointer-events-auto">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-[3px] bg-saffron rounded-full"></div>
