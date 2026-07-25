@@ -294,6 +294,92 @@ export default async function Home() {
         </section>
       )}
 
+      {/* 4. Plan Your Visit / Location & Contact Section */}
+      <section id="contact" className="py-16 px-4 sm:px-6 lg:px-8 bg-white border-t border-warm-gray scroll-mt-24">
+        <div className="max-w-6xl mx-auto space-y-12">
+          <div className="text-center space-y-2">
+            <span className="text-xs font-bold uppercase tracking-[0.3em] text-saffron">Reach Nirmal Nagar</span>
+            <h2 className="text-2xl sm:text-3xl font-light tracking-tight text-teal-dark">
+              Plan Your <span className="font-semibold">Visit</span>
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
+            {/* Address & Contact Cards */}
+            <div className="space-y-6">
+              <div className="bg-cream border border-warm-gray rounded-2xl p-6 space-y-4 shadow-sm">
+                <div className="flex items-start space-x-3">
+                  <div className="w-9 h-9 bg-saffron/10 text-saffron rounded-lg flex items-center justify-center shrink-0 text-base font-bold">
+                    📍
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-base font-semibold text-teal-dark">Campus Address</h3>
+                    <p className="text-xs text-warm-charcoal/80 leading-relaxed font-light">
+                      Nirmal Nagar, Jainepally Village, Bibi Nagar Mandal, Yadadri Dst, Telangana — 508126
+                    </p>
+                    <p className="text-[11px] text-saffron font-medium pt-1">
+                      Landmark: Param Pujya Shri Mataji Nirmala Devi Road
+                    </p>
+                    <span className="inline-block text-[10px] font-mono bg-white border border-warm-gray px-2.5 py-1 rounded text-warm-charcoal/60 mt-1">
+                      Plus Code: GQ9M+WPW, Tirmalagiri, Telangana 508126
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-cream border border-warm-gray rounded-2xl p-6 space-y-4 shadow-sm">
+                <div className="flex items-start space-x-3">
+                  <div className="w-9 h-9 bg-teal/10 text-teal rounded-lg flex items-center justify-center shrink-0 text-base font-bold">
+                    ✉️
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-base font-semibold text-teal-dark">General Helpdesk & Enquiries</h3>
+                    <p className="text-xs text-warm-charcoal/80 font-light">
+                      Email: <a href="mailto:syhydhealthcentre@gmail.com" className="text-saffron font-medium hover:underline">syhydhealthcentre@gmail.com</a>
+                    </p>
+                    {settings.helpdeskPhone && (
+                      <p className="text-xs text-warm-charcoal/80 font-light">
+                        Phone: <a href={`tel:${settings.helpdeskPhone}`} className="text-teal font-medium hover:underline">{settings.helpdeskPhone}</a>
+                      </p>
+                    )}
+                    <p className="text-[10px] text-warm-charcoal/50 pt-1 font-light">
+                      H.H. Shri Mataji Nirmala Devi Sahaja Yoga National Trust
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <a
+                  href="https://maps.google.com/?q=GQ9M%2BWPW,+Tirmalagiri,+Telangana+508126"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider px-6 py-3 bg-teal text-white rounded-md hover:bg-teal-dark transition-colors shadow-sm"
+                >
+                  <span>Open in Google Maps</span>
+                  <span>↗</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Embedded Google Map Preview */}
+            <div className="relative aspect-[4/3] sm:aspect-[16/11] rounded-2xl overflow-hidden border border-warm-gray shadow-sm bg-cream-dark">
+              <iframe
+                title="Sahaja Yoga Health Centre Hyderabad Location Map"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.2828739502275!2d78.7845!3d17.4475!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTfCsDI2JzUxLjAiTiA3OMKwNDcnMDQuMiJF!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen={false}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="w-full h-full"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="border-t border-warm-gray py-10 px-8 bg-cream">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
