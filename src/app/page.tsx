@@ -42,159 +42,63 @@ export default async function Home() {
       {/* Universal Header */}
       <HeaderNav announcement={settings.announcementBanner} />
 
-      {/* 1. Hero Section */}
-      <section id="hero" className="relative h-[42vh] sm:h-[50vh] lg:h-[58vh] max-h-[560px] scroll-mt-24">
-        <HeroCarousel />
-        
-        {/* Clean Hero Text Overlay */}
-        <div className="absolute inset-0 flex flex-col justify-end z-20 px-6 sm:px-10 lg:px-16 pb-8 sm:pb-10 pointer-events-none">
-          <div className="max-w-3xl space-y-3 pointer-events-auto">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-[3px] bg-saffron rounded-full"></div>
-              <p className="text-xs sm:text-sm tracking-[0.25em] uppercase text-saffron font-bold [text-shadow:_0_1px_4px_rgba(0,0,0,0.9)]">
-                National Sahaja Yoga Resource Centre
-              </p>
-            </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight [text-shadow:_0_2px_12px_rgba(0,0,0,0.9)]">
-              Health Centre <span className="font-light text-cream">Hyderabad</span>
-            </h1>
-            <div className="pt-2">
-              <Link
-                href="/book"
-                prefetch={true}
-                className="inline-block text-xs sm:text-sm font-bold tracking-wider px-8 py-3.5 bg-saffron text-white hover:bg-saffron-dark transition-all rounded-md shadow-lg uppercase"
-              >
-                Register for Session
-              </Link>
+      {/* 1. Hero Section (30% Left: Shri Dhanvantri, 70% Right: Hero Carousel) */}
+      <section id="hero" className="py-6 px-4 sm:px-6 lg:px-8 bg-cream border-b border-warm-gray scroll-mt-24">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-10 gap-4 lg:gap-6 items-stretch">
+          {/* Left 30% Column: Shri Dhanvantri Picture (No text overlay) */}
+          <div className="md:col-span-3 relative rounded-2xl overflow-hidden border border-warm-gray shadow-sm bg-cream-dark min-h-[300px] md:min-h-[380px]">
+            <Image
+              src="/images/shri-dhanvantari.jpg"
+              alt="Shri Dhanvantari"
+              fill
+              className="object-cover object-top"
+              sizes="(max-width: 768px) 100vw, 30vw"
+              priority
+            />
+          </div>
+
+          {/* Right 70% Column: Hero Carousel with Compact Text Overlay */}
+          <div className="md:col-span-7 relative rounded-2xl overflow-hidden border border-warm-gray shadow-sm h-[320px] sm:h-[380px] md:h-auto min-h-[320px]">
+            <HeroCarousel />
+
+            {/* Clean Hero Text Overlay */}
+            <div className="absolute inset-0 flex flex-col justify-end z-20 px-6 sm:px-8 pb-6 sm:pb-8 pointer-events-none">
+              <div className="max-w-xl space-y-2 pointer-events-auto">
+                <div className="flex items-center space-x-2">
+                  <div className="w-6 h-[2.5px] bg-saffron rounded-full"></div>
+                  <p className="text-[11px] sm:text-xs tracking-[0.2em] uppercase text-saffron font-bold [text-shadow:_0_1px_4px_rgba(0,0,0,0.9)]">
+                    National Sahaja Yoga Resource Centre
+                  </p>
+                </div>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight [text-shadow:_0_2px_10px_rgba(0,0,0,0.9)]">
+                  Sahaja Yoga <span className="font-light text-cream">Health Centre</span>
+                </h1>
+                <div className="pt-1.5">
+                  <Link
+                    href="/book"
+                    prefetch={true}
+                    className="inline-block text-xs font-bold tracking-wider px-6 py-2.5 bg-saffron text-white hover:bg-saffron-dark transition-all rounded-md shadow-md uppercase"
+                  >
+                    Register for Session
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 2. Combined Divine Approval & Foundation Section */}
-      <section id="about" className="py-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-warm-gray">
-        <div className="max-w-5xl mx-auto space-y-12">
-          
-          {/* Founder & Divine Approval Card */}
-          <div className="grid md:grid-cols-[0.9fr_1.1fr] gap-8 lg:gap-12 items-center bg-cream border border-warm-gray rounded-2xl p-6 sm:p-10 shadow-sm">
-            <div className="relative aspect-[4/3] sm:aspect-[16/11] overflow-hidden rounded-xl border border-warm-gray bg-cream-dark shadow-sm">
-              <Image
-                src="/images/ppt/image3.png"
-                alt="Approved by H.H. Shri Mataji Nirmala Devi"
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 40vw"
-                priority
-              />
-            </div>
-            <div className="space-y-4">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-widest text-saffron">Divine Guidance</span>
-                <h2 className="text-2xl font-light text-teal-dark mt-1">
-                  Approved by <span className="font-semibold">H.H. Shri Mataji Nirmala Devi</span>
-                </h2>
-              </div>
-              <div className="border-l-2 border-saffron pl-4 py-1 italic text-sm text-warm-charcoal/70 font-light">
-                &quot;The concept of Sahaja Yoga Resource Centre & Health Centre was envisioned and approved by Param Pujya Shri Mataji Nirmala Devi to benefit all Sahaja Yogis.&quot;
-              </div>
-              <p className="text-sm text-warm-charcoal/70 font-light leading-relaxed">
-                Spanning 3 acres at Nirmal Nagar, Hyderabad, Telangana, this Resource Centre and Health Centre operates under the divine blessings of Shri Mataji to provide vibratory diagnostics, chakra clearance, and collective meditation.
-              </p>
-            </div>
-          </div>
-
-          {/* Infrastructure Facility Cards */}
-          <div className="space-y-8">
+      {/* 2. Upcoming Health Sessions Section (Right below Hero, only shown if sessions exist) */}
+      {hasSessions && (
+        <section id="sessions" className="py-12 px-4 sm:px-6 lg:px-8 bg-cream-dark border-b border-warm-gray scroll-mt-24">
+          <div className="max-w-6xl mx-auto space-y-8">
             <div className="text-center space-y-2">
-              <span className="text-xs font-bold uppercase tracking-[0.3em] text-saffron">Resource Centre Campus</span>
-              <h2 className="text-2xl sm:text-3xl font-light text-teal-dark">
-                Infrastructure
+              <p className="text-xs tracking-[0.3em] uppercase text-saffron font-semibold">Upcoming Health Sessions</p>
+              <h2 className="text-2xl sm:text-3xl font-light tracking-tight text-teal-dark">
+                Register for a <span className="font-semibold">Session</span>
               </h2>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {/* Image 4: Meditation Hall */}
-              <div className="bg-cream border border-warm-gray rounded-2xl overflow-hidden shadow-sm space-y-3 flex flex-col">
-                <div className="relative aspect-[16/10] bg-cream-dark border-b border-warm-gray">
-                  <Image src="/images/ppt/image4.jpeg" alt="Meditation Hall & Glass Altar" fill className="object-cover" />
-                  <span className="absolute top-2 right-2 bg-saffron text-white text-[9px] font-bold uppercase px-2.5 py-0.5 rounded-full shadow-sm">
-                    In Construction
-                  </span>
-                </div>
-                <div className="p-4 pt-1 space-y-2 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-sm font-semibold text-teal-dark">Meditation Hall & Glass Altar</h3>
-                    <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light mt-1">
-                      Spacious meditation hall featuring a glass-covered Altar and renovated stage area for collective Havans, pujas, and meditation.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Image 6: Footsoaking Area */}
-              <div className="bg-cream border border-warm-gray rounded-2xl overflow-hidden shadow-sm space-y-3 flex flex-col">
-                <div className="relative aspect-[16/10] bg-cream-dark border-b border-warm-gray">
-                  <Image src="/images/ppt/image6.png" alt="Collective Footsoaking Area" fill className="object-cover" />
-                </div>
-                <div className="p-4 pt-1 space-y-2 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-sm font-semibold text-teal-dark">Collective Footsoaking Area</h3>
-                    <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light mt-1">
-                      Dedicated collective footsoaking shed equipped for evening element treatment sessions to soothe and clear subtle channels.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Image 7: Shoebeat Ground */}
-              <div className="bg-cream border border-warm-gray rounded-2xl overflow-hidden shadow-sm space-y-3 flex flex-col">
-                <div className="relative aspect-[16/10] bg-cream-dark border-b border-warm-gray">
-                  <Image src="/images/ppt/image7.png" alt="Shoebeat Ground & Open Lawn" fill className="object-cover" />
-                </div>
-                <div className="p-4 pt-1 space-y-2 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-sm font-semibold text-teal-dark">Shoebeat Ground & Open Lawn</h3>
-                    <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light mt-1">
-                      Open ground area specified for collective shoebeating and nature clearing surrounded by natural greenery and trees.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Constructed Health Centre Card: Updated to health-centre-main.jpg */}
-              <div className="bg-cream border border-warm-gray rounded-2xl overflow-hidden shadow-sm space-y-3 flex flex-col">
-                <div className="relative aspect-[16/10] bg-cream-dark border-b border-warm-gray">
-                  <Image src="/images/health-centre-main.jpg" alt="Constructed Health Centre Building" fill className="object-cover" />
-                  <span className="absolute top-2 right-2 bg-sage text-white text-[9px] font-bold uppercase px-2.5 py-0.5 rounded-full shadow-sm">
-                    Constructed Building
-                  </span>
-                </div>
-                <div className="p-4 pt-1 space-y-2 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-sm font-semibold text-teal-dark">Constructed Health Centre</h3>
-                    <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light mt-1">
-                      Completed main Health Centre facility featuring ground floor consultation rooms and doctor accommodation.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* 3. Upcoming Health Sessions Section */}
-      <section id="sessions" className="py-16 px-4 sm:px-6 lg:px-8 bg-cream-dark scroll-mt-24">
-        <div className="max-w-6xl mx-auto space-y-10">
-          <div className="text-center space-y-2">
-            <p className="text-xs tracking-[0.3em] uppercase text-saffron font-semibold">Upcoming Health Sessions</p>
-            <h2 className="text-2xl sm:text-3xl font-light tracking-tight text-teal-dark">
-              Register for a <span className="font-semibold">Session</span>
-            </h2>
-          </div>
-
-          {hasSessions ? (
             <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {sessions.map((sess) => {
                 const isUnlimited = sess.limitSeats === false;
@@ -276,37 +180,101 @@ export default async function Home() {
                 );
               })}
             </div>
-          ) : (
-            <div className="bg-white border border-warm-gray rounded-2xl p-10 text-center space-y-3 shadow-sm max-w-lg mx-auto">
-              <div className="w-12 h-12 bg-saffron/10 text-saffron rounded-full flex items-center justify-center mx-auto text-lg font-bold">
-                !
-              </div>
-              <h3 className="text-base font-semibold text-teal-dark">No Active Sessions Scheduled</h3>
-              <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light">
-                There are no active health sessions scheduled at this moment. Please check back later or contact our desk.
-              </p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* 4. Experience Reviews Section (if enabled by Admin) */}
-      {settings.reviewsEnabled && (
-        <section id="reviews" className="py-16 px-4 sm:px-6 lg:px-8 bg-white border-t border-warm-gray scroll-mt-24">
-          <div className="max-w-4xl mx-auto space-y-8">
-            <div className="text-center space-y-2">
-              <p className="text-xs tracking-[0.3em] uppercase text-saffron font-semibold">Sahaja Yogi Feedback</p>
-              <h2 className="text-2xl sm:text-3xl font-light tracking-tight text-teal-dark">
-                Share Your <span className="font-semibold">Experience</span>
-              </h2>
-            </div>
-
-            <ReviewForm />
           </div>
         </section>
       )}
 
-      {/* Contact Section — Original Teal Theme from commit e762744 */}
+      {/* 3. Combined Divine Approval & Infrastructure Section */}
+      <section id="about" className="py-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-warm-gray">
+        <div className="max-w-5xl mx-auto space-y-12">
+          {/* Founder & Divine Approval Card */}
+          <div className="grid md:grid-cols-[0.9fr_1.1fr] gap-8 lg:gap-12 items-center bg-cream border border-warm-gray rounded-2xl p-6 sm:p-10 shadow-sm">
+            <div className="relative aspect-[4/3] sm:aspect-[16/11] overflow-hidden rounded-xl border border-warm-gray bg-cream-dark shadow-sm">
+              <Image
+                src="/images/ppt/image3.png"
+                alt="Approved by H.H. Shri Mataji Nirmala Devi"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 40vw"
+                priority
+              />
+            </div>
+            <div className="space-y-4">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-widest text-saffron">Divine Guidance</span>
+                <h2 className="text-2xl font-light text-teal-dark mt-1">
+                  Approved by <span className="font-semibold">H.H. Shri Mataji Nirmala Devi</span>
+                </h2>
+              </div>
+              <div className="border-l-2 border-saffron pl-4 py-1 italic text-sm text-warm-charcoal/70 font-light">
+                &quot;The concept of Sahaja Yoga Resource Centre & Health Centre was envisioned and approved by Param Pujya Shri Mataji Nirmala Devi to benefit all Sahaja Yogis.&quot;
+              </div>
+              <p className="text-sm text-warm-charcoal/70 font-light leading-relaxed">
+                With the blessings of Shri Mataji this Resource Centre and Health Centre operates under the H. H. Shri Mataji Nirmala Devi Trust (National) to provide vibratory diagnostics, chakra clearance, and collective meditation.
+              </p>
+            </div>
+          </div>
+
+          {/* Infrastructure Facility Cards */}
+          <div className="space-y-8">
+            <div className="text-center space-y-2">
+              <span className="text-xs font-bold uppercase tracking-[0.3em] text-saffron">Resource Centre Campus</span>
+              <h2 className="text-2xl sm:text-3xl font-light text-teal-dark">
+                Infrastructure
+              </h2>
+            </div>
+
+            <div className="grid sm:grid-cols-3 gap-6">
+              {/* Image 4: Meditation Hall */}
+              <div className="bg-cream border border-warm-gray rounded-2xl overflow-hidden shadow-sm flex flex-col">
+                <div className="relative aspect-[16/10] bg-cream-dark border-b border-warm-gray">
+                  <Image src="/images/ppt/image4.jpeg" alt="Meditation Hall & Glass Altar" fill className="object-cover" />
+                </div>
+                <div className="p-5 space-y-2 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-teal-dark">Meditation Hall & Glass Altar</h3>
+                    <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light mt-1">
+                      Spacious meditation hall featuring a glass-covered Altar and renovated stage area for collective Havans, pujas, and meditation.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Image 6: Footsoaking Area */}
+              <div className="bg-cream border border-warm-gray rounded-2xl overflow-hidden shadow-sm flex flex-col">
+                <div className="relative aspect-[16/10] bg-cream-dark border-b border-warm-gray">
+                  <Image src="/images/ppt/image6.png" alt="Collective Footsoaking Area" fill className="object-cover" />
+                </div>
+                <div className="p-5 space-y-2 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-teal-dark">Collective Footsoaking Area</h3>
+                    <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light mt-1">
+                      Dedicated collective footsoaking shed equipped for evening element treatment sessions to soothe and clear subtle channels.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Newly Constructed Health Centre */}
+              <div className="bg-cream border border-warm-gray rounded-2xl overflow-hidden shadow-sm flex flex-col">
+                <div className="relative aspect-[16/10] bg-cream-dark border-b border-warm-gray">
+                  <Image src="/images/health-centre-main.jpg" alt="Newly Constructed Health Centre Building" fill className="object-cover" />
+                </div>
+                <div className="p-5 space-y-2 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-teal-dark">Newly Constructed Health Centre</h3>
+                    <p className="text-xs text-warm-charcoal/60 leading-relaxed font-light mt-1">
+                      Completed main Health Centre facility featuring ground floor consultation rooms and doctor accommodation.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Visit the Centre Section (Placed above Share Your Experience) */}
       <section id="contact" className="py-16 px-4 sm:px-6 lg:px-8 bg-teal-dark text-white scroll-mt-24">
         <div className="max-w-5xl mx-auto space-y-10">
           <div className="text-center space-y-3">
@@ -361,20 +329,20 @@ export default async function Home() {
             {/* Map */}
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-4 flex flex-col justify-between">
               <div className="w-full aspect-[4/3] bg-warm-charcoal/20 border border-white/10 relative overflow-hidden rounded-lg">
-                <iframe 
-                  src="https://maps.google.com/maps?q=17.5198654,78.7843353&hl=en&z=16&output=embed" 
-                  width="100%" 
-                  height="100%" 
-                  style={{ border: 0 }} 
-                  allowFullScreen 
+                <iframe
+                  src="https://maps.google.com/maps?q=17.5198654,78.7843353&hl=en&z=16&output=embed"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
                   loading="lazy"
                 ></iframe>
               </div>
               <div className="mt-4">
-                <a 
-                  href="https://maps.app.goo.gl/QNu14TFmGcJaZ3cn6" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                <a
+                  href="https://maps.app.goo.gl/QNu14TFmGcJaZ3cn6"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-block text-center text-xs font-semibold px-4 py-2.5 bg-saffron text-white hover:bg-saffron-dark transition-all w-full rounded-md uppercase tracking-wider"
                 >
                   OPEN IN GOOGLE MAPS
@@ -384,6 +352,22 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* 5. Experience Reviews Section (Placed below Visit the Centre, if enabled by Admin) */}
+      {settings.reviewsEnabled && (
+        <section id="reviews" className="py-16 px-4 sm:px-6 lg:px-8 bg-white border-t border-warm-gray scroll-mt-24">
+          <div className="max-w-4xl mx-auto space-y-8">
+            <div className="text-center space-y-2">
+              <p className="text-xs tracking-[0.3em] uppercase text-saffron font-semibold">Sahaja Yogi Feedback</p>
+              <h2 className="text-2xl sm:text-3xl font-light tracking-tight text-teal-dark">
+                Share Your <span className="font-semibold">Experience</span>
+              </h2>
+            </div>
+
+            <ReviewForm />
+          </div>
+        </section>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-warm-gray py-10 px-8 bg-cream">
