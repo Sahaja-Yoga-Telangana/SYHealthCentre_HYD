@@ -118,7 +118,7 @@ export default function SessionForm() {
           </div>
           {imageUrl && (
             <div className="mt-2 relative w-full h-32 rounded border border-neutral-200 overflow-hidden bg-neutral-50">
-              <Image src={imageUrl} alt="Event Preview" fill className="object-cover" />
+              <Image src={imageUrl} alt="Event Preview" fill className="object-cover object-top" />
               <button
                 type="button"
                 onClick={() => setImageUrl('')}

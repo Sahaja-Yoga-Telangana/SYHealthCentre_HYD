@@ -104,6 +104,8 @@ export default async function Home() {
                 const isUnlimited = sess.limitSeats === false;
                 const remaining = Math.max(0, sess.maxParticipants - sess.registeredCount);
                 const isFull = !isUnlimited && remaining === 0;
+                const sessionUrl = `/sessions/${sess._id.toString()}`;
+
                 return (
                   <div
                     key={sess._id.toString()}
@@ -111,16 +113,24 @@ export default async function Home() {
                       isFull ? 'border-warm-gray opacity-60' : 'border-warm-gray hover:border-saffron/50'
                     }`}
                   >
+                    {/* Clickable Image Banner with object-top */}
                     {sess.imageUrl && (
-                      <div className="relative w-full aspect-[16/9] bg-cream-dark border-b border-warm-gray">
-                        <Image src={sess.imageUrl} alt={sess.title} fill className="object-cover" />
-                      </div>
+                      <Link href={sessionUrl} className="block relative w-full aspect-[16/9] bg-cream-dark border-b border-warm-gray group">
+                        <Image
+                          src={sess.imageUrl}
+                          alt={sess.title}
+                          fill
+                          className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </Link>
                     )}
 
                     <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
                       <div className="space-y-2">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className="text-base font-semibold text-teal-dark leading-snug">{sess.title}</h3>
+                          <Link href={sessionUrl} className="hover:text-saffron transition-colors">
+                            <h3 className="text-base font-semibold text-teal-dark leading-snug">{sess.title}</h3>
+                          </Link>
                           <span
                             className={`shrink-0 px-2.5 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded-full ${
                               sess.stayAvailable
@@ -146,32 +156,37 @@ export default async function Home() {
                             year: 'numeric',
                           })}
                         </p>
-                        <p>
-                          <strong className="font-semibold text-warm-charcoal">Seat Availability:</strong>{' '}
-                          {isUnlimited ? (
-                            <span className="text-sage font-bold">Unlimited Seats</span>
-                          ) : (
+                        {/* Only display seat availability if seat limiting is enabled */}
+                        {!isUnlimited && (
+                          <p>
+                            <strong className="font-semibold text-warm-charcoal">Seat Availability:</strong>{' '}
                             <span className={isFull ? 'text-red-500 font-bold' : 'text-teal font-bold'}>
                               {remaining} / {sess.maxParticipants} left
                             </span>
-                          )}
-                        </p>
+                          </p>
+                        )}
                       </div>
 
-                      <div className="pt-2">
+                      <div className="pt-2 flex items-center gap-2">
+                        <Link
+                          href={sessionUrl}
+                          className="flex-1 text-center text-xs font-semibold uppercase tracking-wider py-2.5 bg-cream hover:bg-warm-gray text-teal-dark transition-colors rounded-md border border-warm-gray"
+                        >
+                          Details
+                        </Link>
                         {isFull ? (
                           <button
                             disabled
-                            className="w-full text-center text-xs font-bold uppercase tracking-wider py-2.5 bg-warm-gray text-warm-charcoal/40 rounded-md cursor-not-allowed"
+                            className="flex-1 text-center text-xs font-bold uppercase tracking-wider py-2.5 bg-warm-gray text-warm-charcoal/40 rounded-md cursor-not-allowed"
                           >
-                            Session Full
+                            Full
                           </button>
                         ) : (
                           <Link
                             href={`/book?sessionId=${sess._id.toString()}`}
-                            className="block text-center text-xs font-bold uppercase tracking-wider py-2.5 bg-saffron text-white hover:bg-saffron-dark transition-colors rounded-md shadow-sm"
+                            className="flex-1 text-center text-xs font-bold uppercase tracking-wider py-2.5 bg-saffron text-white hover:bg-saffron-dark transition-colors rounded-md shadow-sm"
                           >
-                            Select & Register →
+                            Register →
                           </Link>
                         )}
                       </div>

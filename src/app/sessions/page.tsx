@@ -76,7 +76,6 @@ export default async function SessionsPage() {
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8 space-y-16">
-        
         {/* Header */}
         <div className="text-center space-y-3">
           <span className="text-xs font-bold uppercase tracking-[0.3em] text-saffron">Collective Seminars</span>
@@ -98,7 +97,9 @@ export default async function SessionsPage() {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {upcomingSessions.map((sess) => {
                 const remaining = Math.max(0, sess.maxParticipants - sess.registeredCount);
-                const isFull = remaining === 0;
+                const isFull = sess.limitSeats !== false && remaining === 0;
+                const sessionUrl = `/sessions/${sess.id}`;
+
                 return (
                   <div
                     key={sess.id}
@@ -106,16 +107,24 @@ export default async function SessionsPage() {
                       isFull ? 'border-warm-gray opacity-60' : 'border-warm-gray hover:border-saffron/50'
                     }`}
                   >
+                    {/* Clickable Image Banner with object-top */}
                     {sess.imageUrl && (
-                      <div className="relative w-full aspect-[16/9] bg-cream-dark border-b border-warm-gray">
-                        <Image src={sess.imageUrl} alt={sess.title} fill className="object-cover" />
-                      </div>
+                      <Link href={sessionUrl} className="block relative w-full aspect-[16/9] bg-cream-dark border-b border-warm-gray group">
+                        <Image
+                          src={sess.imageUrl}
+                          alt={sess.title}
+                          fill
+                          className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </Link>
                     )}
 
                     <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
                       <div className="space-y-2">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className="text-base font-semibold text-teal-dark leading-snug">{sess.title}</h3>
+                          <Link href={sessionUrl} className="hover:text-saffron transition-colors">
+                            <h3 className="text-base font-semibold text-teal-dark leading-snug">{sess.title}</h3>
+                          </Link>
                           <span
                             className={`shrink-0 px-2.5 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded-full ${
                               sess.stayAvailable
@@ -144,9 +153,8 @@ export default async function SessionsPage() {
 
                       <div className="flex items-center justify-between pt-3 border-t border-warm-gray">
                         <div>
-                          {sess.limitSeats === false ? (
-                            <span className="text-xs font-bold text-sage">UNLIMITED SEATS</span>
-                          ) : (
+                          {/* If limitSeats === false, show nothing */}
+                          {sess.limitSeats !== false && (
                             <>
                               <span className={`text-xs font-bold ${isFull ? 'text-red-500' : remaining < 10 ? 'text-saffron' : 'text-sage'}`}>
                                 {isFull ? 'FULLY BOOKED' : `${remaining} seats left`}
@@ -155,16 +163,24 @@ export default async function SessionsPage() {
                             </>
                           )}
                         </div>
-                        <Link
-                          href={isFull && sess.limitSeats !== false ? '#' : `/book?sessionId=${sess.id}`}
-                          className={`text-[10px] font-bold tracking-wider uppercase px-4 py-2 rounded-md transition-colors ${
-                            isFull && sess.limitSeats !== false
-                              ? 'bg-warm-gray text-warm-charcoal/40 cursor-not-allowed'
-                              : 'bg-saffron text-white hover:bg-saffron-dark shadow-sm'
-                          }`}
-                        >
-                          {isFull && sess.limitSeats !== false ? 'FULL' : 'REGISTER →'}
-                        </Link>
+                        <div className="flex items-center gap-2">
+                          <Link
+                            href={sessionUrl}
+                            className="text-[10px] font-bold tracking-wider uppercase px-3 py-1.5 rounded-md border border-warm-gray text-teal-dark hover:bg-warm-gray transition-colors"
+                          >
+                            DETAILS
+                          </Link>
+                          <Link
+                            href={isFull ? '#' : `/book?sessionId=${sess.id}`}
+                            className={`text-[10px] font-bold tracking-wider uppercase px-3 py-1.5 rounded-md transition-colors ${
+                              isFull
+                                ? 'bg-warm-gray text-warm-charcoal/40 cursor-not-allowed'
+                                : 'bg-saffron text-white hover:bg-saffron-dark shadow-sm'
+                            }`}
+                          >
+                            {isFull ? 'FULL' : 'REGISTER →'}
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -189,23 +205,28 @@ export default async function SessionsPage() {
 
           {pastSessions.length > 0 ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 opacity-80">
-              {pastSessions.map((sess) => (
-                <div key={sess.id} className="bg-white border border-warm-gray rounded-2xl p-6 space-y-3 shadow-sm">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-sm font-semibold text-warm-charcoal">{sess.title}</h3>
-                    <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-warm-gray text-warm-charcoal/60 rounded-full">
-                      Past
-                    </span>
+              {pastSessions.map((sess) => {
+                const sessionUrl = `/sessions/${sess.id}`;
+                return (
+                  <div key={sess.id} className="bg-white border border-warm-gray rounded-2xl p-6 space-y-3 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between gap-2">
+                      <Link href={sessionUrl} className="hover:text-saffron transition-colors">
+                        <h3 className="text-sm font-semibold text-warm-charcoal">{sess.title}</h3>
+                      </Link>
+                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-warm-gray text-warm-charcoal/60 rounded-full">
+                        Past
+                      </span>
+                    </div>
+                    <p className="text-xs text-warm-charcoal/60 font-light leading-relaxed line-clamp-2">
+                      {sess.description}
+                    </p>
+                    <div className="text-[11px] font-mono text-warm-charcoal/50 border-t border-warm-gray pt-2 flex justify-between">
+                      <span>Dr. {sess.instructor}</span>
+                      <span>{new Date(sess.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                    </div>
                   </div>
-                  <p className="text-xs text-warm-charcoal/60 font-light leading-relaxed line-clamp-2">
-                    {sess.description}
-                  </p>
-                  <div className="text-[11px] font-mono text-warm-charcoal/50 border-t border-warm-gray pt-2 flex justify-between">
-                    <span>Dr. {sess.instructor}</span>
-                    <span>{new Date(sess.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-8 bg-white border border-warm-gray rounded-2xl">
@@ -213,7 +234,6 @@ export default async function SessionsPage() {
             </div>
           )}
         </div>
-
       </main>
     </div>
   );

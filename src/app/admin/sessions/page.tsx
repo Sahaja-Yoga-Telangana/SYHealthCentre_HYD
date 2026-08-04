@@ -58,14 +58,13 @@ export default async function SessionsAdminPage() {
               {sessions.map((session) => {
                 const isUnlimited = session.limitSeats === false;
                 const remainingSeats = isUnlimited ? 'Unlimited' : Math.max(0, session.maxParticipants - session.registeredCount);
-                
+
                 return (
                   <div key={session._id.toString()} className="py-5 first:pt-0 last:pb-0 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    
-                    {/* Picture Thumbnail if present */}
+                    {/* Picture Thumbnail if present (top aligned) */}
                     {session.imageUrl && (
                       <div className="relative w-20 h-20 rounded border border-neutral-200 overflow-hidden bg-neutral-100 shrink-0">
-                        <Image src={session.imageUrl} alt={session.title} fill className="object-cover" />
+                        <Image src={session.imageUrl} alt={session.title} fill className="object-cover object-top" />
                       </div>
                     )}
 
@@ -79,13 +78,12 @@ export default async function SessionsAdminPage() {
                         }`}>
                           {session.isActive ? 'Active' : 'Inactive'}
                         </span>
-                        <span className={`inline-block px-2 py-0.5 border text-[9px] font-bold tracking-wider uppercase rounded ${
-                          isUnlimited
-                            ? 'border-emerald-700 bg-emerald-50 text-emerald-800'
-                            : 'border-blue-700 bg-blue-50 text-blue-800'
-                        }`}>
-                          {isUnlimited ? 'UNLIMITED SEATS' : `LIMITED: ${session.maxParticipants} SEATS`}
-                        </span>
+                        {/* Only show badge if seats are limited */}
+                        {!isUnlimited && (
+                          <span className="inline-block px-2 py-0.5 border text-[9px] font-bold tracking-wider uppercase rounded border-blue-700 bg-blue-50 text-blue-800">
+                            LIMITED: {session.maxParticipants} SEATS
+                          </span>
+                        )}
                         <span className={`inline-block px-2 py-0.5 border text-[9px] font-bold tracking-wider uppercase rounded ${
                           session.stayAvailable 
                             ? 'border-neutral-200 bg-neutral-100 text-neutral-800' 
@@ -96,16 +94,19 @@ export default async function SessionsAdminPage() {
                       </div>
 
                       <p className="text-xs text-neutral-500 font-light max-w-xl line-clamp-2">{session.description}</p>
-                      
+
                       {/* Doctor & Seats Stats */}
                       <div className="text-[11px] text-neutral-600 font-mono flex flex-wrap gap-x-4 gap-y-1 bg-neutral-50 p-2.5 border border-neutral-100 rounded">
                         <span>Coordinator/Doctor: <strong className="text-neutral-900">{session.instructor}</strong></span>
                         <span>Date: <strong className="text-neutral-900">{new Date(session.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</strong></span>
                         <span>Time: <strong className="text-neutral-900">{session.time}</strong></span>
                         <span>Registered: <strong className="text-neutral-900">{session.registeredCount}</strong></span>
-                        <span className={isUnlimited ? 'text-emerald-700 font-bold' : 'text-blue-700 font-bold'}>
-                          Seats Available: {remainingSeats}
-                        </span>
+                        {/* Only show remaining seats stat if limitSeats is enabled */}
+                        {!isUnlimited && (
+                          <span className="text-blue-700 font-bold">
+                            Seats Available: {remainingSeats}
+                          </span>
+                        )}
                       </div>
                     </div>
 
