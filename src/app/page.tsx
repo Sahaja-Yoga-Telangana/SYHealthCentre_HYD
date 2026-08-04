@@ -113,18 +113,6 @@ export default async function Home() {
                       isFull ? 'border-warm-gray opacity-60' : 'border-warm-gray hover:border-saffron/50'
                     }`}
                   >
-                    {/* Clickable Image Banner with object-top */}
-                    {sess.imageUrl && (
-                      <Link href={sessionUrl} className="block relative w-full aspect-[16/9] bg-cream-dark border-b border-warm-gray group">
-                        <Image
-                          src={sess.imageUrl}
-                          alt={sess.title}
-                          fill
-                          className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
-                        />
-                      </Link>
-                    )}
-
                     <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
                       <div className="space-y-2">
                         <div className="flex items-start justify-between gap-2">
