@@ -46,12 +46,12 @@ export default async function Home() {
       <section id="hero" className="py-6 px-4 sm:px-6 lg:px-8 bg-cream border-b border-warm-gray scroll-mt-24">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-10 gap-4 lg:gap-6 items-stretch">
           {/* Left 30% Column: Shri Dhanvantri Picture (No text overlay) */}
-          <div className="md:col-span-3 relative rounded-2xl overflow-hidden border border-warm-gray shadow-sm bg-cream-dark min-h-[300px] md:min-h-[380px]">
+          <div className="md:col-span-3 relative rounded-2xl overflow-hidden border border-warm-gray shadow-sm bg-cream-dark min-h-[300px] md:min-h-[380px] p-2 flex items-center justify-center">
             <Image
               src="/images/shri-dhanvantari.jpg"
               alt="Shri Dhanvantari"
               fill
-              className="object-cover object-top"
+              className="object-contain object-center p-1"
               sizes="(max-width: 768px) 100vw, 30vw"
               priority
             />
