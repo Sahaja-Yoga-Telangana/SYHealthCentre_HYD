@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 
 const slides = [
@@ -10,15 +10,11 @@ const slides = [
   },
   {
     src: '/images/ppt/image4.jpeg',
-    alt: 'Meditation Hall & Glass Altar (In Construction)',
+    alt: 'Meditation Hall & Glass Altar',
   },
   {
     src: '/images/ppt/image6.png',
     alt: 'Collective Footsoaking Area',
-  },
-  {
-    src: '/images/ppt/image7.png',
-    alt: 'Shoebeat Ground & Open Lawn',
   },
   {
     src: '/images/health-centre-front.jpg',
@@ -26,7 +22,7 @@ const slides = [
   },
 ];
 
-export default function HeroCarousel() {
+function HeroCarouselComponent() {
   const [current, setCurrent] = useState(0);
 
   const nextSlide = useCallback(() => {
@@ -42,7 +38,7 @@ export default function HeroCarousel() {
       nextSlide();
     }, 5000);
     return () => clearInterval(timer);
-  }, [nextSlide, current]);
+  }, [nextSlide]);
 
   return (
     <div className="relative w-full h-full overflow-hidden group">
@@ -60,7 +56,7 @@ export default function HeroCarousel() {
             fill
             className="object-cover object-center"
             sizes="100vw"
-            priority={index === 0}
+            priority={true}
           />
         </div>
       ))}
@@ -122,3 +118,5 @@ export default function HeroCarousel() {
     </div>
   );
 }
+
+export default React.memo(HeroCarouselComponent);
