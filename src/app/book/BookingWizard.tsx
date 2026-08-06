@@ -7,11 +7,13 @@ import Link from 'next/link';
 
 interface SessionItem {
   id: string;
+  type?: 'Session' | 'Event';
   title: string;
   description: string;
   date: string;
   time: string;
   instructor: string;
+  limitSeats?: boolean;
   maxParticipants: number;
   registeredCount: number;
   stayAvailable?: boolean;
@@ -512,25 +514,29 @@ export default function BookingWizard({
                         </p>
 
                         <div className="text-[11px] font-mono text-neutral-600 flex flex-wrap gap-x-4 gap-y-1 pt-1">
-                          <span>Doctor / Specialist: <strong className="text-neutral-900">{session.instructor}</strong></span>
+                          {session.instructor && session.instructor !== 'Sahaja Yoga Health Centre' && (
+                            <span>Doctor / Specialist: <strong className="text-neutral-900">{session.instructor}</strong></span>
+                          )}
                           <span>Date: <strong className="text-neutral-900">{new Date(session.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</strong></span>
                           <span>Time: <strong className="text-neutral-900">{session.time}</strong></span>
                         </div>
                       </div>
 
                       <div className="flex flex-col items-end shrink-0 w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0 border-neutral-100">
-                        <div className="text-right mb-2">
-                          <span
-                            className={`text-xs font-mono font-bold block ${
-                              isFull ? 'text-red-500' : remainingSeats < 10 ? 'text-amber-600' : 'text-emerald-700'
-                            }`}
-                          >
-                            {isFull ? 'FULLY BOOKED' : `${remainingSeats} SEATS LEFT`}
-                          </span>
-                          <span className="text-[9px] text-neutral-400 font-mono">
-                            Total Capacity: {session.maxParticipants} seats
-                          </span>
-                        </div>
+                        {session.limitSeats !== false && session.maxParticipants < 99999 && (
+                          <div className="text-right mb-2">
+                            <span
+                              className={`text-xs font-mono font-bold block ${
+                                isFull ? 'text-red-500' : remainingSeats < 10 ? 'text-amber-600' : 'text-emerald-700'
+                              }`}
+                            >
+                              {isFull ? 'FULLY BOOKED' : `${remainingSeats} SEATS LEFT`}
+                            </span>
+                            <span className="text-[9px] text-neutral-400 font-mono">
+                              Total Capacity: {session.maxParticipants} seats
+                            </span>
+                          </div>
+                        )}
 
                         <button
                           type="button"

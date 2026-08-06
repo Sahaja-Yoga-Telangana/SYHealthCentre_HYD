@@ -14,11 +14,13 @@ export const revalidate = 0;
 
 interface SessionItem {
   id: string;
+  type?: 'Session' | 'Event';
   title: string;
   description: string;
   date: string;
   time: string;
   instructor: string;
+  limitSeats?: boolean;
   maxParticipants: number;
   registeredCount: number;
   stayAvailable: boolean;
@@ -48,17 +50,19 @@ export default async function BookingPage({
     await dbConnect();
     const [settingsData, activeSessions] = await Promise.all([
       getSiteSettings(),
-      Session.find({ isActive: true }).sort({ date: 1 }),
+      Session.find({ isActive: true, type: { $ne: 'Event' } }).sort({ date: 1 }),
     ]);
 
     settings = settingsData;
     sessionsList = activeSessions.map((session) => ({
       id: session._id.toString(),
+      type: session.type || 'Session',
       title: session.title,
-      description: session.description,
+      description: session.description || '',
       date: session.date.toISOString(),
       time: session.time,
-      instructor: session.instructor,
+      instructor: session.instructor || '',
+      limitSeats: session.limitSeats !== undefined ? session.limitSeats : true,
       maxParticipants: session.maxParticipants,
       registeredCount: session.registeredCount,
       stayAvailable: session.stayAvailable ?? true,

@@ -166,20 +166,22 @@ export default async function Home() {
                         >
                           Details
                         </Link>
-                        {isFull ? (
-                          <button
-                            disabled
-                            className="flex-1 text-center text-xs font-bold uppercase tracking-wider py-2.5 bg-warm-gray text-warm-charcoal/40 rounded-md cursor-not-allowed"
-                          >
-                            Full
-                          </button>
-                        ) : (
-                          <Link
-                            href={`/book?sessionId=${sess._id.toString()}`}
-                            className="flex-1 text-center text-xs font-bold uppercase tracking-wider py-2.5 bg-saffron text-white hover:bg-saffron-dark transition-colors rounded-md shadow-sm"
-                          >
-                            Register →
-                          </Link>
+                        {sess.type !== 'Event' && (
+                          isFull ? (
+                            <button
+                              disabled
+                              className="flex-1 text-center text-xs font-bold uppercase tracking-wider py-2.5 bg-warm-gray text-warm-charcoal/40 rounded-md cursor-not-allowed"
+                            >
+                              Full
+                            </button>
+                          ) : (
+                            <Link
+                              href={`/book?sessionId=${sess._id.toString()}`}
+                              className="flex-1 text-center text-xs font-bold uppercase tracking-wider py-2.5 bg-saffron text-white hover:bg-saffron-dark transition-colors rounded-md shadow-sm"
+                            >
+                              Register →
+                            </Link>
+                          )
                         )}
                       </div>
                     </div>
