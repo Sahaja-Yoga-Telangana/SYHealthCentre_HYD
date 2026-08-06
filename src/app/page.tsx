@@ -51,7 +51,7 @@ export default async function Home() {
               src="/images/shri-dhanvantari.jpg"
               alt="Shri Dhanvantari"
               fill
-              className="object-cover object-top"
+              className="object-cover object-center"
               sizes="(max-width: 768px) 100vw, 30vw"
               priority
             />
