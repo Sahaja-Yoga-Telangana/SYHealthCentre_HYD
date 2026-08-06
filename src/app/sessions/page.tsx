@@ -9,11 +9,12 @@ export const revalidate = 0;
 
 interface SessionItem {
   id: string;
+  type?: 'Session' | 'Event';
   title: string;
-  description: string;
+  description?: string;
   date: Date;
   time: string;
-  instructor: string;
+  instructor?: string;
   imageUrl?: string;
   limitSeats?: boolean;
   maxParticipants: number;
@@ -38,11 +39,12 @@ export default async function SessionsPage() {
 
     upcomingSessions = upcomingDb.map((s) => ({
       id: s._id.toString(),
+      type: s.type || 'Session',
       title: s.title,
-      description: s.description,
+      description: s.description || '',
       date: s.date,
       time: s.time,
-      instructor: s.instructor,
+      instructor: s.instructor || '',
       imageUrl: s.imageUrl || '',
       limitSeats: s.limitSeats !== undefined ? s.limitSeats : true,
       maxParticipants: s.maxParticipants,
@@ -53,11 +55,12 @@ export default async function SessionsPage() {
 
     pastSessions = pastDb.map((s) => ({
       id: s._id.toString(),
+      type: s.type || 'Session',
       title: s.title,
-      description: s.description,
+      description: s.description || '',
       date: s.date,
       time: s.time,
-      instructor: s.instructor,
+      instructor: s.instructor || '',
       imageUrl: s.imageUrl || '',
       limitSeats: s.limitSeats !== undefined ? s.limitSeats : true,
       maxParticipants: s.maxParticipants,
@@ -78,26 +81,27 @@ export default async function SessionsPage() {
       <main className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8 space-y-16">
         {/* Header */}
         <div className="text-center space-y-3">
-          <span className="text-xs font-bold uppercase tracking-[0.3em] text-saffron">Collective Seminars</span>
+          <span className="text-xs font-bold uppercase tracking-[0.3em] text-saffron">Collective Seminars & Events</span>
           <h1 className="text-3xl sm:text-4xl font-light text-teal-dark">
-            Health Centre <span className="font-semibold">Sessions</span>
+            Health Centre <span className="font-semibold">Sessions & Events</span>
           </h1>
         </div>
 
-        {/* Upcoming Sessions Section */}
+        {/* Upcoming Sessions & Events Section */}
         <div className="space-y-6">
           <div className="border-b border-warm-gray pb-3 flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-teal-dark">Upcoming Sessions ({upcomingSessions.length})</h2>
+            <h2 className="text-xl font-semibold text-teal-dark">Upcoming Sessions & Events ({upcomingSessions.length})</h2>
             <span className="text-xs font-mono bg-saffron/10 text-saffron px-3 py-1 rounded-full font-bold uppercase tracking-wider">
-              Open for Registration
+              Open & Active
             </span>
           </div>
 
           {upcomingSessions.length > 0 ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {upcomingSessions.map((sess) => {
+                const isEvent = sess.type === 'Event';
                 const remaining = Math.max(0, sess.maxParticipants - sess.registeredCount);
-                const isFull = sess.limitSeats !== false && remaining === 0;
+                const isFull = !isEvent && sess.limitSeats !== false && remaining === 0;
                 const sessionUrl = `/sessions/${sess.id}`;
 
                 return (
@@ -107,7 +111,7 @@ export default async function SessionsPage() {
                       isFull ? 'border-warm-gray opacity-60' : 'border-warm-gray hover:border-saffron/50'
                     }`}
                   >
-                    {/* Clickable Image Banner with object-top */}
+                    {/* Clickable Image Banner with object-top if present */}
                     {sess.imageUrl && (
                       <Link href={sessionUrl} className="block relative w-full aspect-[16/9] bg-cream-dark border-b border-warm-gray group">
                         <Image
@@ -127,23 +131,29 @@ export default async function SessionsPage() {
                           </Link>
                           <span
                             className={`shrink-0 px-2.5 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded-full ${
-                              sess.stayAvailable
+                              isEvent
+                                ? 'bg-saffron/10 text-saffron border border-saffron/30'
+                                : sess.stayAvailable
                                 ? 'bg-sage/10 text-sage border border-sage/30'
-                                : 'bg-saffron/10 text-saffron border border-saffron/30'
+                                : 'bg-warm-gray text-warm-charcoal/60'
                             }`}
                           >
-                            {sess.stayAvailable ? 'Stay Available' : 'Day Visit'}
+                            {isEvent ? 'Collective Event' : sess.stayAvailable ? 'Stay Available' : 'Day Visit'}
                           </span>
                         </div>
-                        <p className="text-xs text-warm-charcoal/60 font-light leading-relaxed line-clamp-3">
-                          {sess.description}
-                        </p>
+                        {sess.description && (
+                          <p className="text-xs text-warm-charcoal/60 font-light leading-relaxed line-clamp-3">
+                            {sess.description}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-1.5 text-xs font-mono text-warm-charcoal/60 pt-2 border-t border-warm-gray">
-                        <div className="flex items-center gap-2">
-                          <span>Coordinator / Dr. <strong className="text-warm-charcoal">{sess.instructor}</strong></span>
-                        </div>
+                        {!isEvent && sess.instructor && (
+                          <div className="flex items-center gap-2">
+                            <span>Coordinator / Dr. <strong className="text-warm-charcoal">{sess.instructor}</strong></span>
+                          </div>
+                        )}
                         <div className="flex items-center gap-2">
                           <span>{new Date(sess.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                           <span>•</span>
@@ -153,8 +163,8 @@ export default async function SessionsPage() {
 
                       <div className="flex items-center justify-between pt-3 border-t border-warm-gray">
                         <div>
-                          {/* If limitSeats === false, show nothing */}
-                          {sess.limitSeats !== false && (
+                          {/* If limitSeats === false or Event, show nothing */}
+                          {!isEvent && sess.limitSeats !== false && (
                             <>
                               <span className={`text-xs font-bold ${isFull ? 'text-red-500' : remaining < 10 ? 'text-saffron' : 'text-sage'}`}>
                                 {isFull ? 'FULLY BOOKED' : `${remaining} seats left`}
@@ -163,23 +173,25 @@ export default async function SessionsPage() {
                             </>
                           )}
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 w-full justify-end">
                           <Link
                             href={sessionUrl}
                             className="text-[10px] font-bold tracking-wider uppercase px-3 py-1.5 rounded-md border border-warm-gray text-teal-dark hover:bg-warm-gray transition-colors"
                           >
                             DETAILS
                           </Link>
-                          <Link
-                            href={isFull ? '#' : `/book?sessionId=${sess.id}`}
-                            className={`text-[10px] font-bold tracking-wider uppercase px-3 py-1.5 rounded-md transition-colors ${
-                              isFull
-                                ? 'bg-warm-gray text-warm-charcoal/40 cursor-not-allowed'
-                                : 'bg-saffron text-white hover:bg-saffron-dark shadow-sm'
-                            }`}
-                          >
-                            {isFull ? 'FULL' : 'REGISTER →'}
-                          </Link>
+                          {!isEvent && (
+                            <Link
+                              href={isFull ? '#' : `/book?sessionId=${sess.id}`}
+                              className={`text-[10px] font-bold tracking-wider uppercase px-3 py-1.5 rounded-md transition-colors ${
+                                isFull
+                                  ? 'bg-warm-gray text-warm-charcoal/40 cursor-not-allowed'
+                                  : 'bg-saffron text-white hover:bg-saffron-dark shadow-sm'
+                              }`}
+                            >
+                              {isFull ? 'FULL' : 'REGISTER →'}
+                            </Link>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -189,15 +201,15 @@ export default async function SessionsPage() {
             </div>
           ) : (
             <div className="text-center py-12 bg-white border border-warm-gray rounded-2xl">
-              <p className="text-xs text-warm-charcoal/50 font-light">No upcoming sessions currently open for registration.</p>
+              <p className="text-xs text-warm-charcoal/50 font-light">No upcoming sessions or events currently scheduled.</p>
             </div>
           )}
         </div>
 
-        {/* Previous / Past Sessions Section */}
+        {/* Previous / Past Sessions & Events Section */}
         <div className="space-y-6 pt-6">
           <div className="border-b border-warm-gray pb-3 flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-warm-charcoal/70">Previous & Completed Sessions</h2>
+            <h2 className="text-xl font-semibold text-warm-charcoal/70">Previous Sessions & Events</h2>
             <span className="text-xs font-mono bg-warm-gray text-warm-charcoal/50 px-3 py-1 rounded-full font-bold uppercase tracking-wider">
               Completed
             </span>
@@ -214,15 +226,17 @@ export default async function SessionsPage() {
                         <h3 className="text-sm font-semibold text-warm-charcoal">{sess.title}</h3>
                       </Link>
                       <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-warm-gray text-warm-charcoal/60 rounded-full">
-                        Past
+                        {sess.type === 'Event' ? 'Event' : 'Past'}
                       </span>
                     </div>
-                    <p className="text-xs text-warm-charcoal/60 font-light leading-relaxed line-clamp-2">
-                      {sess.description}
-                    </p>
+                    {sess.description && (
+                      <p className="text-xs text-warm-charcoal/60 font-light leading-relaxed line-clamp-2">
+                        {sess.description}
+                      </p>
+                    )}
                     <div className="text-[11px] font-mono text-warm-charcoal/50 border-t border-warm-gray pt-2 flex justify-between">
-                      <span>Dr. {sess.instructor}</span>
                       <span>{new Date(sess.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                      <span>{sess.time}</span>
                     </div>
                   </div>
                 );
@@ -230,7 +244,7 @@ export default async function SessionsPage() {
             </div>
           ) : (
             <div className="text-center py-8 bg-white border border-warm-gray rounded-2xl">
-              <p className="text-xs text-warm-charcoal/40 font-light">No past session records archived.</p>
+              <p className="text-xs text-warm-charcoal/40 font-light">No past records archived.</p>
             </div>
           )}
         </div>

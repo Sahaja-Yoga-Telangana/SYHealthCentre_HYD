@@ -107,11 +107,12 @@ export async function toggleDoctorActive(id: string, active: boolean) {
 }
 
 export async function createSessionAction(data: {
+  type?: 'Session' | 'Event';
   title: string;
-  description: string;
+  description?: string;
   date: string;
   time: string;
-  instructor: string;
+  instructor?: string;
   imageUrl?: string;
   limitSeats?: boolean;
   maxParticipants?: number;
@@ -119,19 +120,25 @@ export async function createSessionAction(data: {
 }) {
   try {
     await dbConnect();
+    const entryType = data.type || 'Session';
     await Session.create({
-      ...data,
+      type: entryType,
+      title: data.title.trim(),
+      description: data.description ? data.description.trim() : '',
       date: new Date(data.date),
+      time: data.time.trim(),
+      instructor: data.instructor ? data.instructor.trim() : (entryType === 'Event' ? 'Sahaja Yoga Health Centre' : 'Sahaja Yoga Coordinator'),
       imageUrl: data.imageUrl || '',
-      limitSeats: data.limitSeats !== undefined ? data.limitSeats : true,
-      maxParticipants: data.maxParticipants || 45,
-      stayAvailable: data.stayAvailable !== undefined ? data.stayAvailable : true,
+      limitSeats: entryType === 'Event' ? false : (data.limitSeats !== undefined ? data.limitSeats : true),
+      maxParticipants: entryType === 'Event' ? 999999 : (data.maxParticipants || 45),
+      stayAvailable: entryType === 'Event' ? false : (data.stayAvailable !== undefined ? data.stayAvailable : true),
       registeredCount: 0,
       isActive: true,
     });
     revalidatePath('/');
     revalidatePath('/admin');
     revalidatePath('/admin/sessions');
+    revalidatePath('/sessions');
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };
