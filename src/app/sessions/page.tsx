@@ -149,7 +149,7 @@ export default async function SessionsPage() {
                       </div>
 
                       <div className="space-y-1.5 text-xs font-mono text-warm-charcoal/60 pt-2 border-t border-warm-gray">
-                        {!isEvent && sess.instructor && (
+                        {!isEvent && sess.instructor && sess.instructor !== 'Sahaja Yoga Health Centre' && (
                           <div className="flex items-center gap-2">
                             <span>Coordinator / Dr. <strong className="text-warm-charcoal">{sess.instructor}</strong></span>
                           </div>

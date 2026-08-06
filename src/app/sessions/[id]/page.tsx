@@ -111,7 +111,7 @@ export default async function SessionDetailPage({ params }: PageProps) {
                 at {session.time}
               </div>
 
-              {!isEvent && session.instructor && (
+              {!isEvent && session.instructor && session.instructor !== 'Sahaja Yoga Health Centre' && (
                 <div>
                   <strong className="font-semibold text-teal-dark block text-xs uppercase tracking-wider mb-0.5">
                     Coordinator / Doctor

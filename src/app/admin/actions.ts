@@ -127,7 +127,7 @@ export async function createSessionAction(data: {
       description: data.description ? data.description.trim() : '',
       date: new Date(data.date),
       time: data.time.trim(),
-      instructor: data.instructor ? data.instructor.trim() : (entryType === 'Event' ? 'Sahaja Yoga Health Centre' : 'Sahaja Yoga Coordinator'),
+      instructor: data.instructor ? data.instructor.trim() : '',
       imageUrl: data.imageUrl || '',
       limitSeats: entryType === 'Event' ? false : (data.limitSeats !== undefined ? data.limitSeats : true),
       maxParticipants: entryType === 'Event' ? 999999 : (data.maxParticipants || 45),

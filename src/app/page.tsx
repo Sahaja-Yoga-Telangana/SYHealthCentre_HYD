@@ -121,21 +121,25 @@ export default async function Home() {
                           </Link>
                           <span
                             className={`shrink-0 px-2.5 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded-full ${
-                              sess.stayAvailable
+                              sess.type === 'Event'
+                                ? 'bg-saffron/10 text-saffron'
+                                : sess.stayAvailable
                                 ? 'bg-sage/20 text-sage-dark'
                                 : 'bg-warm-gray text-warm-charcoal/60'
                             }`}
                           >
-                            {sess.stayAvailable ? 'Stay Included' : 'Day Visit'}
+                            {sess.type === 'Event' ? 'Collective Event' : sess.stayAvailable ? 'Stay Included' : 'Day Visit'}
                           </span>
                         </div>
-                        <p className="text-xs text-warm-charcoal/70 font-light line-clamp-3">{sess.description}</p>
+                        {sess.description && <p className="text-xs text-warm-charcoal/70 font-light line-clamp-3">{sess.description}</p>}
                       </div>
 
                       <div className="text-xs space-y-1 text-warm-charcoal/70 pt-2 border-t border-warm-gray font-light">
-                        <p>
-                          <strong className="font-semibold text-warm-charcoal">Coordinator / Doctor:</strong> {sess.instructor}
-                        </p>
+                        {sess.type !== 'Event' && sess.instructor && sess.instructor !== 'Sahaja Yoga Health Centre' && (
+                          <p>
+                            <strong className="font-semibold text-warm-charcoal">Coordinator / Doctor:</strong> {sess.instructor}
+                          </p>
+                        )}
                         <p>
                           <strong className="font-semibold text-warm-charcoal">Date:</strong>{' '}
                           {new Date(sess.date).toLocaleDateString('en-IN', {
