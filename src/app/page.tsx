@@ -48,7 +48,7 @@ export default async function Home() {
           {/* Left 30% Column: Shri Dhanvantri Picture (No text overlay) */}
           <div className="md:col-span-3 relative rounded-2xl overflow-hidden border border-warm-gray shadow-sm bg-cream-dark w-full aspect-[3/4] md:aspect-auto md:min-h-[380px]">
             <Image
-              src="/ShriMatajisPictures/Shri Dhanvantri.jpg"
+              src="/ShriMatajisPictures/Shri Dhanvantri.png"
               alt="Shri Dhanvantari"
               fill
               className="object-cover object-top sm:object-center"
@@ -154,6 +154,14 @@ export default async function Home() {
                             <strong className="font-semibold text-warm-charcoal">Seat Availability:</strong>{' '}
                             <span className={isFull ? 'text-red-500 font-bold' : 'text-teal font-bold'}>
                               {remaining} / {sess.maxParticipants} left
+                            </span>
+                          </p>
+                        )}
+                        {sess.samarpanAmount !== undefined && (
+                          <p>
+                            <strong className="font-semibold text-warm-charcoal">Samarpan:</strong>{' '}
+                            <span className="font-semibold text-teal-dark">
+                              {sess.samarpanAmount > 0 ? `₹${sess.samarpanAmount}` : 'Free / Voluntary'}
                             </span>
                           </p>
                         )}

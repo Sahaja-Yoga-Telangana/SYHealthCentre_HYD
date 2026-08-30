@@ -16,6 +16,9 @@ export default function SessionForm() {
   const [limitSeats, setLimitSeats] = useState(true);
   const [maxParticipants, setMaxParticipants] = useState(45);
   const [stayAvailable, setStayAvailable] = useState(true);
+  const [samarpanAmount, setSamarpanAmount] = useState('');
+  const [upiQrCodeUrl, setUpiQrCodeUrl] = useState('');
+  const [upiId, setUpiId] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
@@ -35,13 +38,29 @@ export default function SessionForm() {
     }
   };
 
+  // UPI QR Code upload conversion
+  const handleQrCodeFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        setError('QR Code image size should be less than 2MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUpiQrCodeUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess(false);
 
     if (type === 'Event') {
-      // For Event: Title, Date, Time are compulsory. Photo and Description are optional.
+      // For Event: Title, Date, Time are compulsory. Photo, Samarpan, and Description are optional.
       if (!title.trim() || !date || !time.trim()) {
         setError('For Events: Title, Date, and Time are compulsory.');
         return;
@@ -66,6 +85,9 @@ export default function SessionForm() {
         limitSeats: type === 'Event' ? false : limitSeats,
         maxParticipants: type === 'Event' ? 999999 : (limitSeats ? Number(maxParticipants) : 999999),
         stayAvailable: type === 'Event' ? false : stayAvailable,
+        samarpanAmount: samarpanAmount ? Number(samarpanAmount) : 0,
+        upiQrCodeUrl,
+        upiId: upiId.trim(),
       });
 
       if (res.success) {
@@ -78,6 +100,9 @@ export default function SessionForm() {
         setLimitSeats(true);
         setMaxParticipants(45);
         setStayAvailable(true);
+        setSamarpanAmount('');
+        setUpiQrCodeUrl('');
+        setUpiId('');
       } else {
         setError(res.error || 'Failed to create entry');
       }
@@ -239,6 +264,92 @@ export default function SessionForm() {
             placeholder={type === 'Event' ? 'Optional event details or announcement notes...' : 'Enter session details, guidelines, clearance focus...'}
             required={type === 'Session'}
           />
+        </div>
+
+        {/* Samarpan (Price / Contribution) & UPI QR Code Section */}
+        <div className="p-4 border border-neutral-200 bg-neutral-50/70 rounded-lg space-y-4">
+          <div className="border-b border-neutral-200/80 pb-2 flex items-center justify-between">
+            <span className="text-[11px] uppercase tracking-wider text-neutral-800 font-bold">
+              Samarpan & Payment Settings (Optional)
+            </span>
+            <span className="text-[10px] text-neutral-400 font-mono">UPI / Fee</span>
+          </div>
+
+          {/* Samarpan Amount / Price */}
+          <div>
+            <label className="block text-[10px] uppercase tracking-widest text-neutral-500 font-semibold mb-1">
+              Samarpan Amount (₹)
+            </label>
+            <input
+              type="number"
+              min={0}
+              value={samarpanAmount}
+              onChange={(e) => setSamarpanAmount(e.target.value)}
+              disabled={isPending}
+              className="w-full text-xs p-2.5 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-white rounded"
+              placeholder="e.g. 500 (Enter 0 or leave empty for Free / Voluntary)"
+            />
+            <p className="text-[10px] text-neutral-400 font-light mt-1">
+              Set the required or suggested Samarpan fee for this event/session.
+            </p>
+          </div>
+
+          {/* UPI QR Code Upload */}
+          <div>
+            <label className="block text-[10px] uppercase tracking-widest text-neutral-500 font-semibold mb-1">
+              UPI QR Code for Payment
+            </label>
+            <div className="flex flex-col sm:flex-row gap-3 items-center">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleQrCodeFileChange}
+                disabled={isPending}
+                className="text-xs text-neutral-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-neutral-200 file:text-neutral-700 hover:file:bg-neutral-300 cursor-pointer"
+              />
+              <span className="text-xs text-neutral-400 font-mono">OR</span>
+              <input
+                type="text"
+                value={upiQrCodeUrl}
+                onChange={(e) => setUpiQrCodeUrl(e.target.value)}
+                disabled={isPending}
+                className="flex-1 w-full text-xs p-2.5 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-white rounded"
+                placeholder="https://... or upload QR image"
+              />
+            </div>
+            {upiQrCodeUrl && (
+              <div className="mt-2.5 flex items-center gap-3 p-2.5 bg-white border border-neutral-200 rounded">
+                <div className="relative w-16 h-16 rounded border border-neutral-200 overflow-hidden bg-neutral-50 shrink-0">
+                  <Image src={upiQrCodeUrl} alt="UPI QR Preview" fill className="object-contain" />
+                </div>
+                <div className="flex-1">
+                  <span className="text-xs font-semibold text-neutral-800 block">UPI QR Code Uploaded</span>
+                  <button
+                    type="button"
+                    onClick={() => setUpiQrCodeUrl('')}
+                    className="text-[10px] text-red-600 hover:text-red-800 font-semibold uppercase tracking-wider mt-1"
+                  >
+                    Remove QR Code
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Specific UPI ID */}
+          <div>
+            <label className="block text-[10px] uppercase tracking-widest text-neutral-500 font-semibold mb-1">
+              UPI ID / VPA (Optional)
+            </label>
+            <input
+              type="text"
+              value={upiId}
+              onChange={(e) => setUpiId(e.target.value)}
+              disabled={isPending}
+              className="w-full text-xs p-2.5 border border-neutral-200 focus:border-neutral-900 focus:outline-none bg-white rounded font-mono"
+              placeholder="e.g. syhealthcentre@sbi"
+            />
+          </div>
         </div>
 
         {/* Session-only fields */}

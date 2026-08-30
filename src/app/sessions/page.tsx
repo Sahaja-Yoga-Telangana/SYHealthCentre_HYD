@@ -20,6 +20,9 @@ interface SessionItem {
   maxParticipants: number;
   registeredCount: number;
   stayAvailable: boolean;
+  samarpanAmount?: number;
+  upiQrCodeUrl?: string;
+  upiId?: string;
   isActive: boolean;
 }
 
@@ -50,6 +53,9 @@ export default async function SessionsPage() {
       maxParticipants: s.maxParticipants,
       registeredCount: s.registeredCount,
       stayAvailable: s.stayAvailable ?? true,
+      samarpanAmount: s.samarpanAmount ?? 0,
+      upiQrCodeUrl: s.upiQrCodeUrl || '',
+      upiId: s.upiId || '',
       isActive: s.isActive,
     }));
 
@@ -66,6 +72,9 @@ export default async function SessionsPage() {
       maxParticipants: s.maxParticipants,
       registeredCount: s.registeredCount,
       stayAvailable: s.stayAvailable ?? true,
+      samarpanAmount: s.samarpanAmount ?? 0,
+      upiQrCodeUrl: s.upiQrCodeUrl || '',
+      upiId: s.upiId || '',
       isActive: s.isActive,
     }));
   } catch (error) {
@@ -159,6 +168,14 @@ export default async function SessionsPage() {
                           <span>•</span>
                           <span>{sess.time}</span>
                         </div>
+                        {sess.samarpanAmount !== undefined && (
+                          <div className="flex items-center gap-2">
+                            <span>Samarpan: <strong className="text-teal-dark">{sess.samarpanAmount > 0 ? `₹${sess.samarpanAmount}` : 'Free'}</strong></span>
+                            {sess.upiQrCodeUrl && (
+                              <span className="text-[10px] bg-purple-50 text-purple-700 px-1.5 py-0.2 rounded border border-purple-200">UPI QR</span>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       <div className="flex items-center justify-between pt-3 border-t border-warm-gray">

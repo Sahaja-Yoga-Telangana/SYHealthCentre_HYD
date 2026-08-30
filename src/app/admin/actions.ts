@@ -117,6 +117,9 @@ export async function createSessionAction(data: {
   limitSeats?: boolean;
   maxParticipants?: number;
   stayAvailable?: boolean;
+  samarpanAmount?: number;
+  upiQrCodeUrl?: string;
+  upiId?: string;
 }) {
   try {
     await dbConnect();
@@ -132,6 +135,9 @@ export async function createSessionAction(data: {
       limitSeats: entryType === 'Event' ? false : (data.limitSeats !== undefined ? data.limitSeats : true),
       maxParticipants: entryType === 'Event' ? 999999 : (data.maxParticipants || 45),
       stayAvailable: entryType === 'Event' ? false : (data.stayAvailable !== undefined ? data.stayAvailable : true),
+      samarpanAmount: data.samarpanAmount !== undefined ? Number(data.samarpanAmount) : 0,
+      upiQrCodeUrl: data.upiQrCodeUrl || '',
+      upiId: data.upiId ? data.upiId.trim() : '',
       registeredCount: 0,
       isActive: true,
     });
@@ -151,10 +157,14 @@ export async function updateSessionAction(id: string, data: Partial<any>) {
     if (data.date) {
       data.date = new Date(data.date) as any;
     }
+    if (data.samarpanAmount !== undefined) {
+      data.samarpanAmount = Number(data.samarpanAmount);
+    }
     await Session.findByIdAndUpdate(id, data);
     revalidatePath('/');
     revalidatePath('/admin');
     revalidatePath('/admin/sessions');
+    revalidatePath('/sessions');
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };

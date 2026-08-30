@@ -12,6 +12,9 @@ export interface ISession extends Document {
   maxParticipants: number; // Seat Capacity if limitSeats is true
   registeredCount: number; // Booked Seats
   stayAvailable: boolean; // Stay/Accommodation Allowed: Yes or No
+  samarpanAmount?: number; // Price / Samarpan contribution fee in ₹
+  upiQrCodeUrl?: string; // UPI QR code image URL / data URL
+  upiId?: string; // Specific UPI ID (e.g. syhealthcentre@upi)
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -30,6 +33,9 @@ const SessionSchema = new Schema<ISession>(
     maxParticipants: { type: Number, default: 45 },
     registeredCount: { type: Number, default: 0 },
     stayAvailable: { type: Boolean, default: true },
+    samarpanAmount: { type: Number, default: 0 },
+    upiQrCodeUrl: { type: String, default: '' },
+    upiId: { type: String, default: '' },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }

@@ -86,6 +86,15 @@ export default async function SessionsAdminPage() {
                         }`}>
                           {session.isActive ? 'Active' : 'Inactive'}
                         </span>
+                        {/* Samarpan Badge */}
+                        <span className="inline-block px-2 py-0.5 border text-[9px] font-bold tracking-wider uppercase rounded border-emerald-700 bg-emerald-50 text-emerald-800">
+                          {session.samarpanAmount && session.samarpanAmount > 0 ? `SAMARPAN: ₹${session.samarpanAmount}` : 'SAMARPAN: FREE'}
+                        </span>
+                        {session.upiQrCodeUrl && (
+                          <span className="inline-block px-2 py-0.5 border text-[9px] font-bold tracking-wider uppercase rounded border-purple-700 bg-purple-50 text-purple-800">
+                            UPI QR ATTACHED
+                          </span>
+                        )}
                         {/* Only show badge if seats are limited */}
                         {!isEvent && !isUnlimited && (
                           <span className="inline-block px-2 py-0.5 border text-[9px] font-bold tracking-wider uppercase rounded border-blue-700 bg-blue-50 text-blue-800">
@@ -114,6 +123,9 @@ export default async function SessionsAdminPage() {
                         )}
                         <span>Date: <strong className="text-neutral-900">{new Date(session.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</strong></span>
                         <span>Time: <strong className="text-neutral-900">{session.time}</strong></span>
+                        {session.samarpanAmount !== undefined && (
+                          <span>Samarpan: <strong className="text-neutral-900">{session.samarpanAmount > 0 ? `₹${session.samarpanAmount}` : 'Free'}</strong></span>
+                        )}
                         {!isEvent && (
                           <span>Registered: <strong className="text-neutral-900">{session.registeredCount}</strong></span>
                         )}

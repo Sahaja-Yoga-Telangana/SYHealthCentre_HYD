@@ -120,6 +120,17 @@ export default async function SessionDetailPage({ params }: PageProps) {
                 </div>
               )}
 
+              {session.samarpanAmount !== undefined && (
+                <div>
+                  <strong className="font-semibold text-teal-dark block text-xs uppercase tracking-wider mb-0.5">
+                    Samarpan (Fee)
+                  </strong>
+                  <span className="font-semibold text-warm-charcoal text-base">
+                    {session.samarpanAmount > 0 ? `₹${session.samarpanAmount}` : 'Free / Voluntary'}
+                  </span>
+                </div>
+              )}
+
               {/* Only show seat availability for Session if limitSeats is enabled */}
               {!isEvent && !isUnlimited && (
                 <div className="sm:col-span-2 pt-2 border-t border-warm-gray">
@@ -136,6 +147,59 @@ export default async function SessionDetailPage({ params }: PageProps) {
                 </div>
               )}
             </div>
+
+            {/* UPI QR Code & Samarpan Payment Card if configured */}
+            {(session.upiQrCodeUrl || (session.samarpanAmount && session.samarpanAmount > 0) || session.upiId) && (
+              <div className="p-6 bg-cream border border-warm-gray rounded-2xl space-y-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-warm-gray pb-3">
+                  <div>
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-saffron">
+                      Samarpan & Contribution Details
+                    </h3>
+                    <p className="text-xs text-warm-charcoal/60 font-light mt-0.5">
+                      Contribute / Offer Samarpan for this event or session directly via UPI.
+                    </p>
+                  </div>
+                  {session.samarpanAmount !== undefined && session.samarpanAmount > 0 && (
+                    <div className="px-3 py-1 bg-white border border-warm-gray rounded-lg font-mono text-sm font-bold text-teal-dark">
+                      Amount: ₹{session.samarpanAmount}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 pt-2">
+                  {session.upiQrCodeUrl && (
+                    <div className="relative w-48 h-48 bg-white border border-warm-gray rounded-xl overflow-hidden shadow-sm p-2 flex items-center justify-center shrink-0">
+                      <Image
+                        src={session.upiQrCodeUrl}
+                        alt="Event UPI QR Code"
+                        fill
+                        className="object-contain p-2"
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-3 text-xs font-light text-warm-charcoal/80 text-center sm:text-left flex-1">
+                    {session.upiId && (
+                      <div>
+                        <span className="text-[10px] uppercase font-bold tracking-wider text-warm-charcoal/50 block">
+                          UPI ID / VPA
+                        </span>
+                        <span className="font-mono text-sm font-bold text-teal-dark bg-white px-2.5 py-1 rounded border border-warm-gray inline-block mt-0.5 select-all">
+                          {session.upiId}
+                        </span>
+                      </div>
+                    )}
+                    <p className="leading-relaxed">
+                      Scan the QR code with <strong>Google Pay, PhonePe, Paytm, BHIM</strong>, or any UPI app to complete your Samarpan contribution.
+                    </p>
+                    <p className="text-[11px] text-warm-charcoal/50">
+                      All contributions support the collective maintenance and spiritual activities of the Sahaja Yoga Health Centre under H.H. Shri Mataji Nirmala Devi National Trust.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Optional Description */}
             {session.description && (
