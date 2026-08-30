@@ -2,7 +2,7 @@ import React from 'react';
 import dbConnect from '@/lib/db';
 import Session from '@/models/Session';
 import SessionForm from './SessionForm';
-import { deleteSessionAction, updateSessionAction } from '../actions';
+import { deleteSessionAction, updateSessionAction, autoDeactivateExpiredSessions } from '../actions';
 import Image from 'next/image';
 
 export const revalidate = 0; // Disable caching to fetch real-time session list
@@ -12,6 +12,7 @@ export default async function SessionsAdminPage() {
 
   try {
     await dbConnect();
+    await autoDeactivateExpiredSessions();
     sessions = await Session.find({}).sort({ date: 1 });
   } catch (error) {
     console.error('Error fetching sessions list for admin:', error);

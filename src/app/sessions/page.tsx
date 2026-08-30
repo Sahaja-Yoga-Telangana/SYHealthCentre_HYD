@@ -4,6 +4,7 @@ import Session from '@/models/Session';
 import Link from 'next/link';
 import Image from 'next/image';
 import HeaderNav from '@/components/HeaderNav';
+import { autoDeactivateExpiredSessions } from '@/app/admin/actions';
 
 export const revalidate = 0;
 
@@ -32,6 +33,7 @@ export default async function SessionsPage() {
 
   try {
     await dbConnect();
+    await autoDeactivateExpiredSessions();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 

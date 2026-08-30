@@ -4,6 +4,7 @@ import Session from '@/models/Session';
 import Link from 'next/link';
 import Image from 'next/image';
 import HeaderNav from '@/components/HeaderNav';
+import { autoDeactivateExpiredSessions } from '@/app/admin/actions';
 import { notFound } from 'next/navigation';
 
 export const revalidate = 0;
@@ -19,6 +20,7 @@ export default async function SessionDetailPage({ params }: PageProps) {
 
   try {
     await dbConnect();
+    await autoDeactivateExpiredSessions();
     session = await Session.findById(id);
   } catch (error) {
     console.error('Error fetching session detail:', error);
@@ -28,6 +30,9 @@ export default async function SessionDetailPage({ params }: PageProps) {
     notFound();
   }
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const isExpired = new Date(session.date) < today;
   const isEvent = session.type === 'Event';
   const isUnlimited = session.limitSeats === false;
   const remaining = Math.max(0, session.maxParticipants - session.registeredCount);
@@ -216,7 +221,14 @@ export default async function SessionDetailPage({ params }: PageProps) {
             {/* Action Buttons */}
             <div className="pt-4 border-t border-warm-gray flex flex-col sm:flex-row gap-4">
               {!isEvent ? (
-                isFull ? (
+                isExpired || !session.isActive ? (
+                  <button
+                    disabled
+                    className="w-full text-center text-xs sm:text-sm font-bold uppercase tracking-wider py-4 bg-warm-gray text-warm-charcoal/50 rounded-xl cursor-not-allowed"
+                  >
+                    Session Date Over / Completed
+                  </button>
+                ) : isFull ? (
                   <button
                     disabled
                     className="w-full text-center text-xs sm:text-sm font-bold uppercase tracking-wider py-4 bg-warm-gray text-warm-charcoal/40 rounded-xl cursor-not-allowed"

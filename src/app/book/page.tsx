@@ -6,7 +6,7 @@ import BookingWizard from './BookingWizard';
 import Link from 'next/link';
 import shriMatajiPortrait from '../../../ShriMatajisPictures/PhotoSM-206.jpg';
 
-import { getSiteSettings } from '@/app/admin/actions';
+import { getSiteSettings, autoDeactivateExpiredSessions } from '@/app/admin/actions';
 
 import HeaderNav from '@/components/HeaderNav';
 
@@ -48,9 +48,12 @@ export default async function BookingPage({
 
   try {
     await dbConnect();
+    await autoDeactivateExpiredSessions();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const [settingsData, activeSessions] = await Promise.all([
       getSiteSettings(),
-      Session.find({ isActive: true, type: { $ne: 'Event' } }).sort({ date: 1 }),
+      Session.find({ isActive: true, type: { $ne: 'Event' }, date: { $gte: today } }).sort({ date: 1 }),
     ]);
 
     settings = settingsData;

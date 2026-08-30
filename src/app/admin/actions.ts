@@ -106,6 +106,21 @@ export async function toggleDoctorActive(id: string, active: boolean) {
   revalidatePath('/admin/doctors');
 }
 
+// Auto-deactivate sessions/events whose scheduled date has passed
+export async function autoDeactivateExpiredSessions() {
+  try {
+    await dbConnect();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    await Session.updateMany(
+      { date: { $lt: today }, isActive: true },
+      { $set: { isActive: false } }
+    );
+  } catch (error) {
+    console.error('Error auto-deactivating expired sessions:', error);
+  }
+}
+
 export async function createSessionAction(data: {
   type?: 'Session' | 'Event';
   title: string;

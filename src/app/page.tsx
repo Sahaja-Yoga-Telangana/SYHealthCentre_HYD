@@ -6,7 +6,7 @@ import Session from '@/models/Session';
 import ReviewForm from '@/components/ReviewForm';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { getSiteSettings } from '@/app/admin/actions';
+import { getSiteSettings, autoDeactivateExpiredSessions } from '@/app/admin/actions';
 import HeaderNav from '@/components/HeaderNav';
 
 export const revalidate = 0;
@@ -29,8 +29,11 @@ export default async function Home() {
 
   try {
     await dbConnect();
+    await autoDeactivateExpiredSessions();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     settings = await getSiteSettings();
-    sessions = await Session.find({ isActive: true }).sort({ date: 1 });
+    sessions = await Session.find({ isActive: true, date: { $gte: today } }).sort({ date: 1 });
   } catch (error) {
     console.error('Error loading landing page data:', error);
   }
